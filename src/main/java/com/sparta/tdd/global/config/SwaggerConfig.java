@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
-    
+
     @Bean
     public OpenAPI toTastyApi() {
         return new OpenAPI()
@@ -25,7 +25,7 @@ public class SwaggerConfig {
                 .addSecuritySchemes("AccessToken",
                     new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)
-                        .scheme("bearer")
+                        .scheme("Bearer")
                         .bearerFormat("JWT")))
             .addSecurityItem(new SecurityRequirement().addList("AccessToken"));
     }
