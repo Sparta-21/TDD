@@ -1,5 +1,10 @@
 package com.sparta.tdd.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.tdd.global.jwt.entrypoint.JwtAuthenticationEntryPoint;
+import com.sparta.tdd.global.jwt.filter.JwtAuthenticationFilter;
+import com.sparta.tdd.global.jwt.filter.JwtExceptionFilter;
+import com.sparta.tdd.global.jwt.handler.JwtAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,11 +16,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtExceptionFilter jwtExceptionFilter;
+    private final ObjectMapper objectMapper;
 
     private final String[] readOnlyUrl = {
         "/favicon.ico",
@@ -34,11 +44,18 @@ public class SecurityConfig {
             .logout(AbstractHttpConfigurer::disable)
             .sessionManagement(sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
             .authorizeHttpRequests(authorizeHttpRequests ->
                 authorizeHttpRequests
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.GET, readOnlyUrl).permitAll()
+                    .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/signup").permitAll()
                     .anyRequest().authenticated())
+            .exceptionHandling(exception ->
+                exception
+                    .accessDeniedHandler(new JwtAccessDeniedHandler(objectMapper))
+                    .authenticationEntryPoint(new JwtAuthenticationEntryPoint(objectMapper)));
         ;
 
         return http.build();
