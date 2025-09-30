@@ -1,6 +1,6 @@
 package com.sparta.tdd.domain.order.entity;
 
-import com.sparta.tdd.domain.order.model.OrderStatus;
+import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.model.BaseEntity;
@@ -21,7 +21,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
