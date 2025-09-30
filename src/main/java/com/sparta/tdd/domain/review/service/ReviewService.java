@@ -2,9 +2,7 @@ package com.sparta.tdd.domain.review.service;
 
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
-import com.sparta.tdd.domain.review.dto.ReviewRequestDto;
-import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
-import com.sparta.tdd.domain.review.dto.ReviewUpdateDto;
+import com.sparta.tdd.domain.review.dto.*;
 import com.sparta.tdd.domain.review.entity.Review;
 import com.sparta.tdd.domain.review.entity.ReviewReply;
 import com.sparta.tdd.domain.review.repository.ReviewReplyRepository;
@@ -39,7 +37,6 @@ public class ReviewService {
     // 리뷰 등록
     @Transactional
     public ReviewResponseDto createReview(Long userId, UUID orderId, ReviewRequestDto request) {
-        // 엔티티 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -49,7 +46,6 @@ public class ReviewService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
 
-        // Review 생성
         Review review = Review.builder()
                 .user(user)
                 .store(store)
@@ -69,7 +65,6 @@ public class ReviewService {
         Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
 
-        // 본인 확인
         if (!review.getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인의 리뷰만 수정할 수 있습니다.");
         }
@@ -84,7 +79,6 @@ public class ReviewService {
         Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
 
-        // 답글 조회
         ReviewReply reply = reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId).orElse(null);
         ReviewResponseDto.ReviewReplyInfo replyInfo = reply != null
                 ? new ReviewResponseDto.ReviewReplyInfo(reply.getContent())
@@ -98,17 +92,14 @@ public class ReviewService {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Review> reviews = reviewRepository.findPageByStoreIdAndNotDeleted(storeId, pageable);
 
-        // 리뷰 ID 목록 추출
         List<UUID> reviewIds = reviews.getContent().stream()
-                .map(Review::getId)  // getId() 사용
+                .map(Review::getId)
                 .collect(Collectors.toList());
 
-        // 답글 목록 조회
         Map<UUID, ReviewReply> replyMap = reviewReplyRepository.findByReviewIdsAndNotDeleted(reviewIds)
                 .stream()
                 .collect(Collectors.toMap(ReviewReply::getReviewId, reply -> reply));
 
-        // DTO 변환
         return reviews.map(review -> {
             ReviewReply reply = replyMap.get(review.getId());
             ReviewResponseDto.ReviewReplyInfo replyInfo = reply != null
@@ -124,11 +115,68 @@ public class ReviewService {
         Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
 
-        // 본인 확인
         if (!review.getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인의 리뷰만 삭제할 수 있습니다.");
         }
 
         review.delete(userId);
+    }
+
+    // ========== 답글 관련 메서드 ==========
+
+    // 답글 등록
+    @Transactional
+    public ReviewReplyResponseDto createReply(UUID reviewId, Long ownerId, ReviewReplyRequestDto request) {
+        Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+
+        // 이미 답글이 있는지 확인
+        reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
+                .ifPresent(reply -> {
+                    throw new IllegalArgumentException("이미 답글이 존재합니다.");
+                });
+
+        // 가게 소유자 확인 (필요시 Store 엔티티에서 ownerId 확인 로직 추가)
+        // Store store = review.getStore();
+        // if (!store.getOwnerId().equals(ownerId)) {
+        //     throw new IllegalArgumentException("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+        // }
+
+        ReviewReply reply = ReviewReply.builder()
+                .review(review)
+                .content(request.content())
+                .ownerId(ownerId)
+                .build();
+
+        ReviewReply savedReply = reviewReplyRepository.save(reply);
+        return ReviewReplyResponseDto.from(savedReply);
+    }
+
+    // 답글 수정
+    @Transactional
+    public ReviewReplyResponseDto updateReply(UUID reviewId, Long ownerId, ReviewReplyRequestDto request) {
+        ReviewReply reply = reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답글입니다."));
+
+        if (!reply.getOwnerId().equals(ownerId)) {
+            throw new IllegalArgumentException("본인의 답글만 수정할 수 있습니다.");
+        }
+
+        reply.updateContent(request.content());
+
+        return ReviewReplyResponseDto.from(reply);
+    }
+
+    // 답글 삭제
+    @Transactional
+    public void deleteReply(UUID reviewId, Long ownerId) {
+        ReviewReply reply = reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답글입니다."));
+
+        if (!reply.getOwnerId().equals(ownerId)) {
+            throw new IllegalArgumentException("본인의 답글만 삭제할 수 있습니다.");
+        }
+
+        reply.delete(ownerId);
     }
 }

@@ -1,9 +1,7 @@
 package com.sparta.tdd.domain.review.controller;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
-import com.sparta.tdd.domain.review.dto.ReviewRequestDto;
-import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
-import com.sparta.tdd.domain.review.dto.ReviewUpdateDto;
+import com.sparta.tdd.domain.review.dto.*;
 import com.sparta.tdd.domain.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -93,6 +91,47 @@ public class ReviewController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         reviewService.deleteReview(reviewId, userDetails.getUserId());
+        return ResponseEntity.noContent().build();
+    }
+
+    // ========== 답글 관련 엔드포인트 ==========
+
+    @PostMapping("/{reviewId}/reply")
+    public ResponseEntity<ReviewReplyResponseDto> createReply(
+            @PathVariable UUID reviewId,
+            @RequestBody @Valid ReviewReplyRequestDto request,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        ReviewReplyResponseDto response = reviewService.createReply(
+                reviewId,
+                userDetails.getUserId(),
+                request
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PatchMapping("/{reviewId}/reply")
+    public ResponseEntity<ReviewReplyResponseDto> updateReply(
+            @PathVariable UUID reviewId,
+            @RequestBody @Valid ReviewReplyRequestDto request,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        ReviewReplyResponseDto response = reviewService.updateReply(
+                reviewId,
+                userDetails.getUserId(),
+                request
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{reviewId}/reply")
+    public ResponseEntity<Void> deleteReply(
+            @PathVariable UUID reviewId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        reviewService.deleteReply(reviewId, userDetails.getUserId());
         return ResponseEntity.noContent().build();
     }
 }
