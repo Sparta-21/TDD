@@ -1,11 +1,15 @@
 package com.sparta.tdd.domain.ai.entity;
 
+import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -33,4 +37,7 @@ public class Ai extends BaseEntity {
     @Column(name = "output_text", columnDefinition = "TEXT")
     private String outputText;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

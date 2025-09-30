@@ -32,47 +32,49 @@ class OrderRepositoryTest {
         @Test
         @DisplayName("ID 로 주문 조회")
         void findId() {
-            Order order = new Order();
-            order.setId(123L);
-            orderRepository.save(order);
+            Order order = Order.builder()
+                .price(1000)
+                .build();
+            Order saved = orderRepository.save(order);
 
-            Optional<Order> found = orderRepository.findById(123L);
+            Optional<Order> found = orderRepository.findById(saved.getId());
 
             assertThat(found).isPresent();
-            assertThat(found.get().getId()).isEqualTo(123L);
+            assertThat(found.get().getId()).isEqualTo(saved.getId());
         }
 
         @Test
         @DisplayName("Dirty Checking 확인")
         void update() {
-            Order order = new Order();
-            order.setId(123L);
-            order.setPrice(1000);
-            orderRepository.save(order);
+            Order order = Order.builder()
+                .price(1000)
+                .build();
+            Order saved = orderRepository.save(order);
 
-            Order found = orderRepository.findById(123L).get();
+            Order found = orderRepository.findById(saved.getId()).get();
 
-            found.setPrice(2000);
+            found.updatePrice(2000);
 
             em.flush();
             em.clear();
 
-            Order updated = orderRepository.findById(123L).get();
+            Order updated = orderRepository.findById(saved.getId()).get();
             assertThat(updated.getPrice()).isEqualTo(2000);
         }
 
         @Test
         @DisplayName("Id 로 삭제상태 변경 확인")
         void delete() {
-            Order order = new Order();
-            order.setId(123L);
-            orderRepository.save(order);
+            Order order = Order.builder()
+                .price(1000)
+                .build();
+            Order saved = orderRepository.save(order);
 
-            Order found = orderRepository.findById(123L).get();
+            Order found = orderRepository.findById(saved.getId()).get();
             found.delete(11L);
 
             assertThat(found.isDeleted()).isTrue();
-            assertThat(orderRepository.findById(123L)).isPresent();
+            assertThat(orderRepository.findById(saved.getId())).isPresent();
             assertThat(found.getDeletedBy()).isEqualTo(11L);
         }
     }
