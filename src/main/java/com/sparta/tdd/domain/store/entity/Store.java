@@ -18,7 +18,7 @@ public class Store extends BaseEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "store_id")
+    @Column(name = "store_id", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "name", nullable = false)
