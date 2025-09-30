@@ -61,4 +61,8 @@ public class Order extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
     private Payment payment;
+
+    public void updatePrice(Integer price) {
+        this.price = price;
+    }
 }

@@ -40,4 +40,8 @@ public class OrderMenu extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;
+
+    public void updateQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
 }
