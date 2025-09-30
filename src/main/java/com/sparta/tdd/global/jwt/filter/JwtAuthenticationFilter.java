@@ -48,8 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private UserDetailsImpl getUserDetails(String accessToken) {
         Claims claims = accessTokenProvider.getClaims(accessToken);
-        String username = claims.getSubject();
-        Long userId = claims.get("userId", Long.class);
+        Long userId = Long.valueOf(claims.getSubject());
+        String username = claims.get("username", String.class);
         UserAuthority authority = UserAuthority.valueOf(claims.get("authority", String.class));
 
         return new UserDetailsImpl(userId, username, authority);
