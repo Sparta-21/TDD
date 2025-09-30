@@ -23,7 +23,7 @@ import org.hibernate.annotations.ColumnDefault;
 public class Menu extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "menu_id", nullable = false)
     private UUID menuId;
 
@@ -39,7 +39,7 @@ public class Menu extends BaseEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "is_hidden")
+    @Column(name = "is_hidden", nullable = false)
     @ColumnDefault("false")
     private Boolean isHidden;
 
