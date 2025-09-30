@@ -45,7 +45,7 @@ public class Menu extends BaseEntity {
     private Boolean isHidden = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id")
+    @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
     @Builder
