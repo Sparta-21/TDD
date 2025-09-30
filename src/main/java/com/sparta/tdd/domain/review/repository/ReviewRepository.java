@@ -1,6 +1,8 @@
 package com.sparta.tdd.domain.review.repository;
 
 import com.sparta.tdd.domain.review.entity.Review;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +24,9 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     // 특정 가게의 삭제되지 않은 리뷰 목록 조회
     @Query("SELECT r FROM Review r WHERE r.storeId = :storeId AND r.deletedAt IS NULL")
     List<Review> findByStoreIdAndNotDeleted(@Param("storeId") UUID storeId);
+
+    @Query("SELECT r FROM Review r WHERE r.storeId = :storeId AND r.deletedAt IS NULL")
+    Page<Review> findPageByStoreIdAndNotDeleted(@Param("storeId") UUID storeId, Pageable pageable);
 
     // 특정 가게의 평균 평점 조회
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.storeId = :storeId AND r.deletedAt IS NULL")

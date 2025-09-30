@@ -23,34 +23,17 @@ class ReviewRepositoryTest {
     private ReviewRepository reviewRepository;
 
     @Test
-    @DisplayName("리뷰 저장")
-    void 리뷰저장() {
-        // given
-        Review review = new Review(
-                null,
-                1L,// userId
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                5,
-                "이미지",
-                "good"
-        );
-
-        // when
-        Review savedReview = reviewRepository.save(review);
-
-        // then
-        assertThat(savedReview.getReviewId()).isNotNull();
-        assertThat(savedReview.getUserId()).isEqualTo(1L);
-        assertThat(savedReview.getRating()).isEqualTo(5);
-        assertThat(savedReview.getContent()).isEqualTo("good");  // ← 수정!
-    }
-    @Test
     @DisplayName("ID로 리뷰를 조회할 수 있다")
     void 리뷰조회() {
         // given
-        Review review = new Review(null, 1L, UUID.randomUUID(), UUID.randomUUID(),
-                5, "이미지", "맛있어요");
+        Review review = Review.builder()
+                .userId(1L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(5)
+                .imageUrl("이미지")
+                .content("맛있어요")
+                .build();
         Review savedReview = reviewRepository.save(review);
 
         // when
@@ -62,11 +45,17 @@ class ReviewRepositoryTest {
     }
 
     @Test
-    @DisplayName("삭제된지 않은 ID로 리뷰를 조회할 수 있다")
+    @DisplayName("삭제되지 않은 ID로 리뷰를 조회할 수 있다")
     void 삭제되지않은리뷰조회2() {
         // given
-        Review review = new Review(null, 1L, UUID.randomUUID(), UUID.randomUUID(),
-                5, "이미지", "맛있어요");
+        Review review = Review.builder()
+                .userId(1L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(5)
+                .imageUrl("이미지")
+                .content("맛있어요")
+                .build();
         Review savedReview = reviewRepository.save(review);
 
         // when
@@ -76,12 +65,19 @@ class ReviewRepositoryTest {
         assertThat(foundReview).isPresent();
         assertThat(foundReview.get().getContent()).isEqualTo("맛있어요");
     }
+
     @Test
     @DisplayName("리뷰를 수정할 수 있다")
     void 리뷰수정() {
         // given
-        Review review = new Review(null,1L, UUID.randomUUID(), UUID.randomUUID(),
-                3, "이미지", "보통이에요");
+        Review review = Review.builder()
+                .userId(1L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(3)
+                .imageUrl("이미지")
+                .content("보통이에요")
+                .build();
         Review savedReview = reviewRepository.save(review);
 
         // when
@@ -98,8 +94,13 @@ class ReviewRepositoryTest {
     @DisplayName("리뷰를 삭제할 수 있다")
     void 리뷰삭제() {
         // given
-        Review review = new Review(null,1L, UUID.randomUUID(), UUID.randomUUID(),
-                4, null, "좋아요");
+        Review review = Review.builder()
+                .userId(1L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(4)
+                .content("좋아요")
+                .build();
         Review savedReview = reviewRepository.save(review);
 
         // when
@@ -112,15 +113,36 @@ class ReviewRepositoryTest {
         assertThat(deletedReview.getDeletedAt()).isNotNull();
         assertThat(deletedReview.getDeletedBy()).isEqualTo(1L);
     }
+
     @Test
     @DisplayName("특정 가게의 리뷰 목록을 조회할 수 있다")
     void 리뷰목록조회_가게() {
         // given
         UUID storeId = UUID.randomUUID();
 
-        Review review1 = new Review(null,1L, storeId, UUID.randomUUID(), 5, null, "맛있어요");
-        Review review2 = new Review(null,2L, storeId, UUID.randomUUID(), 4, null, "좋아요");
-        Review review3 = new Review(null,3L, UUID.randomUUID(), UUID.randomUUID(), 3, null, "다른 가게");
+        Review review1 = Review.builder()
+                .userId(1L)
+                .storeId(storeId)
+                .orderId(UUID.randomUUID())
+                .rating(5)
+                .content("맛있어요")
+                .build();
+
+        Review review2 = Review.builder()
+                .userId(2L)
+                .storeId(storeId)
+                .orderId(UUID.randomUUID())
+                .rating(4)
+                .content("좋아요")
+                .build();
+
+        Review review3 = Review.builder()
+                .userId(3L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(3)
+                .content("다른 가게")
+                .build();
 
         reviewRepository.save(review1);
         reviewRepository.save(review2);
@@ -132,6 +154,7 @@ class ReviewRepositoryTest {
         // then
         assertThat(storeReviews).hasSize(2);
     }
+
     @Test
     @DisplayName("특정 유저의 리뷰 목록을 조회할 수 있다")
     void 리뷰목록조회_개인() {
@@ -140,9 +163,29 @@ class ReviewRepositoryTest {
         UUID storeId1 = UUID.randomUUID();
         UUID storeId2 = UUID.randomUUID();
 
-        Review review1 = new Review(null,userId, storeId1, UUID.randomUUID(), 5, null, "맛있어요");
-        Review review2 = new Review(null,userId, storeId2, UUID.randomUUID(), 4, null, "좋아요");
-        Review review3 = new Review(null, 2l,storeId1, UUID.randomUUID(), 3, null, "보통이에요");
+        Review review1 = Review.builder()
+                .userId(userId)
+                .storeId(storeId1)
+                .orderId(UUID.randomUUID())
+                .rating(5)
+                .content("맛있어요")
+                .build();
+
+        Review review2 = Review.builder()
+                .userId(userId)
+                .storeId(storeId2)
+                .orderId(UUID.randomUUID())
+                .rating(4)
+                .content("좋아요")
+                .build();
+
+        Review review3 = Review.builder()
+                .userId(2L)
+                .storeId(storeId1)
+                .orderId(UUID.randomUUID())
+                .rating(3)
+                .content("보통이에요")
+                .build();
 
         reviewRepository.save(review1);
         reviewRepository.save(review2);
@@ -153,16 +196,35 @@ class ReviewRepositoryTest {
 
         // then
         assertThat(userReviews).hasSize(2);
-
     }
+
     @Test
     @DisplayName("모든 리뷰 확인 매니저 이상 급")
     void 리뷰목록조회_전체() {
         // given
+        Review review1 = Review.builder()
+                .userId(1L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(5)
+                .content("맛있어요")
+                .build();
 
-        Review review1 = new Review(null,1L, UUID.randomUUID(), UUID.randomUUID(), 5, null, "맛있어요");
-        Review review2 = new Review(null,3L, UUID.randomUUID(), UUID.randomUUID(), 4, null, "좋아요");
-        Review review3 = new Review(null, 2l,UUID.randomUUID(), UUID.randomUUID(), 3, null, "보통이에요");
+        Review review2 = Review.builder()
+                .userId(3L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(4)
+                .content("좋아요")
+                .build();
+
+        Review review3 = Review.builder()
+                .userId(2L)
+                .storeId(UUID.randomUUID())
+                .orderId(UUID.randomUUID())
+                .rating(3)
+                .content("보통이에요")
+                .build();
 
         reviewRepository.save(review1);
         reviewRepository.save(review2);
@@ -174,16 +236,36 @@ class ReviewRepositoryTest {
         // then
         assertThat(userReviews).hasSize(3);
     }
+
     @Test
     @DisplayName("특정 가게의 평점을 확인할 수 있다.")
     void 평점확인() {
         // given
-        Long userId = 1L;
         UUID storeId1 = UUID.randomUUID();
 
-        Review review1 = new Review(null,userId, storeId1, UUID.randomUUID(), 5, null, "맛있어요");
-        Review review2 = new Review(null,userId, storeId1, UUID.randomUUID(), 4, null, "좋아요");
-        Review review3 = new Review(null, userId,storeId1, UUID.randomUUID(), 3, null, "보통이에요");
+        Review review1 = Review.builder()
+                .userId(1L)
+                .storeId(storeId1)
+                .orderId(UUID.randomUUID())
+                .rating(5)
+                .content("맛있어요")
+                .build();
+
+        Review review2 = Review.builder()
+                .userId(1L)
+                .storeId(storeId1)
+                .orderId(UUID.randomUUID())
+                .rating(4)
+                .content("좋아요")
+                .build();
+
+        Review review3 = Review.builder()
+                .userId(1L)
+                .storeId(storeId1)
+                .orderId(UUID.randomUUID())
+                .rating(3)
+                .content("보통이에요")
+                .build();
 
         reviewRepository.save(review1);
         reviewRepository.save(review2);
@@ -194,8 +276,5 @@ class ReviewRepositoryTest {
 
         // then
         assertThat(average).isEqualTo(4.0);
-
     }
-
-
 }

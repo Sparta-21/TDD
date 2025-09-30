@@ -3,7 +3,7 @@ package com.sparta.tdd.domain.review.entity;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
@@ -14,7 +14,6 @@ import java.util.UUID;
 @Table(name = "p_review")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Review extends BaseEntity {
 
     @Id
@@ -46,6 +45,16 @@ public class Review extends BaseEntity {
     @Comment("리뷰 내용")
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Builder
+    public Review(Long userId, UUID storeId, UUID orderId, Integer rating, String imageUrl, String content) {
+        this.userId = userId;
+        this.storeId = storeId;
+        this.orderId = orderId;
+        this.rating = rating;
+        this.imageUrl = imageUrl;
+        this.content = content;
+    }
 
     public void updateContent(Integer rating, String imageUrl, String content) {
         this.rating = rating;
