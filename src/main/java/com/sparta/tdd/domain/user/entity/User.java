@@ -26,7 +26,7 @@ public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long id;
 
     @Column(name = "username", nullable = false, length = 10, unique = true)
@@ -35,7 +35,22 @@ public class User extends BaseEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "nickname", nullable = false)
+    private String nickname;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "authority", nullable = false, length = 20)
     private UserAuthority authority;
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateAuthority(UserAuthority authority) {
+        this.authority = authority;
+    }
 }
