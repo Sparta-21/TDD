@@ -23,6 +23,14 @@ springdoc:
     groups:
       enabled: true
 
+jwt:
+  access:
+    secret: ${JWT_ACCESS_SECRET}
+    expiration: ${JWT_ACCESS_EXPIRED}
+  refresh:
+    secret: ${JWT_REFRESH_SECRET}
+    expiration: ${JWT_REFRESH_EXPIRED}
+
 ---
 spring:
   config:
