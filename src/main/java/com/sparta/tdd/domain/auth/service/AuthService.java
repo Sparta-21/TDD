@@ -26,22 +26,27 @@ public class AuthService {
     public AuthInfo signUp(SignUpRequestDto request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("이미 존재하는 username 입니다.");
-        } else {
-            User newUser = User.builder()
-                .username(request.username())
-                .password(passwordEncoder.encode(request.password()))
-                .authority(UserAuthority.CUSTOMER)
-                .nickname(request.nickname())
-                .build();
-            User savedUser = userRepository.save(newUser);
-
-            String accessToken = accessTokenProvider.generateToken(
-                savedUser.getUsername(), savedUser.getId(), savedUser.getAuthority());
-            String refreshToken = refreshTokenProvider.generateToken(
-                savedUser.getUsername(), savedUser.getId(), savedUser.getAuthority());
-
-            return new AuthInfo(savedUser.getId(), accessToken, refreshToken);
         }
+
+        // authority가 null이면 CUSTOMER, 아니면 요청값 사용
+        UserAuthority userAuthority = request.authority() != null
+            ? request.authority()
+            : UserAuthority.CUSTOMER;
+
+        User newUser = User.builder()
+            .username(request.username())
+            .password(passwordEncoder.encode(request.password()))
+            .authority(userAuthority)
+            .nickname(request.nickname())
+            .build();
+        User savedUser = userRepository.save(newUser);
+
+        String accessToken = accessTokenProvider.generateToken(
+            savedUser.getUsername(), savedUser.getId(), savedUser.getAuthority());
+        String refreshToken = refreshTokenProvider.generateToken(
+            savedUser.getUsername(), savedUser.getId(), savedUser.getAuthority());
+
+        return new AuthInfo(savedUser.getId(), accessToken, refreshToken);
     }
 
     public AuthInfo login(LoginRequestDto request) {

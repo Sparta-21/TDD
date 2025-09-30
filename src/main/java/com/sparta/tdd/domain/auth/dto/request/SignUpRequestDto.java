@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.auth.dto.request;
 
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -18,7 +19,8 @@ public record SignUpRequestDto(
     @Schema(description = "비밀번호(필수)", example = "Password1!")
     String password,
 
-    String nickname
+    String nickname,
+    UserAuthority authority
 ) {
 
 }
