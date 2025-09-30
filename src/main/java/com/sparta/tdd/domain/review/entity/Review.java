@@ -1,5 +1,8 @@
 package com.sparta.tdd.domain.review.entity;
 
+import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.store.entity.Store;
+import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,40 +23,44 @@ public class Review extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Comment("리뷰ID")
     @Column(name = "review_id", nullable = false)
-    private UUID reviewId;
+    private UUID id;
 
-    @Comment("회원ID")
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Comment("음식점ID")
-    @Column(name = "store_id", nullable = false)
-    private UUID storeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 
-    @Comment("주문ID")
-    @Column(name = "order_id", nullable = false)
-    private UUID orderId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
     @Comment("리뷰 평점")
     @Column(nullable = false)
     private Integer rating;
 
     @Comment("리뷰 이미지")
-    @Column(name = "image_url", length = 255)
+    @Column(name = "image_url")
     private String imageUrl;
 
     @Comment("리뷰 내용")
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private ReviewReply reply;
+
     @Builder
-    public Review(Long userId, UUID storeId, UUID orderId, Integer rating, String imageUrl, String content) {
-        this.userId = userId;
-        this.storeId = storeId;
-        this.orderId = orderId;
+    public Review(User user, Store store, Order order, Integer rating, String imageUrl, String content, ReviewReply reply) {
+        this.user = user;
+        this.store = store;
+        this.order = order;
         this.rating = rating;
         this.imageUrl = imageUrl;
         this.content = content;
+        this.reply = reply;
     }
 
     public void updateContent(Integer rating, String imageUrl, String content) {
@@ -61,4 +68,20 @@ public class Review extends BaseEntity {
         this.imageUrl = imageUrl;
         this.content = content;
     }
+
+    public Long getUserId(){
+        Long userId = this.user.getId();
+        return userId;
+    }
+
+    public UUID getStoreId(){
+        UUID storeId = this.store.getId();
+        return storeId;
+    }
+
+    public UUID getOrderId(){
+        UUID orderId = this.order.getId();
+        return orderId;
+    }
+
 }

@@ -2,8 +2,11 @@ package com.sparta.tdd.domain.order.entity;
 
 import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
+import com.sparta.tdd.domain.payment.entity.Payment;
+import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.model.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,7 +17,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -51,5 +56,13 @@ public class Order extends BaseEntity {
     private Store store;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderMenu> orderMenuList;
+    private List<OrderMenu> orderMenuList = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
+
+    public void updatePrice(Integer price) {
+        this.price = price;
+    }
 }

@@ -2,7 +2,10 @@ package com.sparta.tdd.domain.store.repository;
 
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
+import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.global.config.AuditConfig;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,33 +29,37 @@ class StoreRepositoryTest {
     @Autowired
     private StoreRepository storeRepository;
 
-    Store chickenStore;
-    Store pizzaStore;
+    @Autowired
+    private EntityManager em;
+
+    User testUser;
 
     @BeforeEach
     void setUp() {
-        chickenStore = Store.builder()
-                .name("BBQ")
-                .category(StoreCategory.CHICKEN)
-                .description("BBQ 광화문점")
-                .imageUrl("www.test.com")
+        testUser = User.builder()
+                .username("testuser")
+                .password("password123")
+                .nickname("테스트유저")
+                .authority(UserAuthority.CUSTOMER)
                 .build();
-
-        pizzaStore = Store.builder()
-                .name("도미노피자")
-                .category(StoreCategory.PIZZA)
-                .description("도미노피자 광화문점")
-                .imageUrl("www.test.com")
-                .avgRating(BigDecimal.valueOf(4.0))        // 평균 별점 예시값
-                .reviewCount(3)
-                .build();
-
+        em.persist(testUser);
+        em.flush();
+        em.clear();
     }
 
     @Test
     @DisplayName("Store 저장 및 조회 테스트")
     void testSaveAndFind() {
         //given
+        User user = em.find(User.class, testUser.getId());
+        Store chickenStore = Store.builder()
+                .name("BBQ")
+                .category(StoreCategory.CHICKEN)
+                .description("BBQ 광화문점")
+                .imageUrl("www.test.com")
+                .user(user)
+                .build();
+
         Store savedStore = storeRepository.save(chickenStore);
         storeRepository.flush();
 
@@ -75,6 +82,26 @@ class StoreRepositoryTest {
     @DisplayName("Store 저장 및 조회 테스트")
     void testFindAll() {
         //given
+        User user = em.find(User.class, testUser.getId());
+
+        Store chickenStore = Store.builder()
+                .name("BBQ")
+                .category(StoreCategory.CHICKEN)
+                .description("BBQ 광화문점")
+                .imageUrl("www.test.com")
+                .user(user)
+                .build();
+
+        Store pizzaStore = Store.builder()
+                .name("도미노피자")
+                .category(StoreCategory.PIZZA)
+                .description("도미노피자 광화문점")
+                .imageUrl("www.test.com")
+                .avgRating(BigDecimal.valueOf(4.0))
+                .reviewCount(3)
+                .user(user)
+                .build();
+
         storeRepository.save(chickenStore);
         storeRepository.save(pizzaStore);
         storeRepository.flush();
@@ -94,6 +121,15 @@ class StoreRepositoryTest {
     @DisplayName("Store 이름 수정 테스트")
     void testUpdateStoreName() {
         //given
+        User user = em.find(User.class, testUser.getId());
+        Store chickenStore = Store.builder()
+                .name("BBQ")
+                .category(StoreCategory.CHICKEN)
+                .description("BBQ 광화문점")
+                .imageUrl("www.test.com")
+                .user(user)
+                .build();
+
         Store savedStore = storeRepository.save(chickenStore);
         storeRepository.flush();
 
