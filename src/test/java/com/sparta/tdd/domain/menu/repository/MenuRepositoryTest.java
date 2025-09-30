@@ -5,15 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sparta.tdd.domain.menu.entity.Menu;
+import com.sparta.tdd.global.config.AuditConfig;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(AuditConfig.class)
 class MenuRepositoryTest {
 
     @Autowired
@@ -23,7 +26,7 @@ class MenuRepositoryTest {
     @DisplayName("생성 및 조회 테스트")
     void createAndReadTest() {
         // given
-        Menu menu = new Menu(null, "test", "this is testing", 10000, "1234", null);
+        Menu menu = new Menu(null, "test", "this is testing", 10000, "1234", false);
         menuRepository.save(menu);
         menuRepository.flush();
 
