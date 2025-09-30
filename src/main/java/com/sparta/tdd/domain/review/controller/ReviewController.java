@@ -24,12 +24,15 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @PostMapping("/{orderId}")
+    @PostMapping("/order/{orderId}")
     public ResponseEntity<ReviewResponseDto> createReview(
             @PathVariable UUID orderId,
             @RequestBody @Valid ReviewRequestDto request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
-    ) {
+    ) { log.info("=== createReview 호출됨 ===");
+        log.info("orderId: {}", orderId);
+        log.info("userId: {}", userDetails.getUserId());
+        log.info("storeId: {}", request.storeId());
         ReviewResponseDto response = reviewService.createReview(
                 userDetails.getUserId(),
                 orderId,
