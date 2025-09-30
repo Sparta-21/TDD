@@ -1,5 +1,25 @@
 package com.sparta.tdd.domain.menu.dto;
 
-public record MenuResponseDto() {
+import com.sparta.tdd.domain.menu.entity.Menu;
+import java.util.UUID;
 
+public record MenuResponseDto(
+    UUID menuId,
+    String name,
+    String description,
+    Integer price,
+    String imageUrl,
+    Boolean isHidden
+) {
+
+    public static MenuResponseDto of(Menu menu) {
+        return new MenuResponseDto(
+            menu.getMenuId(),
+            menu.getName(),
+            menu.getDescription(),
+            menu.getPrice(),
+            menu.getImageUrl(),
+            menu.getIsHidden()
+        );
+    }
 }
