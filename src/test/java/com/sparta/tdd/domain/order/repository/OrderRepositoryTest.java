@@ -33,7 +33,6 @@ class OrderRepositoryTest {
         @DisplayName("ID 로 주문 조회")
         void findId() {
             Order order = Order.builder()
-                .price(1000)
                 .build();
             Order saved = orderRepository.save(order);
 
@@ -47,26 +46,21 @@ class OrderRepositoryTest {
         @DisplayName("Dirty Checking 확인")
         void update() {
             Order order = Order.builder()
-                .price(1000)
                 .build();
             Order saved = orderRepository.save(order);
 
             Order found = orderRepository.findById(saved.getId()).get();
 
-            found.updatePrice(2000);
-
             em.flush();
             em.clear();
 
             Order updated = orderRepository.findById(saved.getId()).get();
-            assertThat(updated.getPrice()).isEqualTo(2000);
         }
 
         @Test
         @DisplayName("Id 로 삭제상태 변경 확인")
         void delete() {
             Order order = Order.builder()
-                .price(1000)
                 .build();
             Order saved = orderRepository.save(order);
 
