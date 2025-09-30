@@ -17,8 +17,8 @@ import java.util.UUID;
 public class Store extends BaseEntity {
 
     @Id
-    @GeneratedValue
-    @Column(name = "store_id")
+    @GeneratedValue(strategy =  GenerationType.UUID)
+    @Column(name = "store_id", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "name", nullable = false)
