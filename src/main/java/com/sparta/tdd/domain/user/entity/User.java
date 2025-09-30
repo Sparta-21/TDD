@@ -35,7 +35,22 @@ public class User extends BaseEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "nickname", nullable = false)
+    private String nickname;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "authority", nullable = false, length = 20)
     private UserAuthority authority;
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateAuthority(UserAuthority authority) {
+        this.authority = authority;
+    }
 }
