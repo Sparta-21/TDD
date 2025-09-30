@@ -29,11 +29,7 @@ public class ReviewController {
             @PathVariable UUID orderId,
             @RequestBody @Valid ReviewRequestDto request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
-    ) { log.info("=== createReview 호출됨 ===");
-        log.info("orderId: {}", orderId);
-        log.info("userId: {}", userDetails.getUserId());
-        log.info("storeId: {}", request.storeId());
-        ReviewResponseDto response = reviewService.createReview(
+    ) {         ReviewResponseDto response = reviewService.createReview(
                 userDetails.getUserId(),
                 orderId,
                 request
