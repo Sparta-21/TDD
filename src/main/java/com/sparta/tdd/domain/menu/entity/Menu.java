@@ -43,4 +43,8 @@ public class Menu extends BaseEntity {
     @ColumnDefault("false")
     private Boolean isHidden;
 
+    public void updateName(String name) {
+        this.name = name;
+    }
+
 }
