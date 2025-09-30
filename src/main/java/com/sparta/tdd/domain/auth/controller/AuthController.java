@@ -2,12 +2,11 @@ package com.sparta.tdd.domain.auth.controller;
 
 import com.sparta.tdd.domain.auth.RefreshTokenCookieFactory;
 import com.sparta.tdd.domain.auth.dto.AuthInfo;
-import com.sparta.tdd.domain.auth.dto.request.LoginRequest;
-import com.sparta.tdd.domain.auth.dto.request.SignUpRequest;
+import com.sparta.tdd.domain.auth.dto.request.LoginRequestDto;
+import com.sparta.tdd.domain.auth.dto.request.SignUpRequestDto;
 import com.sparta.tdd.domain.auth.dto.response.LoginResponse;
 import com.sparta.tdd.domain.auth.dto.response.SignUpResponse;
 import com.sparta.tdd.domain.auth.service.AuthService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +24,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequestDto request) {
         AuthInfo info = authService.signUp(request);
 
         HttpHeaders headers = new HttpHeaders();
@@ -38,7 +37,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDto request) {
         AuthInfo info = authService.login(request);
 
         HttpHeaders headers = new HttpHeaders();
