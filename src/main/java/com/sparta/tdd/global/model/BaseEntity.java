@@ -41,4 +41,13 @@ public class BaseEntity {
     @Comment("삭제자")
     private Long deletedBy;
 
+    public void delete(Long deletedBy) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deletedBy;
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
+
 }
