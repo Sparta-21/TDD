@@ -40,7 +40,8 @@ public class Order extends BaseEntity {
     private Integer price;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+    @Builder.Default
+    private OrderStatus orderStatus = OrderStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
