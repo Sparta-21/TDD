@@ -14,7 +14,7 @@ public record MenuResponseDto(
 
     public static MenuResponseDto of(Menu menu) {
         return new MenuResponseDto(
-            menu.getMenuId(),
+            menu.getId(),
             menu.getName(),
             menu.getDescription(),
             menu.getPrice(),
