@@ -1,20 +1,17 @@
 package com.sparta.tdd.domain.user.entity;
 
+import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.global.model.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -48,6 +45,9 @@ public class User extends BaseEntity {
         this.nickname = nickname;
         this.authority = authority;
     }
+
+    @OneToMany(mappedBy = "user")
+    private List<Store> stores = new ArrayList<>();
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
