@@ -57,7 +57,6 @@ class OrderMenuRepositoryTest {
         em.persist(testStore);
 
         testOrder = Order.builder()
-            .price(10000)
             .user(testUser)
             .store(testStore)
             .build();

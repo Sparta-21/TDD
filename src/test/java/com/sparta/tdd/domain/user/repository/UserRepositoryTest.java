@@ -27,7 +27,7 @@ class UserRepositoryTest {
         user = User.builder()
                 .username("test01")
                 .password("test12345")
-                .nickname("")
+                .nickname("test")
                 .authority(UserAuthority.CUSTOMER)
                 .build();
     }
