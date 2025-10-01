@@ -53,6 +53,9 @@ dependencies {
     implementation("io.github.openfeign.querydsl:querydsl-jpa:7.0")
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.0:jpa")
 
+    // webflux
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
     // Google GenAi
     implementation 'com.google.genai:google-genai:1.18.0'
 }
