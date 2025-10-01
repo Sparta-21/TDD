@@ -388,8 +388,8 @@ class ReviewReplyServiceTest {
     class ValidateStoreOwnerTest {
 
         @Test
-        @DisplayName("MANAGER 권한으로 답글 등록 가능")
-        void createReply_WithManagerAuthority() {
+        @DisplayName("MANAGER 권한으로 답글 등록 불가 - 가게 소유자가 아님")
+        void createReply_Fail_WithManagerAuthority() throws Exception {
             // given
             User manager = User.builder()
                     .username("manager")
@@ -397,26 +397,25 @@ class ReviewReplyServiceTest {
                     .nickname("관리자")
                     .authority(UserAuthority.MANAGER)
                     .build();
+            setUserId(manager, 3L);
 
             ReviewReplyRequestDto requestDto = new ReviewReplyRequestDto("관리자 답글입니다!");
 
             given(reviewRepository.findByIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReview));
             given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
-            given(userRepository.findById(manager.getId())).willReturn(Optional.of(manager));
-            given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.empty());
-            given(reviewReplyRepository.save(any(ReviewReply.class))).willReturn(testReply);
+            given(userRepository.findById(3L)).willReturn(Optional.of(manager));
 
-            // when
-            ReviewReplyResponseDto result = reviewReplyService.createReply(reviewId, manager.getId(), requestDto);
+            // when & then
+            assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, 3L, requestDto))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
 
-            // then
-            assertThat(result).isNotNull();
-            verify(reviewReplyRepository).save(any(ReviewReply.class));
+            verify(reviewReplyRepository, never()).save(any());
         }
 
         @Test
-        @DisplayName("MASTER 권한으로 답글 등록 가능")
-        void createReply_WithMasterAuthority() {
+        @DisplayName("MASTER 권한으로 답글 등록 불가 - 가게 소유자가 아님")
+        void createReply_Fail_WithMasterAuthority() throws Exception {
             // given
             User master = User.builder()
                     .username("master")
@@ -424,21 +423,20 @@ class ReviewReplyServiceTest {
                     .nickname("최종관리자")
                     .authority(UserAuthority.MASTER)
                     .build();
+            setUserId(master, 4L);
 
             ReviewReplyRequestDto requestDto = new ReviewReplyRequestDto("마스터 답글입니다!");
 
             given(reviewRepository.findByIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReview));
             given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
-            given(userRepository.findById(master.getId())).willReturn(Optional.of(master));
-            given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.empty());
-            given(reviewReplyRepository.save(any(ReviewReply.class))).willReturn(testReply);
+            given(userRepository.findById(4L)).willReturn(Optional.of(master));
 
-            // when
-            ReviewReplyResponseDto result = reviewReplyService.createReply(reviewId, master.getId(), requestDto);
+            // when & then
+            assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, 4L, requestDto))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
 
-            // then
-            assertThat(result).isNotNull();
-            verify(reviewReplyRepository).save(any(ReviewReply.class));
+            verify(reviewReplyRepository, never()).save(any());
         }
 
         @Test

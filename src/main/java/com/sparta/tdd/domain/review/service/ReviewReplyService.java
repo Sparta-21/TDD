@@ -85,7 +85,7 @@ public class ReviewReplyService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답글입니다."));
     }
 
-    //가게 소유자 검증 - Store의 isOwner() 메서드 활용
+    //가게 소유자 검증
     private void validateStoreOwner(UUID storeId, Long userId) {
         Store store = storeRepository.findByStoreIdAndNotDeleted(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
