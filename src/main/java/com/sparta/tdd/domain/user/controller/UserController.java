@@ -25,12 +25,10 @@ public class UserController {
     // 회원 목록 조회
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_MASTER') or hasRole('ROLE_MANAGER')")
     @Operation(summary = "모든 유저 조회")
-    public ResponseEntity<UserPageResponseDto> getAllUser(Pageable pageable,
-            @AuthenticationPrincipal UserDetailsImpl userDetails
-    ) {
-        UserPageResponseDto users =
-                new UserPageResponseDto(userService.getAllUsers(pageable, userDetails.getUserAuthority()));
+    public ResponseEntity<UserPageResponseDto> getAllUser(Pageable pageable) {
+        UserPageResponseDto users = new UserPageResponseDto(userService.getAllUsers(pageable));
         return ResponseEntity.ok(users);
     }
 
@@ -63,11 +61,10 @@ public class UserController {
 
     // 회원 매니저 권한 부여
     @PatchMapping("/{userId}/authority")
-    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_MASTER')")
     @Operation(summary = "유저 매니저 권한 부여")
-    public ResponseEntity<UserResponseDto> updateManagerAuthorityUser(@PathVariable("userId") Long userId,
-                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        UserResponseDto responseDto = userService.grantUserManagerAuthority(userId, userDetails.getUserAuthority());
+    public ResponseEntity<UserResponseDto> updateManagerAuthorityUser(@PathVariable("userId") Long userId) {
+        UserResponseDto responseDto = userService.grantUserManagerAuthority(userId);
         return ResponseEntity.ok(responseDto);
     }
 }
