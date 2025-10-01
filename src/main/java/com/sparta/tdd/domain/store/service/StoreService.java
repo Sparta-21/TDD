@@ -1,0 +1,91 @@
+package com.sparta.tdd.domain.store.service;
+
+import com.sparta.tdd.domain.store.dto.StoreRequestDto;
+import com.sparta.tdd.domain.store.dto.StoreResponseDto;
+import com.sparta.tdd.domain.store.entity.Store;
+import com.sparta.tdd.domain.store.enums.StoreCategory;
+import com.sparta.tdd.domain.store.repository.StoreRepository;
+import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class StoreService {
+
+    private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
+
+    // TODO: 키워드, 카테고리 기반 검색 조건 구현
+    public void getStores(String keyword, StoreCategory storeCategory, Pageable pageable) {
+
+    }
+
+    @Transactional
+    public StoreResponseDto createStore(Long userId, @Valid StoreRequestDto requestDto) {
+        User user = getUserById(userId);
+        validateStorePermission(user);
+
+        Store store = requestDto.toEntity(user);
+        user.addStore(store);
+
+        Store savedStore = storeRepository.save(store);
+        return StoreResponseDto.of(savedStore);
+    }
+
+    public StoreResponseDto getStore(UUID storeId) {
+        Store store = getStoreById(storeId);
+        return StoreResponseDto.of(store);
+    }
+
+    @Transactional
+    public void updateStore(Long userId, UUID storeId, @Valid StoreRequestDto requestDto) {
+        User user = getUserById(userId);
+        Store store = getStoreById(storeId);
+        validateStoreOwnership(user, store);
+
+        store.updateName(requestDto.name());
+        store.updateUser(user);
+        store.updateCategory(requestDto.category());
+        store.updateDescription(requestDto.description());
+        store.updateImageUrl(requestDto.imageUrl());
+    }
+
+    @Transactional
+    public void deleteStore(Long userId, UUID storeId) {
+        User user = getUserById(userId);
+        Store store = getStoreById(storeId);
+        validateStoreOwnership(user, store);
+
+        store.delete(user.getId());
+    }
+
+    private Store getStoreById(UUID storeId) {
+        return storeRepository.findByStoreIdAndNotDeleted(storeId)
+            .orElseThrow(() -> new EntityNotFoundException("상점이 존재하지 않습니다."));
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+    }
+
+    private void validateStorePermission(User user) {
+        if (!user.isOwnerLevel()) {
+            throw new IllegalArgumentException("상점 관련 작업을 수행할 권한이 없습니다.");
+        }
+    }
+
+    private void validateStoreOwnership(User user, Store store) {
+        if (!store.isOwner(user) && !user.isManagerLevel()) {
+            throw new IllegalArgumentException("본인의 상점만 수정/삭제할 수 있습니다.");
+        }
+    }
+}
