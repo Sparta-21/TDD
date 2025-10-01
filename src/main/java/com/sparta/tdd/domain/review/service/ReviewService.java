@@ -37,14 +37,9 @@ public class ReviewService {
     // 리뷰 등록
     @Transactional
     public ReviewResponseDto createReview(Long userId, UUID orderId, ReviewRequestDto request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-        Store store = storeRepository.findById(request.storeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
-
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
+        User user = findUserById(userId);
+        Store store = findStoreById(request.storeId());
+        Order order = findOrderById(orderId);
 
         Review review = Review.builder()
                 .user(user)
@@ -64,7 +59,7 @@ public class ReviewService {
     public ReviewResponseDto updateReview(UUID reviewId, Long userId, ReviewUpdateDto request) {
         Review review = findReviewById(reviewId);
 
-        if (!review.getUserId().equals(userId)) {
+        if (!isQualified(review,userId)) {
             throw new IllegalArgumentException("본인의 리뷰만 수정할 수 있습니다.");
         }
 
@@ -73,26 +68,28 @@ public class ReviewService {
         return ReviewResponseDto.from(review);
     }
 
-    // 리뷰 개별 조회 (답글 포함)
     public ReviewResponseDto getReview(UUID reviewId) {
         Review review = findReviewById(reviewId);
 
+        // 아까 피드백 받긴 했지만 orElse(null) -> 답글이 없을수도 있기 때문에 orElse(null)을 사용하겠습니다.
+        // 만약 답글이 무조건 있어야한다면 아까 튜터님이 말한대로 orElseThrow로 수정하겠습니다.
         ReviewReply reply = reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId).orElse(null);
-        ReviewResponseDto.ReviewReplyInfo replyInfo = reply != null
-                ? new ReviewResponseDto.ReviewReplyInfo(reply.getContent())
-                : null;
+        if (reply == null) {
+            return ReviewResponseDto.from(review, null);
+        }
 
+        ReviewResponseDto.ReviewReplyInfo replyInfo =
+                new ReviewResponseDto.ReviewReplyInfo(reply.getContent());
         return ReviewResponseDto.from(review, replyInfo);
     }
 
     // 리뷰 목록 조회 (가게별, 답글 포함)
-    public Page<ReviewResponseDto> getReviewsByStore(UUID storeId, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public Page<ReviewResponseDto> getReviewsByStore(UUID storeId, Pageable pageable) {
         Page<Review> reviews = reviewRepository.findPageByStoreIdAndNotDeleted(storeId, pageable);
 
         List<UUID> reviewIds = reviews.getContent().stream()
                 .map(Review::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         Map<UUID, ReviewReply> replyMap = reviewReplyRepository.findByReviewIdsAndNotDeleted(reviewIds)
                 .stream()
@@ -100,10 +97,14 @@ public class ReviewService {
 
         return reviews.map(review -> {
             ReviewReply reply = replyMap.get(review.getId());
-            ReviewResponseDto.ReviewReplyInfo replyInfo = reply != null
-                    ? new ReviewResponseDto.ReviewReplyInfo(reply.getContent())
-                    : null;
-            return ReviewResponseDto.from(review, replyInfo);
+
+            if (reply != null) {
+                ReviewResponseDto.ReviewReplyInfo replyInfo =
+                        new ReviewResponseDto.ReviewReplyInfo(reply.getContent());
+                return ReviewResponseDto.from(review, replyInfo);
+            }
+
+            return ReviewResponseDto.from(review, null);
         });
     }
 
@@ -112,7 +113,7 @@ public class ReviewService {
     public void deleteReview(UUID reviewId, Long userId) {
         Review review = findReviewById(reviewId);
 
-        if (!review.getUserId().equals(userId)) {
+        if (!isQualified(review,userId)) {
             throw new IllegalArgumentException("본인의 리뷰만 삭제할 수 있습니다.");
         }
 
@@ -122,5 +123,25 @@ public class ReviewService {
     private Review findReviewById(UUID reviewId) {
         return reviewRepository.findByIdAndNotDeleted(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+    }
+
+    // 자격확인 메서드
+    private boolean isQualified(Review review,Long userId) {
+        return review.getUserId().equals(userId);
+    }
+
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    }
+
+    private Store findStoreById(UUID storeId) {
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
+    }
+
+    private Order findOrderById(UUID orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
     }
 }

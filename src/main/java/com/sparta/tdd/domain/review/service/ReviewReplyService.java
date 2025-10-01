@@ -33,20 +33,15 @@ public class ReviewReplyService {
     public ReviewReplyResponseDto createReply(UUID reviewId, Long ownerId, ReviewReplyRequestDto request) {
         Review review = findReviewById(reviewId);
 
-        //가게 소유자 확인
+        // 가게 소유자 확인
         validateStoreOwner(review.getStoreId(), ownerId);
         // 이미 답글이 있는지 확인
-        reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
-                .ifPresent(reply -> {
-                    throw new IllegalArgumentException("이미 답글이 존재합니다.");
-                });
-
+        checkReplyExists(reviewId);
         ReviewReply reply = ReviewReply.builder()
                 .review(review)
                 .content(request.content())
                 .ownerId(ownerId)
                 .build();
-
         ReviewReply savedReply = reviewReplyRepository.save(reply);
         return ReviewReplyResponseDto.from(savedReply);
     }
@@ -68,6 +63,14 @@ public class ReviewReplyService {
         ReviewReply reply = findReplyById(reviewId);
         validateStoreOwner(reply.getReview().getStoreId(), ownerId);
         reply.delete(ownerId);
+    }
+
+    // 이미 답글이 있는지 확인
+    private void checkReplyExists(UUID reviewId) {
+        reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
+                .ifPresent(reply -> {
+                    throw new IllegalArgumentException("이미 답글이 존재합니다.");
+                });
     }
 
     // 리뷰 ID로 삭제되지 않은 리뷰 조회
