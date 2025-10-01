@@ -79,12 +79,11 @@ public class OrderService {
 
             OrderMenu orderMenu = OrderMenu.builder()
                 .quantity(om.quantity())
-                .price(om.price())     // 단가 저장으로 바꾸고 싶으면 menu.getPrice()만 넣기
+                .price(om.price())
                 .menu(menu)
                 .build();
 
             order.addOrderMenu(orderMenu);
-            orderMenu.assignMenu(menu);
         }
 
         Order savedOrder = orderRepository.save(order);
