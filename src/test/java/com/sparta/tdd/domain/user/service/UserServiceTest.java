@@ -45,7 +45,7 @@ class UserServiceTest {
         when(userRepository.findAll(pageable)).thenReturn(userPage);
 
         // when
-        Page<UserResponseDto> result = userService.getAllUsers(0, 10, "username", true, UserAuthority.MASTER);
+        Page<UserResponseDto> result = userService.getAllUsers(pageable, UserAuthority.MASTER);
 
         // then
         assertEquals(3, result.getTotalElements());

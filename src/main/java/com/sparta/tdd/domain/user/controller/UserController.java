@@ -8,12 +8,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/users")
@@ -26,14 +26,10 @@ public class UserController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "모든 유저 조회")
-    public Page<UserResponseDto> getAllUser(
-            @RequestParam("page") int page,
-            @RequestParam("size") int size,
-            @RequestParam("sort") String sort,
-            @RequestParam("isAsc") boolean isAsc,
+    public Page<UserResponseDto> getAllUser(Pageable pageable,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        return userService.getAllUsers(page, size, sort, isAsc, userDetails.getUserAuthority());
+        return userService.getAllUsers(pageable, userDetails.getUserAuthority());
     }
 
     // 회원 정보 조회

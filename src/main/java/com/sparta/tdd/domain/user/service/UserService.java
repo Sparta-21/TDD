@@ -23,15 +23,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     // 회원 목록 조회
-    public Page<UserResponseDto> getAllUsers(int page, int size, String sortBy, boolean isAsc, UserAuthority authority) {
+    public Page<UserResponseDto> getAllUsers(Pageable pageable, UserAuthority authority) {
         if (authority != UserAuthority.MASTER && authority != UserAuthority.MANAGER) {
             throw new IllegalArgumentException("권한이 없습니다.");
         }
-
-        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
-
         Page<User> userList = userRepository.findAll(pageable);
 
         return userList.map(UserResponseDto::from);
