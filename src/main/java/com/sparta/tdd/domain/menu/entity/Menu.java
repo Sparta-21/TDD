@@ -43,6 +43,9 @@ public class Menu extends BaseEntity {
     @Column(name = "is_hidden", nullable = false)
     private Boolean isHidden = false;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
@@ -63,10 +66,14 @@ public class Menu extends BaseEntity {
         this.imageUrl = dto.imageUrl();
     }
 
+    public void updateStatus(Boolean status) {
+        this.isHidden = status;
+    }
+
     @Override
     public void delete(Long deleteBy) {
         super.delete(deleteBy);
         this.isHidden = true;
+        this.isDeleted = true;
     }
-
 }

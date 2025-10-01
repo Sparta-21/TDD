@@ -51,6 +51,12 @@ public class MenuService {
     }
 
     @Transactional
+    public void updateMenuStatus(UUID storeId, UUID menuId, Boolean status) {
+        Menu menu = findMenu(storeId, menuId);
+        menu.updateStatus(status);
+    }
+
+    @Transactional
     public void deleteMenu(UUID storeId, UUID menuId, Long userId) {
         Menu menu = findMenu(storeId, menuId);
         menu.delete(userId);

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -54,6 +55,15 @@ public class MenuController {
         @RequestBody MenuRequestDto menuRequestDto,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         menuService.updateMenu(storeId, menuId, menuRequestDto);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/{storeId}/menu/{menuId}/status")
+    public ResponseEntity<Void> updateMenuStatus(@PathVariable UUID storeId,
+        @PathVariable UUID menuId,
+        @RequestParam Boolean status,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        menuService.updateMenuStatus(storeId, menuId, status);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
