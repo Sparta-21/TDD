@@ -64,9 +64,10 @@ public class Menu extends BaseEntity {
         this.imageUrl = dto.imageUrl();
     }
 
-    public void delete() {
+    @Override
+    public void delete(Long deleteBy) {
+        super.delete(deleteBy);
         this.isHidden = true;
-        //todo: deleteby 이건 어떻게..
     }
 
 }

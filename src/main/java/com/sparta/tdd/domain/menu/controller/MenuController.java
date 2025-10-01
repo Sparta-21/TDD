@@ -60,7 +60,8 @@ public class MenuController {
     @DeleteMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<Void> deleteMenu(@PathVariable UUID storeId, @PathVariable UUID menuId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        menuService.deleteMenu(storeId, menuId);
+        Long userId = userDetails.getUserId();
+        menuService.deleteMenu(storeId, menuId, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

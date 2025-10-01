@@ -52,9 +52,9 @@ public class MenuService {
     }
 
     @Transactional
-    public void deleteMenu(UUID storeId, UUID menuId) {
+    public void deleteMenu(UUID storeId, UUID menuId, Long userId) {
         Menu menu = findMenu(storeId, menuId);
-        menu.delete();
+        menu.delete(userId);
     }
 
     private Menu findMenu(UUID storeId, UUID menuId) {
