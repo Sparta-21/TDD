@@ -169,8 +169,8 @@ class OrderServiceTest {
 
         // then
         assertThat(response).isNotNull();
-        assertThat(response.customerName()).isEqualTo("tester");
-        assertThat(response.storeName()).isEqualTo("치킨집");
+        assertThat(response.customerName()).isEqualTo(user.getUsername());
+        assertThat(response.storeName()).isEqualTo(store.getName());
         assertThat(response.price()).isEqualTo(78000);
 
     }
