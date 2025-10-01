@@ -11,4 +11,6 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 
     @Query("SELECT s FROM Store s WHERE s.id = :storeId AND s.deletedAt IS NULL")
     Optional<Store> findByStoreIdAndNotDeleted(@Param("storeId") UUID storeId);
+  
+    Optional<Store> findByName(String name);
 }

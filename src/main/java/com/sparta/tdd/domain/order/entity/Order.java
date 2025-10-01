@@ -22,17 +22,14 @@ import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Table(name = "p_order")
-@Builder
 public class Order extends BaseEntity {
 
     @Id
@@ -41,10 +38,7 @@ public class Order extends BaseEntity {
 
     private String address;
 
-    private Integer price;
-
     @Enumerated(EnumType.STRING)
-    @Builder.Default
     private OrderStatus orderStatus = OrderStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,7 +56,27 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    public void updatePrice(Integer price) {
-        this.price = price;
+    @Builder
+    public Order(String address, OrderStatus orderStatus, List<OrderMenu> orderMenuList,
+        Store store,
+        User user) {
+        this.address = address;
+        this.orderStatus = orderStatus;
+        this.orderMenuList = orderMenuList;
+        this.store = store;
+        this.user = user;
+    }
+
+    public void assignUser(User user) {
+        this.user = user;
+    }
+
+    public void assignStore(Store store) {
+        this.store = store;
+    }
+
+    public void addOrderMenu(OrderMenu orderMenu) {
+        this.orderMenuList.add(orderMenu);
+        orderMenu.assignOrder(this);
     }
 }

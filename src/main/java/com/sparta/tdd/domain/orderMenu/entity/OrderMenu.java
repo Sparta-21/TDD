@@ -19,8 +19,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
 @Table(name = "p_order_menu")
 public class OrderMenu extends BaseEntity {
@@ -40,6 +38,22 @@ public class OrderMenu extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;
+
+    @Builder
+    public OrderMenu(Integer quantity, Integer price, Order order, Menu menu) {
+        this.quantity = quantity;
+        this.price = price;
+        this.order = order;
+        this.menu = menu;
+    }
+
+    public void assignOrder(Order order) {
+        this.order = order;
+    }
+
+    public void assignMenu(Menu menu) {
+        this.menu = menu;
+    }
 
     public void updateQuantity(Integer quantity) {
         this.quantity = quantity;
