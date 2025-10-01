@@ -24,17 +24,17 @@ public class UserController {
     // 회원 목록 조회
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "모든 유저 조회")
-    public Page<UserResponseDto> getAllUser(Pageable pageable,
+    public ResponseEntity<UserPageResponseDto> getAllUser(Pageable pageable,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        return userService.getAllUsers(pageable, userDetails.getUserAuthority());
+        UserPageResponseDto users =
+                new UserPageResponseDto(userService.getAllUsers(pageable, userDetails.getUserAuthority()));
+        return ResponseEntity.ok(users);
     }
 
     // 회원 정보 조회
     @GetMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 식별자로 유저 조회")
     public UserResponseDto getUserByUserId(@PathVariable("userId") Long userId) {
         return userService.getUserByUserId(userId);
@@ -42,30 +42,31 @@ public class UserController {
 
     // 회원 닉네임 수정
     @PatchMapping("/{userId}/nickname")
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 닉네임 변경")
-    public UserResponseDto updateUserNickname(@PathVariable("userId") Long userId,
+    public ResponseEntity<UserResponseDto> updateUserNickname(@PathVariable("userId") Long userId,
                                               @RequestBody UserNicknameRequestDto requestDto,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.updateUserNickname(userId, userDetails.getUserId(), requestDto);
+        UserResponseDto responseDto = userService.updateUserNickname(userId, userDetails.getUserId(), requestDto);
+        return ResponseEntity.ok(responseDto);
     }
 
     // 회원 비밀번호 수정
     @PatchMapping("/{userId}/password")
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 비밀번호 변경")
-    public UserResponseDto updateUserPassword(@PathVariable("userId") Long userId,
+    public ResponseEntity<UserResponseDto> updateUserPassword(@PathVariable("userId") Long userId,
                                               @Valid @RequestBody UserPasswordRequestDto requestDto,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.updateUserPassword(userId, userDetails.getUserId(), requestDto);
+        UserResponseDto responseDto = userService.updateUserPassword(userId, userDetails.getUserId(), requestDto);
+        return ResponseEntity.ok(responseDto);
     }
 
     // 회원 매니저 권한 부여
     @PatchMapping("/{userId}/authority")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 매니저 권한 부여")
-    public UserResponseDto updateManagerAuthorityUser(@PathVariable("userId") Long userId,
+    public ResponseEntity<UserResponseDto> updateManagerAuthorityUser(@PathVariable("userId") Long userId,
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.grantUserManagerAuthority(userId, userDetails.getUserAuthority());
+        UserResponseDto responseDto = userService.grantUserManagerAuthority(userId, userDetails.getUserAuthority());
+        return ResponseEntity.ok(responseDto);
     }
 }
