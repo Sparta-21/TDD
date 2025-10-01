@@ -41,10 +41,10 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDto createOrder(
-        UserDetailsImpl userDetails,
+        Long userId,
         OrderRequestDto reqDto) {
 
-        User foundUser = userRepository.findById(userDetails.getUserId())
+        User foundUser = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Store foundStore = storeRepository.findByName(reqDto.storeName())
