@@ -2,6 +2,7 @@ package com.sparta.tdd.domain.review.controller;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.review.dto.*;
+import com.sparta.tdd.domain.review.service.ReviewReplyService;
 import com.sparta.tdd.domain.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Slf4j
 @RestController
 @RequestMapping("/v1/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final ReviewReplyService reviewReplyService;
 
     @PostMapping("/order/{orderId}")
     public ResponseEntity<ReviewResponseDto> createReview(
@@ -76,7 +77,6 @@ public class ReviewController {
         pageInfo.put("hasNext", reviews.hasNext());
 
         Map<String, Object> result = new HashMap<>();
-        result.put("status", 200);
         result.put("reviews", reviews.getContent());
         result.put("pageInfo", pageInfo);
 
@@ -101,7 +101,7 @@ public class ReviewController {
             @RequestBody @Valid ReviewReplyRequestDto request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        ReviewReplyResponseDto response = reviewService.createReply(
+        ReviewReplyResponseDto response = reviewReplyService.createReply(
                 reviewId,
                 userDetails.getUserId(),
                 request
@@ -116,7 +116,7 @@ public class ReviewController {
             @RequestBody @Valid ReviewReplyRequestDto request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        ReviewReplyResponseDto response = reviewService.updateReply(
+        ReviewReplyResponseDto response = reviewReplyService.updateReply(
                 reviewId,
                 userDetails.getUserId(),
                 request
@@ -130,7 +130,7 @@ public class ReviewController {
             @PathVariable UUID reviewId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        reviewService.deleteReply(reviewId, userDetails.getUserId());
+        reviewReplyService.deleteReply(reviewId, userDetails.getUserId());
         return ResponseEntity.noContent().build();
     }
 }

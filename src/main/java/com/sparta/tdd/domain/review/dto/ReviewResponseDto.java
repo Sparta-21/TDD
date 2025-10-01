@@ -15,7 +15,7 @@ public record ReviewResponseDto(
         String photos,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt,
-        ReviewReplyInfo reply  // 답글 정보 추가
+        ReviewReplyInfo reply
 ) {
     public static ReviewResponseDto from(Review review) {
         return new ReviewResponseDto(
@@ -28,7 +28,7 @@ public record ReviewResponseDto(
                 review.getImageUrl(),
                 review.getCreatedAt(),
                 review.getUpdatedAt(),
-                null  // 답글 없음
+                null
         );
     }
 

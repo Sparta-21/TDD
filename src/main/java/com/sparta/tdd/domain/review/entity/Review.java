@@ -49,18 +49,14 @@ public class Review extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private ReviewReply reply;
-
     @Builder
-    public Review(User user, Store store, Order order, Integer rating, String imageUrl, String content, ReviewReply reply) {
+    public Review(User user, Store store, Order order, Integer rating, String imageUrl, String content) {
         this.user = user;
         this.store = store;
         this.order = order;
         this.rating = rating;
         this.imageUrl = imageUrl;
         this.content = content;
-        this.reply = reply;
     }
 
     public void updateContent(Integer rating, String imageUrl, String content) {
