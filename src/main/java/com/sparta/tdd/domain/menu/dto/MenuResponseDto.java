@@ -12,7 +12,7 @@ public record MenuResponseDto(
     Boolean isHidden
 ) {
 
-    public static MenuResponseDto of(Menu menu) {
+    public static MenuResponseDto from(Menu menu) {
         return new MenuResponseDto(
             menu.getId(),
             menu.getName(),
