@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "p_menu")
 @Getter
-//@AllArgsConstructor
 @NoArgsConstructor
 public class Menu extends BaseEntity {
 
