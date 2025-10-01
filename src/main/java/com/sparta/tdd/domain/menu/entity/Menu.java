@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.menu.entity;
 
+import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.Column;
@@ -12,17 +13,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "p_menu")
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class Menu extends BaseEntity {
 
@@ -44,15 +41,32 @@ public class Menu extends BaseEntity {
     private String imageUrl;
 
     @Column(name = "is_hidden", nullable = false)
-    @ColumnDefault("false")
-    private Boolean isHidden;
+    private Boolean isHidden = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
-    public void updateName(String name) {
-        this.name = name;
+    @Builder
+    public Menu(MenuRequestDto dto, Store store) {
+        this.name = dto.name();
+        this.description = dto.description();
+        this.price = dto.price();
+        this.imageUrl = dto.imageUrl();
+        this.store = store;
+    }
+
+    public void update(MenuRequestDto dto) {
+        this.name = dto.name();
+        this.description = dto.description();
+        this.price = dto.price();
+        this.imageUrl = dto.imageUrl();
+    }
+
+    @Override
+    public void delete(Long deleteBy) {
+        super.delete(deleteBy);
+        this.isHidden = true;
     }
 
 }
