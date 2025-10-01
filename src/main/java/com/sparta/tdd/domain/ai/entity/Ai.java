@@ -21,9 +21,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "p_ai")
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Ai extends BaseEntity {
 
     @Id
@@ -40,4 +38,11 @@ public class Ai extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Builder
+    public Ai(String inputText, String outputText, User user) {
+        this.inputText = inputText;
+        this.outputText = outputText;
+        this.user = user;
+    }
 }
