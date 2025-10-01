@@ -3,6 +3,7 @@ package com.sparta.tdd.domain.user.controller;
 import com.sparta.tdd.domain.user.dto.*;
 import com.sparta.tdd.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -45,7 +46,7 @@ public class UserController {
     @PatchMapping("/{userId}/nickname")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 닉네임 변경")
-    public UserResponseDto updateUserNickname(@PathVariable("userId") Long userId, UserNicknameRequestDto requestDto) {
+    public UserResponseDto updateUserNickname(@PathVariable("userId") Long userId, @RequestBody UserNicknameRequestDto requestDto) {
         return userService.updateUserNickname(userId, requestDto);
     }
 
@@ -53,7 +54,7 @@ public class UserController {
     @PatchMapping("/{userId}/password")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 비밀번호 변경")
-    public UserResponseDto updateUserPassword(@PathVariable("userId") Long userId, UserPasswordRequestDto requestDto) {
+    public UserResponseDto updateUserPassword(@PathVariable("userId") Long userId, @Valid @RequestBody UserPasswordRequestDto requestDto) {
         return userService.updateUserPassword(userId, requestDto);
     }
 
