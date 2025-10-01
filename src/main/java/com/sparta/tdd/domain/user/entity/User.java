@@ -41,10 +41,12 @@ public class User extends BaseEntity {
     private UserAuthority authority;
 
     @Builder
-    public User(String username, String password, String nickname) {
+    public User(String username, String password,
+                String nickname, UserAuthority authority) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
+        this.authority = authority;
     }
 
     public void updateNickname(String nickname) {
