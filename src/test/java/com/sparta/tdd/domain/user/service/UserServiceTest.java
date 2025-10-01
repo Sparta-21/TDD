@@ -30,11 +30,6 @@ class UserServiceTest {
     @InjectMocks
     UserService userService;
 
-    @BeforeEach
-    void init() {
-
-    }
-
     @Test
     @DisplayName("모든 유저 조회")
     void getAllUserTest() {
@@ -50,7 +45,7 @@ class UserServiceTest {
         when(userRepository.findAll(pageable)).thenReturn(userPage);
 
         // when
-        Page<UserResponseDto> result = userService.getAllUsers(0, 10, "username", true);
+        Page<UserResponseDto> result = userService.getAllUsers(0, 10, "username", true, UserAuthority.MASTER);
 
         // then
         assertEquals(3, result.getTotalElements());
@@ -77,10 +72,11 @@ class UserServiceTest {
     void grantManagerAuthorityTest() {
         //given
         User user1 = createUser("test01", "1234", "test1", UserAuthority.CUSTOMER);
+        User user2 = createUser("test02", "1234", "test2", UserAuthority.MASTER);
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
         //when
-        UserResponseDto result = userService.grantUserManagerAuthority(1L);
+        UserResponseDto result = userService.grantUserManagerAuthority(1L, user2.getAuthority());
         //then
         assertEquals(UserAuthority.MANAGER, user1.getAuthority());
         assertEquals(user1.getId(), result.id());
@@ -88,9 +84,10 @@ class UserServiceTest {
     }
     @Test
     @DisplayName("이미 MANAGER 권한이면 예외 발생")
-    void grantManagerAuthority_alreadyManager() {
+    void grantManagerAuthorityAlreadyManager() {
         // given
         User user = createUser("test01", "1234", "test1", UserAuthority.CUSTOMER);
+        User user2 = createUser("test02", "1234", "test2", UserAuthority.MASTER);
 
         user.updateAuthority(UserAuthority.MANAGER);
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
@@ -98,7 +95,19 @@ class UserServiceTest {
         // then
         assertThrows(IllegalArgumentException.class, () -> {
             // when
-            userService.grantUserManagerAuthority(1L);
+            userService.grantUserManagerAuthority(1L, user2.getAuthority());
+        });
+    }
+    @Test
+    @DisplayName("MASTER 권한이 아닌 유저가 권한 부여를 하면 예외 발생")
+    void grantManagerAuthorityCustomer() {
+        // given
+        User user = createUser("test01", "1234", "test1", UserAuthority.CUSTOMER);
+
+        // then
+        assertThrows(IllegalArgumentException.class, () -> {
+            // when
+            userService.grantUserManagerAuthority(1L, user.getAuthority());
         });
     }
     @Test
@@ -110,7 +119,7 @@ class UserServiceTest {
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
         //when
-        UserResponseDto result = userService.updateUserNickname(1L, requestDto);
+        UserResponseDto result = userService.updateUserNickname(1L, 1L, requestDto);
         //then
         assertEquals(requestDto.nickname(), result.nickname());
     }
@@ -126,7 +135,7 @@ class UserServiceTest {
         //then
         assertThrows(IllegalArgumentException.class, () -> {
             //when
-            userService.updateUserNickname(1L, requestDto);
+            userService.updateUserNickname(1L, 1L, requestDto);
         });
     }
 

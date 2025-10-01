@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.user.controller;
 
+import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.user.dto.*;
 import com.sparta.tdd.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,9 +30,10 @@ public class UserController {
             @RequestParam("page") int page,
             @RequestParam("size") int size,
             @RequestParam("sort") String sort,
-            @RequestParam("isAsc") boolean isAsc
+            @RequestParam("isAsc") boolean isAsc,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        return userService.getAllUsers(page, size, sort, isAsc);
+        return userService.getAllUsers(page, size, sort, isAsc, userDetails.getUserAuthority());
     }
 
     // 회원 정보 조회
@@ -46,23 +48,28 @@ public class UserController {
     @PatchMapping("/{userId}/nickname")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 닉네임 변경")
-    public UserResponseDto updateUserNickname(@PathVariable("userId") Long userId, @RequestBody UserNicknameRequestDto requestDto) {
-        return userService.updateUserNickname(userId, requestDto);
+    public UserResponseDto updateUserNickname(@PathVariable("userId") Long userId,
+                                              @RequestBody UserNicknameRequestDto requestDto,
+                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.updateUserNickname(userId, userDetails.getUserId(), requestDto);
     }
 
     // 회원 비밀번호 수정
     @PatchMapping("/{userId}/password")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 비밀번호 변경")
-    public UserResponseDto updateUserPassword(@PathVariable("userId") Long userId, @Valid @RequestBody UserPasswordRequestDto requestDto) {
-        return userService.updateUserPassword(userId, requestDto);
+    public UserResponseDto updateUserPassword(@PathVariable("userId") Long userId,
+                                              @Valid @RequestBody UserPasswordRequestDto requestDto,
+                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.updateUserPassword(userId, userDetails.getUserId(), requestDto);
     }
 
     // 회원 매니저 권한 부여
     @PatchMapping("/{userId}/authority")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "유저 매니저 권한 부여")
-    public UserResponseDto updateManagerAuthorityUser(@PathVariable("userId") Long userId) {
-        return userService.grantUserManagerAuthority(userId);
+    public UserResponseDto updateManagerAuthorityUser(@PathVariable("userId") Long userId,
+                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.grantUserManagerAuthority(userId, userDetails.getUserAuthority());
     }
 }
