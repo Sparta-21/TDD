@@ -9,30 +9,28 @@ import com.sparta.tdd.domain.store.repository.StoreRepository;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class MenuService {
 
-    @Autowired
-    private MenuRepository menuRepository;
-
-    @Autowired
-    private StoreRepository storeRepository;
+    private final MenuRepository menuRepository;
+    private final StoreRepository storeRepository;
 
     public List<MenuResponseDto> getMenus(UUID storeId) {
         List<Menu> menus = menuRepository.findAllByStoreId(storeId);
         return menus.stream()
-            .map(MenuResponseDto::of)
+            .map(MenuResponseDto::from)
             .collect(Collectors.toList());
     }
 
     public MenuResponseDto getMenu(UUID storeId, UUID menuId) {
         Menu menu = menuRepository.findByStoreIdAndId(storeId, menuId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
-        return MenuResponseDto.of(menu);
+        return MenuResponseDto.from(menu);
     }
 
     @Transactional
@@ -42,7 +40,7 @@ public class MenuService {
             .store(findStore(storeId)).build();
         menuRepository.save(menu);
 
-        return MenuResponseDto.of(menu);
+        return MenuResponseDto.from(menu);
     }
 
     @Transactional
