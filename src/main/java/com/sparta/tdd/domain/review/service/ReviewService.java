@@ -62,8 +62,7 @@ public class ReviewService {
     // 리뷰 수정
     @Transactional
     public ReviewResponseDto updateReview(UUID reviewId, Long userId, ReviewUpdateDto request) {
-        Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+        Review review = findReviewById(reviewId);
 
         if (!review.getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인의 리뷰만 수정할 수 있습니다.");
@@ -76,8 +75,7 @@ public class ReviewService {
 
     // 리뷰 개별 조회 (답글 포함)
     public ReviewResponseDto getReview(UUID reviewId) {
-        Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+        Review review = findReviewById(reviewId);
 
         ReviewReply reply = reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId).orElse(null);
         ReviewResponseDto.ReviewReplyInfo replyInfo = reply != null
@@ -112,8 +110,7 @@ public class ReviewService {
     // 리뷰 삭제
     @Transactional
     public void deleteReview(UUID reviewId, Long userId) {
-        Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+        Review review = findReviewById(reviewId);
 
         if (!review.getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인의 리뷰만 삭제할 수 있습니다.");
@@ -127,8 +124,7 @@ public class ReviewService {
     // 답글 등록
     @Transactional
     public ReviewReplyResponseDto createReply(UUID reviewId, Long ownerId, ReviewReplyRequestDto request) {
-        Review review = reviewRepository.findByIdAndNotDeleted(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+        Review review = findReviewById(reviewId);
 
         // 이미 답글이 있는지 확인
         reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
@@ -155,8 +151,7 @@ public class ReviewService {
     // 답글 수정
     @Transactional
     public ReviewReplyResponseDto updateReply(UUID reviewId, Long ownerId, ReviewReplyRequestDto request) {
-        ReviewReply reply = reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답글입니다."));
+        ReviewReply reply = findReplyById(reviewId);
 
         if (!reply.getOwnerId().equals(ownerId)) {
             throw new IllegalArgumentException("본인의 답글만 수정할 수 있습니다.");
@@ -170,13 +165,22 @@ public class ReviewService {
     // 답글 삭제
     @Transactional
     public void deleteReply(UUID reviewId, Long ownerId) {
-        ReviewReply reply = reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답글입니다."));
+        ReviewReply reply = findReplyById(reviewId);
 
         if (!reply.getOwnerId().equals(ownerId)) {
             throw new IllegalArgumentException("본인의 답글만 삭제할 수 있습니다.");
         }
 
         reply.delete(ownerId);
+    }
+
+    private Review findReviewById(UUID reviewId) {
+        return reviewRepository.findByIdAndNotDeleted(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+    }
+
+    private ReviewReply findReplyById(UUID reviewId) {
+        return reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답글입니다."));
     }
 }
