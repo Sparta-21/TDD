@@ -2,6 +2,7 @@ package com.sparta.tdd.domain.orderMenu.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
@@ -34,40 +35,39 @@ class OrderMenuRepositoryTest {
     private User testUser;
     private Store testStore;
     private Order testOrder;
+    private MenuRequestDto menuDto;
     private Menu testMenu;
 
     @BeforeEach
     void setUp() {
         testUser = User.builder()
-                .username("testuser")
-                .password("password123")
-                .nickname("테스트유저")
-                .authority(UserAuthority.CUSTOMER)
-                .build();
+            .username("testuser")
+            .password("password123")
+            .nickname("테스트유저")
+            .authority(UserAuthority.CUSTOMER)
+            .build();
         em.persist(testUser);
 
         testStore = Store.builder()
-                .name("테스트 가게")
-                .category(StoreCategory.KOREAN)
-                .description("맛있는 가게")
-                .user(testUser)
-                .build();
+            .name("테스트 가게")
+            .category(StoreCategory.KOREAN)
+            .description("맛있는 가게")
+            .user(testUser)
+            .build();
         em.persist(testStore);
 
         testOrder = Order.builder()
-                .price(10000)
-                .user(testUser)
-                .store(testStore)
-                .build();
+            .price(10000)
+            .user(testUser)
+            .store(testStore)
+            .build();
         em.persist(testOrder);
 
+        menuDto = new MenuRequestDto("테스트 메뉴", "맛있는 메뉴", 5000, "string");
         testMenu = Menu.builder()
-                .name("테스트 메뉴")
-                .description("맛있는 메뉴")
-                .price(5000)
-                .isHidden(false)
-                .store(testStore)
-                .build();
+            .dto(menuDto)
+            .store(testStore)
+            .build();
         em.persist(testMenu);
 
         em.flush();
@@ -86,11 +86,11 @@ class OrderMenuRepositoryTest {
             Menu menu = em.find(Menu.class, testMenu.getId());
 
             OrderMenu orderMenu = OrderMenu.builder()
-                    .quantity(2)
-                    .price(5000)
-                    .order(order)
-                    .menu(menu)
-                    .build();
+                .quantity(2)
+                .price(5000)
+                .order(order)
+                .menu(menu)
+                .build();
 
             OrderMenu saved = orderMenuRepository.save(orderMenu);
 
@@ -111,11 +111,11 @@ class OrderMenuRepositoryTest {
             Menu menu = em.find(Menu.class, testMenu.getId());
 
             OrderMenu orderMenu = OrderMenu.builder()
-                    .quantity(1)
-                    .price(5000)
-                    .order(order)
-                    .menu(menu)
-                    .build();
+                .quantity(1)
+                .price(5000)
+                .order(order)
+                .menu(menu)
+                .build();
             OrderMenu saved = orderMenuRepository.save(orderMenu);
 
             // when
