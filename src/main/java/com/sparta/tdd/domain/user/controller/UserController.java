@@ -23,7 +23,6 @@ public class UserController {
     private final UserService userService;
 
     // 회원 목록 조회
-
     @GetMapping
     @PreAuthorize("hasRole('ROLE_MASTER') or hasRole('ROLE_MANAGER')")
     @Operation(summary = "모든 유저 조회")
@@ -35,8 +34,9 @@ public class UserController {
     // 회원 정보 조회
     @GetMapping("/{userId}")
     @Operation(summary = "유저 식별자로 유저 조회")
-    public UserResponseDto getUserByUserId(@PathVariable("userId") Long userId) {
-        return userService.getUserByUserId(userId);
+    public ResponseEntity<UserResponseDto> getUserByUserId(@PathVariable("userId") Long userId) {
+        UserResponseDto user = userService.getUserByUserId(userId);
+        return ResponseEntity.ok(user);
     }
 
     // 회원 닉네임 수정
