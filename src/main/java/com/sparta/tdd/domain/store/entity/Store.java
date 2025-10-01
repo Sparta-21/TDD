@@ -71,4 +71,24 @@ public class Store extends BaseEntity {
     public void updateName(String updatedName) {
         this.name = updatedName;
     }
+
+    public void updateUser(User user) {
+        this.user = user;
+    }
+
+    public void updateCategory(StoreCategory category) {
+        this.category = category;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public boolean isOwner(User user) {
+        return this.getUser().getId().equals(user.getId());
+    }
 }
