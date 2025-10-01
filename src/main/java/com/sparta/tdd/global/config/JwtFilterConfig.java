@@ -5,6 +5,7 @@ import com.sparta.tdd.global.jwt.filter.JwtAuthenticationFilter;
 import com.sparta.tdd.global.jwt.filter.JwtExceptionFilter;
 import com.sparta.tdd.global.jwt.provider.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,6 +14,8 @@ import org.springframework.context.annotation.Configuration;
 public class JwtFilterConfig {
 
     private final ObjectMapper objectMapper;
+    
+    @Qualifier(value = "accessTokenProvider")
     private final JwtTokenProvider accessTokenProvider;
 
     @Bean
