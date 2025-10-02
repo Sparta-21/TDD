@@ -19,4 +19,15 @@ public class RefreshTokenCookieFactory {
             .sameSite("Lax")
             .build();
     }
+
+    public static ResponseCookie invalidate() {
+        return ResponseCookie
+            .from(cookieName, "")
+            .httpOnly(true)
+            .secure(false)
+            .path("/")
+            .maxAge(0)
+            .sameSite("Lax")
+            .build();
+    }
 }
