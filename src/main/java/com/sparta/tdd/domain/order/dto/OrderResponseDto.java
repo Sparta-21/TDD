@@ -1,5 +1,8 @@
 package com.sparta.tdd.domain.order.dto;
 
+import static com.sparta.tdd.domain.order.enums.OrderStatus.PENDING;
+
+import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.orderMenu.dto.OrderMenuResponseDto;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +15,7 @@ public record OrderResponseDto(
     Integer price,
     String address,
     List<OrderMenuResponseDto> orderMenuList,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    OrderStatus orderStatus
 ) {
 }
