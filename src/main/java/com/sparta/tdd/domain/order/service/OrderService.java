@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.order.service;
 
+import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.order.dto.OrderRequestDto;
@@ -14,7 +15,6 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,26 +40,22 @@ public class OrderService {
     private final MenuRepository menuRepository;
 
     public Page<OrderResponseDto> getOrders(
-        Long userId,
+        UserDetailsImpl userDetails,
         Pageable pageable,
         OrderSearchOptionDto searchOption) {
 
-        LocalDateTime start = searchOption.startOrNull();
-        LocalDateTime end = searchOption.endOrNull();
-        UUID targetStoreId = searchOption.storeId();
-        Long targetUserId = searchOption.userId();
-
-        // 검색조건에 맞는 Id 들을 페이징처리해서 가져와야함
+        // 검색조건에 맞는 Id 들을 페이징처리해서 가져옴
         Page<UUID> idPage = orderRepository.findPageIds(
             pageable,
-            targetUserId,
-            start,
-            end,
-            targetStoreId
+            searchOption.userId(),
+            searchOption.startOrNull(),
+            searchOption.endOrNull(),
+            searchOption.storeId()
         );
 
         List<UUID> ids = idPage.getContent();
 
+        // In 은 데이터 순서를 보장하지 않음
         List<Order> loaded = orderRepository.findDetailsByIdIn(ids);
 
         // id 순서대로 재정렬
@@ -69,15 +65,15 @@ public class OrderService {
             .map(byId::get)
             .toList();
 
-
         List<OrderResponseDto> content = ordered.stream()
             .map(orderMapper::toResponse)
             .toList();
 
+
         return new PageImpl<>(content, pageable, idPage.getTotalElements());
     }
 
-    public OrderResponseDto getOrder(Long userId, UUID orderId) {
+    public OrderResponseDto getOrder(UserDetailsImpl userDetails, UUID orderId) {
         Order order = orderRepository.findDetailById(orderId)
             .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
 
@@ -88,10 +84,10 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDto createOrder(
-        Long userId,
+        UserDetailsImpl userDetails,
         OrderRequestDto reqDto) {
 
-        User foundUser = userRepository.findById(userId)
+        User foundUser = userRepository.findById(userDetails.getUserId())
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Store foundStore = storeRepository.findByName(reqDto.storeName())

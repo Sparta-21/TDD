@@ -1,7 +1,6 @@
 package com.sparta.tdd.domain.order.dto;
 
 import com.sparta.tdd.domain.order.enums.OrderStatus;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -14,10 +13,9 @@ public record OrderSearchOptionDto(
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate to,
 
-    OrderStatus status,
-
-    @NotNull
     Long userId,
+
+    OrderStatus status,
 
     UUID storeId
 ) {

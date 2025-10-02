@@ -4,20 +4,15 @@ import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.order.dto.OrderRequestDto;
 import com.sparta.tdd.domain.order.dto.OrderResponseDto;
 import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
-import com.sparta.tdd.domain.order.entity.Order;
-import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.order.service.OrderService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +41,7 @@ public class OrderController {
         log.info("Controller.getOrders 요청 수신");
 
         Page<OrderResponseDto> responseDtos = orderService.getOrders(
-            userDetails.getUserId(),
+            userDetails,
             pageable,
             searchOption
         );
@@ -61,7 +56,10 @@ public class OrderController {
         @PathVariable UUID orderId) {
         log.info("Controller.getOrder 요청수신");
 
-        OrderResponseDto responseDto = orderService.getOrder(userDetails.getUserId(), orderId);
+        OrderResponseDto responseDto = orderService.getOrder(
+            userDetails,
+            orderId
+        );
 
         log.info("Controller.getOrder 요청 종료");
         return ResponseEntity.ok(responseDto);
@@ -72,7 +70,10 @@ public class OrderController {
         @AuthenticationPrincipal UserDetailsImpl userDetails,
         @RequestBody @Valid OrderRequestDto reqDto) {
         log.info("Controller.createOrder 요청수신");
-        OrderResponseDto resDto = orderService.createOrder(userDetails.getUserId(), reqDto);
+        OrderResponseDto resDto = orderService.createOrder(
+            userDetails,
+            reqDto
+        );
 
         URI location = URI.create("/v1/orders/" + resDto.id());
 

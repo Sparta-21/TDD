@@ -5,13 +5,11 @@ import static com.sparta.tdd.domain.user.enums.UserAuthority.CUSTOMER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
-import com.sparta.tdd.domain.payment.entity.Payment;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.config.AuditConfig;
@@ -28,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
