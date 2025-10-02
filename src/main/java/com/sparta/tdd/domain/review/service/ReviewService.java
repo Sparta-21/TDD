@@ -41,14 +41,7 @@ public class ReviewService {
         Store store = findStoreById(request.storeId());
         Order order = findOrderById(orderId);
 
-        Review review = Review.builder()
-                .user(user)
-                .store(store)
-                .order(order)
-                .rating(request.rating())
-                .imageUrl(request.photos())
-                .content(request.content())
-                .build();
+        Review review = request.toEntity(user, store, order);
 
         Review savedReview = reviewRepository.save(review);
         return ReviewResponseDto.from(savedReview);

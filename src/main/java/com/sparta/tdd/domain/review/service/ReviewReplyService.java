@@ -9,6 +9,7 @@ import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,17 +38,13 @@ public class ReviewReplyService {
         validateStoreOwner(review.getStoreId(), ownerId);
         // 이미 답글이 있는지 확인
         checkReplyExists(reviewId);
-        ReviewReply reply = ReviewReply.builder()
-                .review(review)
-                .content(request.content())
-                .ownerId(ownerId)
-                .build();
+        ReviewReply reply = request.toEntity(review, ownerId);
         ReviewReply savedReply = reviewReplyRepository.save(reply);
         return ReviewReplyResponseDto.from(savedReply);
     }
 
     // 답글 수정
-    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER')")
     @Transactional
     public ReviewReplyResponseDto updateReply(UUID reviewId, Long ownerId, ReviewReplyRequestDto request) {
         ReviewReply reply = findReplyById(reviewId);
@@ -92,6 +89,11 @@ public class ReviewReplyService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // MANAGER나 MASTER면 통과, OWNER면 가게 소유자 확인
+        if (user.getAuthority() == UserAuthority.MANAGER || user.getAuthority() == UserAuthority.MASTER) {
+            return;
+        }
 
         if (!store.isOwner(user)) {
             throw new IllegalArgumentException("해당 가게의 소유자만 답글을 작성할 수 있습니다.");

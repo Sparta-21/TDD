@@ -66,7 +66,7 @@ public class ReviewController {
     @GetMapping("/store/{storeId}")
     public ResponseEntity<Page<ReviewResponseDto>> getReviewsByStore(
             @PathVariable UUID storeId,
-            @PageableDefault(size = 10, page = 0) Pageable pageable
+            @PageableDefault Pageable pageable
     ) {
         Page<ReviewResponseDto> reviews = reviewService.getReviewsByStore(storeId, pageable);
         return ResponseEntity.ok(reviews);
