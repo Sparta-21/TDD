@@ -29,6 +29,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -73,10 +74,12 @@ class ReviewServiceTest {
     private Long ownerId;
 
     @BeforeEach
-    void 초기세팅() {
+    void 초기설정() throws Exception {
         reviewId = UUID.randomUUID();
         storeId = UUID.randomUUID();
         orderId = UUID.randomUUID();
+        userId = 1L;
+        ownerId = 2L;
 
         testUser = User.builder()
                 .username("testuser")
@@ -84,6 +87,7 @@ class ReviewServiceTest {
                 .nickname("테스트유저")
                 .authority(UserAuthority.CUSTOMER)
                 .build();
+        setUserId(testUser, userId);
 
         testStore = Store.builder()
                 .name("테스트 가게")
@@ -91,6 +95,7 @@ class ReviewServiceTest {
                 .description("맛있는 한식당")
                 .user(testUser)
                 .build();
+        setStoreId(testStore, storeId);
 
         testOrder = Order.builder()
                 .address("서울시 강남구")
@@ -107,9 +112,26 @@ class ReviewServiceTest {
                 .imageUrl("http://example.com/image.jpg")
                 .content("정말 맛있어요!")
                 .build();
+        setReviewId(testReview, reviewId);
+    }
 
-        userId = 1L;
-        ownerId = 2L;
+    // Reflection을 사용하여 ID 설정 (테스트용)
+    private void setUserId(User user, Long id) throws Exception {
+        Field field = User.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(user, id);
+    }
+
+    private void setStoreId(Store store, UUID id) throws Exception {
+        Field field = Store.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(store, id);
+    }
+
+    private void setReviewId(Review review, UUID id) throws Exception {
+        Field field = Review.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(review, id);
     }
 
     @Nested
@@ -157,7 +179,6 @@ class ReviewServiceTest {
                     "http://example.com/image.jpg"
             );
 
-            // userId가 호출되면 빈 Optional이 반환되도록 설정
             given(userRepository.findById(userId)).willReturn(Optional.empty());
 
             // when & then
@@ -180,7 +201,7 @@ class ReviewServiceTest {
                     "http://example.com/image.jpg"
             );
 
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findById(userId)).willReturn(Optional.of(testUser));
             given(storeRepository.findById(storeId)).willReturn(Optional.empty());
 
             // when & then
@@ -188,7 +209,6 @@ class ReviewServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("존재하지 않는 가게입니다.");
 
-            //save가 0번 호풀되고 어떤 실행도 되면 안됌
             verify(reviewRepository, never()).save(any());
         }
 
@@ -205,11 +225,9 @@ class ReviewServiceTest {
 
             given(userRepository.findById(userId)).willReturn(Optional.of(testUser));
             given(storeRepository.findById(storeId)).willReturn(Optional.of(testStore));
-            // 빈 주문 반환
             given(orderRepository.findById(orderId)).willReturn(Optional.empty());
 
             // when & then
-            //주문이 비어있는 상태로 리뷰 등록하려고함
             assertThatThrownBy(() -> reviewService.createReview(userId, orderId, requestDto))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("존재하지 않는 주문입니다.");
@@ -252,7 +270,6 @@ class ReviewServiceTest {
                     "http://example.com/new-image.jpg"
             );
 
-            //빈 리뷰ID 반환
             given(reviewRepository.findByIdAndNotDeleted(reviewId)).willReturn(Optional.empty());
 
             // when & then
@@ -273,8 +290,7 @@ class ReviewServiceTest {
 
             given(reviewRepository.findByIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReview));
 
-            // 원래 userId에 1 더해서 다른 유저로 변환
-            Long anotherUserId = userId+3;
+            Long anotherUserId = userId + 3;
             // when & then
             assertThatThrownBy(() -> reviewService.updateReview(reviewId, anotherUserId, updateDto))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -309,7 +325,6 @@ class ReviewServiceTest {
         @DisplayName("리뷰 개별 조회 성공 - 답글 포함")
         void 답글있는_리뷰_조회() {
             // given
-
             ReviewReply reply = ReviewReply.builder()
                     .review(testReview)
                     .content("감사합니다!")
@@ -357,7 +372,7 @@ class ReviewServiceTest {
                     .build();
 
             List<Review> reviewList = Arrays.asList(testReview, review2);
-            Pageable pageable = PageRequest.of(0, 10);  // Pageable 객체 생성
+            Pageable pageable = PageRequest.of(0, 10);
             Page<Review> reviewPage = new PageImpl<>(reviewList, pageable, reviewList.size());
 
             given(reviewRepository.findPageByStoreIdAndNotDeleted(eq(storeId), any(Pageable.class)))
@@ -366,7 +381,7 @@ class ReviewServiceTest {
                     .willReturn(Arrays.asList());
 
             // when
-            Page<ReviewResponseDto> result = reviewService.getReviewsByStore(storeId, pageable);  // pageable 추가
+            Page<ReviewResponseDto> result = reviewService.getReviewsByStore(storeId, pageable);
 
             // then
             assertThat(result).isNotNull();
@@ -379,13 +394,12 @@ class ReviewServiceTest {
             verify(reviewReplyRepository).findByReviewIdsAndNotDeleted(anyList());
         }
 
-
         @Test
         @DisplayName("가게별 리뷰 목록 조회 - 빈 결과")
         void 빈리뷰조회() {
             // given
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Review> emptyPage = Page.empty(pageable);  // 👈 더 간단한 방법
+            Page<Review> emptyPage = Page.empty(pageable);
 
             given(reviewRepository.findPageByStoreIdAndNotDeleted(eq(storeId), any(Pageable.class)))
                     .willReturn(emptyPage);

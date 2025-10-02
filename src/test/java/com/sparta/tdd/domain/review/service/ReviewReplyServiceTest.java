@@ -207,7 +207,7 @@ class ReviewReplyServiceTest {
 
         @Test
         @DisplayName("답글 등록 실패 - 가게 소유자가 아님")
-        void createReply_Fail_NotStoreOwner() {
+        void createReply_Fail_NotStoreOwner() throws Exception {
             // given
             ReviewReplyRequestDto requestDto = new ReviewReplyRequestDto("감사합니다!");
             User otherUser = User.builder()
@@ -216,6 +216,7 @@ class ReviewReplyServiceTest {
                     .nickname("다른사람")
                     .authority(UserAuthority.OWNER)
                     .build();
+            setUserId(otherUser, 3L);
 
             given(reviewRepository.findByIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReview));
             given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
@@ -270,7 +271,7 @@ class ReviewReplyServiceTest {
     class UpdateReplyTest {
 
         @Test
-        @DisplayName("답글 수정 성공")
+        @DisplayName("답글 수정 성공 - 가게 소유자")
         void updateReply_Success() {
             // given
             ReviewReplyRequestDto requestDto = new ReviewReplyRequestDto("수정된 답글입니다!");
@@ -307,7 +308,7 @@ class ReviewReplyServiceTest {
 
         @Test
         @DisplayName("답글 수정 실패 - 가게 소유자가 아님")
-        void updateReply_Fail_NotStoreOwner() {
+        void updateReply_Fail_NotStoreOwner() throws Exception {
             // given
             ReviewReplyRequestDto requestDto = new ReviewReplyRequestDto("수정된 답글입니다!");
             User otherUser = User.builder()
@@ -316,6 +317,7 @@ class ReviewReplyServiceTest {
                     .nickname("다른사람")
                     .authority(UserAuthority.OWNER)
                     .build();
+            setUserId(otherUser, 3L);
 
             given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReply));
             given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
@@ -362,8 +364,8 @@ class ReviewReplyServiceTest {
         }
 
         @Test
-        @DisplayName("답글 삭제 실패 - 가게 소유자가 아님")
-        void deleteReply_Fail_NotStoreOwner() {
+        @DisplayName("답글 삭제 실패 - 가게 소유자가 아닌 일반 OWNER")
+        void deleteReply_Fail_NotStoreOwner() throws Exception {
             // given
             User otherUser = User.builder()
                     .username("other")
@@ -371,6 +373,7 @@ class ReviewReplyServiceTest {
                     .nickname("다른사람")
                     .authority(UserAuthority.OWNER)
                     .build();
+            setUserId(otherUser, 3L);
 
             given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReply));
             given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
@@ -384,12 +387,12 @@ class ReviewReplyServiceTest {
     }
 
     @Nested
-    @DisplayName("가게 소유자 검증 테스트")
-    class ValidateStoreOwnerTest {
+    @DisplayName("권한별 답글 작성/수정/삭제 테스트")
+    class AuthorityTest {
 
         @Test
-        @DisplayName("MANAGER 권한으로 답글 등록 불가 - 가게 소유자가 아님")
-        void createReply_Fail_WithManagerAuthority() throws Exception {
+        @DisplayName("MANAGER 권한으로 답글 등록 성공")
+        void createReply_Success_WithManagerAuthority() throws Exception {
             // given
             User manager = User.builder()
                     .username("manager")
@@ -404,18 +407,20 @@ class ReviewReplyServiceTest {
             given(reviewRepository.findByIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReview));
             given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
             given(userRepository.findById(3L)).willReturn(Optional.of(manager));
+            given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.empty());
+            given(reviewReplyRepository.save(any(ReviewReply.class))).willReturn(testReply);
 
-            // when & then
-            assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, 3L, requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+            // when
+            ReviewReplyResponseDto result = reviewReplyService.createReply(reviewId, 3L, requestDto);
 
-            verify(reviewReplyRepository, never()).save(any());
+            // then
+            assertThat(result).isNotNull();
+            verify(reviewReplyRepository).save(any(ReviewReply.class));
         }
 
         @Test
-        @DisplayName("MASTER 권한으로 답글 등록 불가 - 가게 소유자가 아님")
-        void createReply_Fail_WithMasterAuthority() throws Exception {
+        @DisplayName("MASTER 권한으로 답글 등록 성공")
+        void createReply_Success_WithMasterAuthority() throws Exception {
             // given
             User master = User.builder()
                     .username("master")
@@ -430,13 +435,62 @@ class ReviewReplyServiceTest {
             given(reviewRepository.findByIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReview));
             given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
             given(userRepository.findById(4L)).willReturn(Optional.of(master));
+            given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.empty());
+            given(reviewReplyRepository.save(any(ReviewReply.class))).willReturn(testReply);
+
+            // when
+            ReviewReplyResponseDto result = reviewReplyService.createReply(reviewId, 4L, requestDto);
+
+            // then
+            assertThat(result).isNotNull();
+            verify(reviewReplyRepository).save(any(ReviewReply.class));
+        }
+
+        @Test
+        @DisplayName("MANAGER 권한으로 답글 수정 실패 - 가게 소유자만 가능")
+        void updateReply_Fail_WithManagerAuthority() throws Exception {
+            // given
+            User manager = User.builder()
+                    .username("manager")
+                    .password("password123")
+                    .nickname("관리자")
+                    .authority(UserAuthority.MANAGER)
+                    .build();
+            setUserId(manager, 3L);
+
+            ReviewReplyRequestDto requestDto = new ReviewReplyRequestDto("수정 시도!");
+
+            given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReply));
+            given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
+            given(userRepository.findById(3L)).willReturn(Optional.of(manager));
 
             // when & then
-            assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, 4L, requestDto))
+            assertThatThrownBy(() -> reviewReplyService.updateReply(reviewId, 3L, requestDto))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+        }
 
-            verify(reviewReplyRepository, never()).save(any());
+        @Test
+        @DisplayName("MANAGER 권한으로 답글 삭제 성공")
+        void deleteReply_Success_WithManagerAuthority() throws Exception {
+            // given
+            User manager = User.builder()
+                    .username("manager")
+                    .password("password123")
+                    .nickname("관리자")
+                    .authority(UserAuthority.MANAGER)
+                    .build();
+            setUserId(manager, 3L);
+
+            given(reviewReplyRepository.findByReviewIdAndNotDeleted(reviewId)).willReturn(Optional.of(testReply));
+            given(storeRepository.findByStoreIdAndNotDeleted(storeId)).willReturn(Optional.of(testStore));
+            given(userRepository.findById(3L)).willReturn(Optional.of(manager));
+
+            // when
+            reviewReplyService.deleteReply(reviewId, 3L);
+
+            // then
+            verify(reviewReplyRepository).findByReviewIdAndNotDeleted(reviewId);
         }
 
         @Test

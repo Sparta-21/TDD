@@ -35,7 +35,7 @@ public class ReviewReplyService {
         Review review = findReviewById(reviewId);
 
         // 가게 소유자 확인
-        validateStoreOwner(review.getStoreId(), ownerId);
+        checkAuthority(review.getStoreId(), ownerId);
         // 이미 답글이 있는지 확인
         checkReplyExists(reviewId);
         ReviewReply reply = request.toEntity(review, ownerId);
@@ -48,7 +48,7 @@ public class ReviewReplyService {
     @Transactional
     public ReviewReplyResponseDto updateReply(UUID reviewId, Long ownerId, ReviewReplyRequestDto request) {
         ReviewReply reply = findReplyById(reviewId);
-        validateStoreOwner(reply.getReview().getStoreId(), ownerId);
+        checkIfOwner(reply.getReview().getStoreId(), ownerId);
         reply.updateContent(request.content());
         return ReviewReplyResponseDto.from(reply);
     }
@@ -58,7 +58,7 @@ public class ReviewReplyService {
     @Transactional
     public void deleteReply(UUID reviewId, Long ownerId) {
         ReviewReply reply = findReplyById(reviewId);
-        validateStoreOwner(reply.getReview().getStoreId(), ownerId);
+        checkAuthority(reply.getReview().getStoreId(), ownerId);
         reply.delete(ownerId);
     }
 
@@ -82,8 +82,21 @@ public class ReviewReplyService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 답글입니다."));
     }
 
+    private void checkIfOwner(UUID storeId, Long userId) {
+        Store store = storeRepository.findByStoreIdAndNotDeleted(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 수정은 MANAGER/MASTER도 불가, 오직 가게 소유자만 가능
+        if (!store.isOwner(user)) {
+            throw new IllegalArgumentException("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+        }
+    }
+
     //가게 소유자 검증
-    private void validateStoreOwner(UUID storeId, Long userId) {
+    private void checkAuthority(UUID storeId, Long userId) {
         Store store = storeRepository.findByStoreIdAndNotDeleted(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
 
