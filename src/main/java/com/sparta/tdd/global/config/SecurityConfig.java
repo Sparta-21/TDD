@@ -32,7 +32,6 @@ public class SecurityConfig {
         "/api-docs/**",
         "/v3/api-docs/**",
         "/swagger-ui/**", "/swagger",
-        "/v1/auth/**"
     };
 
 
@@ -56,7 +55,6 @@ public class SecurityConfig {
                 exception
                     .accessDeniedHandler(new JwtAccessDeniedHandler(objectMapper))
                     .authenticationEntryPoint(new JwtAuthenticationEntryPoint(objectMapper)));
-        ;
 
         return http.build();
     }
