@@ -7,12 +7,14 @@ import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.jwt.JwtTokenValidator;
 import com.sparta.tdd.global.jwt.TokenResolver;
 import com.sparta.tdd.global.jwt.provider.AccessTokenProvider;
 import com.sparta.tdd.global.jwt.provider.RefreshTokenProvider;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class AuthService {
     private final RefreshTokenProvider refreshTokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
     private final WithdrawalDataCleanService withdrawalDataCleanService;
+    private final JwtTokenValidator jwtTokenValidator;
 
     @Transactional
     public AuthInfo signUp(SignUpRequestDto request) {
@@ -113,18 +116,7 @@ public class AuthService {
         String accessToken = TokenResolver.extractAccessToken(request);
         String refreshToken = TokenResolver.extractRefreshToken(request);
 
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new IllegalArgumentException("리프레시 토큰이 존재하지 않습니다.");
-        }
-
-        if (tokenBlacklistService.isRefreshTokenBlacklisted(refreshToken)) {
-            throw new IllegalArgumentException("금지된 리프레시 토큰입니다.");
-        }
-
-        String tokenType = refreshTokenProvider.getTokenType(refreshToken);
-        if (!"refresh".equals(tokenType) || !refreshTokenProvider.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
-        }
+        jwtTokenValidator.validateRefreshToken(refreshToken);
 
         if (accessToken != null && !accessToken.isEmpty()) {
             tokenBlacklistService.addAccessTokenToBlacklist(accessToken);
@@ -133,11 +125,12 @@ public class AuthService {
 
         Claims claims = refreshTokenProvider.getClaims(refreshToken);
         Long userId = Long.parseLong(claims.getSubject());
-        String username = claims.get("username", String.class);
-        UserAuthority authority = UserAuthority.valueOf(claims.get("authority", String.class));
+        Date refreshExpiration = refreshTokenProvider.getExpiration(refreshToken);
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 요청입니다."));
 
-        String newAccessToken = accessTokenProvider.generateToken(username, userId, authority);
-        String newRefreshToken = refreshTokenProvider.generateToken(username, userId, authority);
+        String newAccessToken = accessTokenProvider.generateToken(user.getUsername(), userId, user.getAuthority());
+        String newRefreshToken = refreshTokenProvider.generateReissueToken(userId, refreshExpiration);
 
         return new AuthInfo(userId, newAccessToken, newRefreshToken);
     }
