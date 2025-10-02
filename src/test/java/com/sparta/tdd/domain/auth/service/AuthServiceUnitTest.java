@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,12 +19,14 @@ import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.jwt.JwtTokenValidator;
 import com.sparta.tdd.global.jwt.provider.AccessTokenProvider;
 import com.sparta.tdd.global.jwt.provider.RefreshTokenProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -52,6 +55,8 @@ public class AuthServiceUnitTest {
     private TokenBlacklistService tokenBlacklistService;
     @Mock
     private WithdrawalDataCleanService withdrawalDataCleanService;
+    @Mock
+    private JwtTokenValidator jwtTokenValidator;
     @Mock
     private HttpServletRequest request;
 
@@ -318,8 +323,8 @@ public class AuthServiceUnitTest {
     class reissueTest {
 
         @Test
-        @DisplayName("토큰 재발급 성공")
-        void reissue_success() {
+        @DisplayName("토큰 재발급 성공 - AT, RT 모두 존재")
+        void reissue_success_withAccessToken() {
             // given
             String accessToken = "accessToken";
             String refreshToken = "refreshToken";
@@ -328,23 +333,27 @@ public class AuthServiceUnitTest {
             when(request.getHeader("Authorization")).thenReturn("Bearer " + accessToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
 
-            when(tokenBlacklistService.isRefreshTokenBlacklisted(refreshToken)).thenReturn(false);
-            when(refreshTokenProvider.getTokenType(refreshToken)).thenReturn("refresh");
-            when(refreshTokenProvider.validateToken(refreshToken)).thenReturn(true);
-
             Claims claims = Jwts.claims()
                 .subject("1")
-                .add("username", "user1")
-                .add("authority", "CUSTOMER")
                 .build();
 
+            User user = User.builder()
+                .username("user1")
+                .authority(UserAuthority.CUSTOMER)
+                .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+
+            Date refreshExpiration = new Date(System.currentTimeMillis() + 604800000); // 7일 후
+
             when(refreshTokenProvider.getClaims(refreshToken)).thenReturn(claims);
+            when(refreshTokenProvider.getExpiration(refreshToken)).thenReturn(refreshExpiration);
+            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
             String newAccessToken = "newAccessToken";
             String newRefreshToken = "newRefreshToken";
 
             when(accessTokenProvider.generateToken(anyString(), anyLong(), any())).thenReturn(newAccessToken);
-            when(refreshTokenProvider.generateToken(anyString(), anyLong(), any())).thenReturn(newRefreshToken);
+            when(refreshTokenProvider.generateReissueToken(anyLong(), any(Date.class))).thenReturn(newRefreshToken);
 
             // when
             AuthInfo result = authService.reissueToken(request);
@@ -352,8 +361,54 @@ public class AuthServiceUnitTest {
             // then
             assertThat(result.accessToken()).isEqualTo(newAccessToken);
             assertThat(result.refreshToken()).isEqualTo(newRefreshToken);
+            verify(jwtTokenValidator).validateRefreshToken(refreshToken);
             verify(tokenBlacklistService).addAccessTokenToBlacklist(accessToken);
             verify(tokenBlacklistService).addRefreshTokenToBlacklist(refreshToken);
+            verify(userRepository).findById(1L);
+        }
+
+        @Test
+        @DisplayName("토큰 재발급 성공 - RT만 존재 (AT 없음)")
+        void reissue_success_withoutAccessToken() {
+            // given
+            String refreshToken = "refreshToken";
+            Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
+
+            when(request.getHeader("Authorization")).thenReturn(null);
+            when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
+
+            Claims claims = Jwts.claims()
+                .subject("1")
+                .build();
+
+            User user = User.builder()
+                .username("user1")
+                .authority(UserAuthority.CUSTOMER)
+                .build();
+            ReflectionTestUtils.setField(user, "id", 1L);
+
+            Date refreshExpiration = new Date(System.currentTimeMillis() + 604800000);
+
+            when(refreshTokenProvider.getClaims(refreshToken)).thenReturn(claims);
+            when(refreshTokenProvider.getExpiration(refreshToken)).thenReturn(refreshExpiration);
+            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+            String newAccessToken = "newAccessToken";
+            String newRefreshToken = "newRefreshToken";
+
+            when(accessTokenProvider.generateToken(anyString(), anyLong(), any())).thenReturn(newAccessToken);
+            when(refreshTokenProvider.generateReissueToken(anyLong(), any(Date.class))).thenReturn(newRefreshToken);
+
+            // when
+            AuthInfo result = authService.reissueToken(request);
+
+            // then
+            assertThat(result.accessToken()).isEqualTo(newAccessToken);
+            assertThat(result.refreshToken()).isEqualTo(newRefreshToken);
+            verify(jwtTokenValidator).validateRefreshToken(refreshToken);
+            verify(tokenBlacklistService, never()).addAccessTokenToBlacklist(anyString());
+            verify(tokenBlacklistService).addRefreshTokenToBlacklist(refreshToken);
+            verify(userRepository).findById(1L);
         }
 
         @Test
@@ -363,12 +418,16 @@ public class AuthServiceUnitTest {
             String refreshToken = "blacklistRefreshToken";
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
-            when(tokenBlacklistService.isRefreshTokenBlacklisted(refreshToken)).thenReturn(true);
+
+            doThrow(new IllegalArgumentException("금지된 리프레시 토큰입니다."))
+                .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("금지된 리프레시 토큰입니다.");
+
+            verify(tokenBlacklistService, never()).addRefreshTokenToBlacklist(anyString());
         }
 
         @Test
@@ -376,6 +435,9 @@ public class AuthServiceUnitTest {
         void reissue_fail_refreshToken_isNull() {
             // given
             when(request.getCookies()).thenReturn(null);
+
+            doThrow(new IllegalArgumentException("리프레시 토큰이 존재하지 않습니다."))
+                .when(jwtTokenValidator).validateRefreshToken(null);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
@@ -390,8 +452,9 @@ public class AuthServiceUnitTest {
             String refreshToken = "ThisIsNotRefreshToken";
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
-            when(tokenBlacklistService.isRefreshTokenBlacklisted(refreshToken)).thenReturn(false);
-            when(refreshTokenProvider.getTokenType(refreshToken)).thenReturn("access");
+
+            doThrow(new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."))
+                .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
@@ -406,14 +469,35 @@ public class AuthServiceUnitTest {
             String refreshToken = "expiredRefreshToken";
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
-            when(tokenBlacklistService.isRefreshTokenBlacklisted(refreshToken)).thenReturn(false);
-            when(refreshTokenProvider.getTokenType(refreshToken)).thenReturn("refresh");
-            when(refreshTokenProvider.validateToken(refreshToken)).thenReturn(false);
+
+            doThrow(new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."))
+                .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        @Test
+        @DisplayName("토큰 재발급 실패 - 존재하지 않는 사용자")
+        void reissue_fail_userNotFound() {
+            // given
+            String refreshToken = "refreshToken";
+            Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
+            when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
+
+            Claims claims = Jwts.claims()
+                .subject("999")
+                .build();
+
+            when(refreshTokenProvider.getClaims(refreshToken)).thenReturn(claims);
+            when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> authService.reissueToken(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("올바르지 않은 요청입니다.");
         }
     }
 }
