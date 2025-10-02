@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/ai")
@@ -24,7 +26,8 @@ public class AiController {
     @Operation(summary = "AI 글 생성")
     public ResponseEntity<AiResponseDto> createComment(@RequestBody AiRequestDto requestDto,
                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        AiResponseDto createdComment = aiService.createComment(requestDto, userDetails);
+        AiResponseDto createdComment = aiService.createComment(requestDto, userDetails.getUserId());
+
         return ResponseEntity.ok(createdComment);
     }
 }
