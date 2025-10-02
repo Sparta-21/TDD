@@ -12,4 +12,20 @@ public enum UserAuthority {
     MASTER("최종 관리자");
 
     private final String description;
+
+    public static boolean isCustomer(UserAuthority authority) {
+        return authority == CUSTOMER;
+    }
+
+    public static boolean isOwner(UserAuthority authority) {
+        return authority == OWNER;
+    }
+
+    public static boolean isManager(UserAuthority authority) {
+        return authority == MANAGER;
+    }
+
+    public static boolean isMater(UserAuthority authority) {
+        return authority == MASTER;
+    }
 }
