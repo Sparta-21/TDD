@@ -13,11 +13,13 @@ public interface OrderMapper {
     @Mapping(target = "orderMenuList", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "store", ignore = true)
+    @Mapping(target = "orderStatus", ignore = true)
     Order toOrder(OrderRequestDto orderRequestDto);
 
     @Mapping(target = "customerName", source = "user.username")
     @Mapping(target = "storeName", source = "store.name")
     @Mapping(target = "price",
-        expression = "java(order.getOrderMenuList().stream().mapToInt(om -> om.getPrice()).sum())")
+        expression = "java(order.getOrderMenuList().stream()"
+            + ".mapToInt(om -> om.getPrice() * om.getQuantity()).sum())")
     OrderResponseDto toResponse(Order order);
 }

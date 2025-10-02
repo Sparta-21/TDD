@@ -38,7 +38,7 @@ public class OrderController {
         @AuthenticationPrincipal UserDetailsImpl userDetails,
         @RequestBody @Valid OrderRequestDto reqDto) {
 
-        OrderResponseDto resDto = orderService.createOrder(userDetails, reqDto);
+        OrderResponseDto resDto = orderService.createOrder(userDetails.getUserId(), reqDto);
 
         URI location = URI.create("/v1/orders/" + resDto.id());
 

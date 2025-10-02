@@ -45,7 +45,7 @@ class UserServiceTest {
         when(userRepository.findAll(pageable)).thenReturn(userPage);
 
         // when
-        Page<UserResponseDto> result = userService.getAllUsers(pageable, UserAuthority.MASTER);
+        Page<UserResponseDto> result = userService.getAllUsers(pageable);
 
         // then
         assertEquals(3, result.getTotalElements());
@@ -76,7 +76,7 @@ class UserServiceTest {
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
         //when
-        UserResponseDto result = userService.grantUserManagerAuthority(1L, user2.getAuthority());
+        UserResponseDto result = userService.grantUserManagerAuthority(1L);
         //then
         assertEquals(UserAuthority.MANAGER, user1.getAuthority());
         assertEquals(user1.getId(), result.id());
@@ -95,7 +95,7 @@ class UserServiceTest {
         // then
         assertThrows(IllegalArgumentException.class, () -> {
             // when
-            userService.grantUserManagerAuthority(1L, user2.getAuthority());
+            userService.grantUserManagerAuthority(1L);
         });
     }
     @Test
@@ -107,7 +107,7 @@ class UserServiceTest {
         // then
         assertThrows(IllegalArgumentException.class, () -> {
             // when
-            userService.grantUserManagerAuthority(1L, user.getAuthority());
+            userService.grantUserManagerAuthority(1L);
         });
     }
     @Test
