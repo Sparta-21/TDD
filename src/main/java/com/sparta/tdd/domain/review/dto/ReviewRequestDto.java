@@ -1,5 +1,9 @@
 package com.sparta.tdd.domain.review.dto;
 
+import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.review.entity.Review;
+import com.sparta.tdd.domain.store.entity.Store;
+import com.sparta.tdd.domain.user.entity.User;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -20,4 +24,14 @@ public record ReviewRequestDto(
 
         String photos
 ) {
+        public Review toEntity(User user, Store store, Order order) {
+                return Review.builder()
+                        .user(user)
+                        .store(store)
+                        .order(order)
+                        .rating(this.rating)
+                        .imageUrl(this.photos)
+                        .content(this.content)
+                        .build();
+        }
 }
