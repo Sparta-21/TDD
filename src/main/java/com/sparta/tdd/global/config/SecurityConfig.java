@@ -51,8 +51,9 @@ public class SecurityConfig {
                 authorizeHttpRequests
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.GET, readOnlyUrl).permitAll()
-                    .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/signup")
-                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/v1/auth/exists").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/signup",
+                        "/v1/auth/token/reissue").permitAll()
                     .anyRequest().authenticated())
             .exceptionHandling(exception ->
                 exception

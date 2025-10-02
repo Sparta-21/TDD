@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +31,6 @@ public class AuthController {
 
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    @PreAuthorize("permitAll()")
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequestDto request) {
         AuthInfo info = authService.signUp(request);
@@ -46,14 +44,12 @@ public class AuthController {
             .body(new SignUpResponse(info.userId()));
     }
 
-    @PreAuthorize("permitAll()")
     @GetMapping("/exists")
     public ResponseEntity<?> checkUsernameExists(@RequestParam(name = "username") String username) {
         authService.checkUsernameExists(username);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("permitAll()")
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDto request) {
         AuthInfo info = authService.login(request);
