@@ -3,7 +3,6 @@ package com.sparta.tdd.domain.store.controller;
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.store.dto.StoreRequestDto;
 import com.sparta.tdd.domain.store.dto.StoreResponseDto;
-import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.service.StoreService;
 import jakarta.validation.Valid;
@@ -31,18 +30,17 @@ public class StoreController {
 
     private final StoreService storeService;
 
-    // TODO: 키워드, 카테고리 기반 검색 조건 구현
-    @GetMapping("")
-    public Page<Store> getStores(
+    @GetMapping
+    public ResponseEntity<Page<StoreResponseDto>> searchStores(
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) StoreCategory storeCategory,
         Pageable pageable) {
-
-        storeService.getStores(keyword, storeCategory, pageable);
-        return null;
+        Page<StoreResponseDto> responseDto = storeService.searchStoresByKeywordAndCategoryWithMenus(
+            keyword, storeCategory, pageable);
+        return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<StoreResponseDto> createStore(
         @Valid @RequestBody StoreRequestDto requestDto,
         @AuthenticationPrincipal UserDetailsImpl user) {
