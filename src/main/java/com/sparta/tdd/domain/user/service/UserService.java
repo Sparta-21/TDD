@@ -23,10 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     // 회원 목록 조회
-    public Page<UserResponseDto> getAllUsers(Pageable pageable, UserAuthority authority) {
-        if (authority != UserAuthority.MASTER && authority != UserAuthority.MANAGER) {
-            throw new IllegalArgumentException("권한이 없습니다.");
-        }
+    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
         Page<User> userList = userRepository.findAll(pageable);
 
         return userList.map(UserResponseDto::from);
@@ -66,11 +63,7 @@ public class UserService {
     }
     // 매니저 권한 부여
     @Transactional
-    public UserResponseDto grantUserManagerAuthority(Long userId, UserAuthority authority) {
-        if (authority != UserAuthority.MASTER) {
-            throw new IllegalArgumentException("권한이 없습니다.");
-        }
-
+    public UserResponseDto grantUserManagerAuthority(Long userId) {
         User user = getUserById(userId);
 
         if (user.getAuthority() == UserAuthority.MANAGER) {
