@@ -62,7 +62,7 @@ public class Order extends BaseEntity {
         User user) {
         this.address = address;
         this.orderStatus = orderStatus;
-        this.orderMenuList = orderMenuList;
+        this.orderMenuList = orderMenuList != null ? orderMenuList : new ArrayList<>();
         this.store = store;
         this.user = user;
     }
