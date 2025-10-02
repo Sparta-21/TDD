@@ -6,9 +6,9 @@ import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,16 +21,23 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
 
-    public List<MenuResponseDto> getMenus(UUID storeId) {
-        List<Menu> menus = menuRepository.findAllByStoreId(storeId);
+    public List<MenuResponseDto> getMenus(UUID storeId, UserAuthority authority) {
+        List<Menu> menus;
+        if (authority.isCustomerOrManager()) {
+            menus = menuRepository.findAllByStoreIdAndIsHiddenFalse(storeId);
+        } else {
+            menus = menuRepository.findAllByStoreId(storeId);
+        }
         return menus.stream()
             .map(MenuResponseDto::from)
-            .collect(Collectors.toList());
+            .toList();
     }
 
-    public MenuResponseDto getMenu(UUID storeId, UUID menuId) {
-        Menu menu = menuRepository.findByStoreIdAndId(storeId, menuId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+    public MenuResponseDto getMenu(UUID storeId, UUID menuId, UserAuthority authority) {
+        Menu menu = findMenu(storeId, menuId);
+        if (authority.isCustomerOrManager() && menu.isHidden()) {
+            throw new IllegalArgumentException("숨겨진 메뉴입니다.");
+        }
         return MenuResponseDto.from(menu);
     }
 

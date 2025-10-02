@@ -12,4 +12,8 @@ public enum UserAuthority {
     MASTER("최종 관리자");
 
     private final String description;
+
+    public boolean isCustomerOrManager() {
+        return this == CUSTOMER || this == MANAGER;
+    }
 }

@@ -4,6 +4,7 @@ import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.dto.MenuResponseDto;
 import com.sparta.tdd.domain.menu.service.MenuService;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,16 +30,20 @@ public class MenuController {
     private final MenuService menuService;
 
     @GetMapping("/{storeId}/menu")
-    public ResponseEntity<List<MenuResponseDto>> getMenus(@PathVariable UUID storeId) {
+    public ResponseEntity<List<MenuResponseDto>> getMenus(@PathVariable UUID storeId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserAuthority authority = userDetails.getUserAuthority();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(menuService.getMenus(storeId));
+            .body(menuService.getMenus(storeId, authority));
     }
 
     @GetMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<MenuResponseDto> getMenu(@PathVariable UUID storeId,
-        @PathVariable UUID menuId) {
+        @PathVariable UUID menuId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserAuthority authority = userDetails.getUserAuthority();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(menuService.getMenu(storeId, menuId));
+            .body(menuService.getMenu(storeId, menuId, authority));
     }
 
     @PreAuthorize("hasRole('ROLE_OWNER') or hasRole('ROLE_MASTER')")

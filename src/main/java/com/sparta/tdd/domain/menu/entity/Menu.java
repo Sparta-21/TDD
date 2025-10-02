@@ -59,6 +59,10 @@ public class Menu extends BaseEntity {
         this.store = store;
     }
 
+    public boolean isHidden() {
+        return isHidden;
+    }
+
     public void update(MenuRequestDto dto) {
         this.name = dto.name();
         this.description = dto.description();
