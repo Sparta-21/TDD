@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,9 +29,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "p_store")
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Store extends BaseEntity {
 
     @Id
@@ -53,13 +50,11 @@ public class Store extends BaseEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Builder.Default
     @Column(name = "avg_rating", precision = 2, scale = 1)
-    private BigDecimal avgRating = BigDecimal.ZERO;
+    private BigDecimal avgRating;
 
-    @Builder.Default
     @Column(name = "review_count")
-    private Integer reviewCount = 0;
+    private Integer reviewCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -67,6 +62,19 @@ public class Store extends BaseEntity {
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Menu> menuList = new ArrayList<>();
+
+    @Builder
+    public Store(String name, StoreCategory category, String description, String imageUrl,
+        User user, List<Menu> menuList) {
+        this.name = name;
+        this.category = category;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.avgRating = BigDecimal.ZERO;
+        this.reviewCount = 0;
+        this.user = user;
+        this.menuList = menuList;
+    }
 
     public void updateName(String updatedName) {
         this.name = updatedName;
