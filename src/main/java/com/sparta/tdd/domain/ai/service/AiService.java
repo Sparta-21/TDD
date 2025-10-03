@@ -26,12 +26,11 @@ public class AiService {
     private final GenerateContentConfig config;
 
     public AiResponseDto createComment(AiRequestDto requestDto, Long userId) {
-        String response = generateText(requestDto.comment());
-
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 회원입니다.")
         );
 
+        String response = generateText(requestDto.comment());
         Ai ai = Ai.of(requestDto.comment(), response, user);
 
         aiRepository.save(ai);
