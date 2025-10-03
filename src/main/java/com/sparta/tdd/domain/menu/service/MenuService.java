@@ -43,9 +43,7 @@ public class MenuService {
 
     @Transactional
     public MenuResponseDto createMenu(UUID storeId, MenuRequestDto menuRequestDto) {
-        Menu menu = Menu.builder()
-            .dto(menuRequestDto)
-            .store(findStore(storeId)).build();
+        Menu menu = menuRequestDto.toEntity(findStore(storeId));
         menuRepository.save(menu);
 
         return MenuResponseDto.from(menu);

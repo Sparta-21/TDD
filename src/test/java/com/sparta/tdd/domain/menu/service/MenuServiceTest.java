@@ -100,15 +100,11 @@ public class MenuServiceTest {
             .imageUrl("this is image url").build();
 
         // 정상 메뉴
-        menu1 = Menu.builder()
-            .dto(dto1)
-            .store(store).build();
+        menu1 = dto1.toEntity(store);
         setMenuId(menu1, menu1Id);
 
         // 숨겨진 메뉴
-        menu2 = Menu.builder()
-            .dto(dto2)
-            .store(store).build();
+        menu2 = dto2.toEntity(store);
         setMenuId(menu2, menu2Id);
         setMenuIsHidden(menu2, true);
     }
