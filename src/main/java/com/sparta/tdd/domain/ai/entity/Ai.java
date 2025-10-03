@@ -45,4 +45,12 @@ public class Ai extends BaseEntity {
         this.outputText = outputText;
         this.user = user;
     }
+
+    public static Ai toEntity(String inputText, String outputText, User user) {
+        return Ai.builder()
+                .inputText(inputText)
+                .outputText(outputText)
+                .user(user)
+                .build();
+    }
 }

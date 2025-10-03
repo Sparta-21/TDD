@@ -32,11 +32,7 @@ public class AiService {
                 new IllegalArgumentException("존재하지 않는 회원입니다.")
         );
 
-        Ai ai = Ai.builder()
-                .inputText(requestDto.comment())
-                .outputText(response)
-                .user(user)
-                .build();
+        Ai ai = Ai.toEntity(requestDto.comment(), response, user);
 
         aiRepository.save(ai);
         log.info(getLog(ai));
