@@ -106,12 +106,7 @@ public class OrderService {
                 .collect(Collectors.toMap(Menu::getId, Function.identity()));
 
         // 빠진 메뉴(존재하지 않는 menuId) 검증
-        if (menuMap.size() != menuIds.size()) {
-            // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
-            List<UUID> missing = new ArrayList<>(menuIds);
-            missing.removeAll(menuMap.keySet());
-            throw new IllegalArgumentException("존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
-        }
+        verifyOrderMenus(menuMap, menuIds);
 
         for (OrderMenuRequestDto om : reqDto.menu()) {
             Menu menu = menuMap.get(om.menuId());
@@ -135,4 +130,20 @@ public class OrderService {
 
         return resDto;
     }
+
+    /**
+     * Dto 와 repository 조회 결과를 비교해서 누락된 메뉴가 있는지 검증
+     * @param menuMap repository 에서 조회된 menuId, Menu map
+     * @param menuIds Dto 에서 넘어온 menuId 들
+     */
+    private static void verifyOrderMenus(Map<UUID, Menu> menuMap, List<UUID> menuIds) {
+        if (menuMap.size() != menuIds.size()) {
+            // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
+            List<UUID> missing = new ArrayList<>(menuIds);
+            missing.removeAll(menuMap.keySet());
+            throw new IllegalArgumentException("존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
+        }
+    }
+
+
 }

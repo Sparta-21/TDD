@@ -28,22 +28,22 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
     @Override
     public Optional<Order> findDetailById(UUID id) {
-        QOrder o = QOrder.order;
-        QUser u = QUser.user;
-        QStore s = QStore.store;
-        QPayment p = QPayment.payment;
-        QOrderMenu om = QOrderMenu.orderMenu;
-        QMenu m = QMenu.menu;
+        QOrder qOrder = QOrder.order;
+        QUser qUser = QUser.user;
+        QStore qStore = QStore.store;
+        QPayment qPayment = QPayment.payment;
+        QOrderMenu qOrderMenu = QOrderMenu.orderMenu;
+        QMenu qMenu = QMenu.menu;
 
         Order result = query
-            .selectFrom(o)
+            .selectFrom(qOrder)
             .distinct()
-            .leftJoin(o.user, u).fetchJoin()
-            .leftJoin(o.store, s).fetchJoin()
-            .leftJoin(o.payment, p).fetchJoin()
-            .leftJoin(o.orderMenuList, om).fetchJoin()
-            .leftJoin(om.menu, m).fetchJoin()
-            .where(o.id.eq(id))
+            .leftJoin(qOrder.user, qUser).fetchJoin()
+            .leftJoin(qOrder.store, qStore).fetchJoin()
+            .leftJoin(qOrder.payment, qPayment).fetchJoin()
+            .leftJoin(qOrder.orderMenuList, qOrderMenu).fetchJoin()
+            .leftJoin(qOrderMenu.menu, qMenu).fetchJoin()
+            .where(qOrder.id.eq(id))
             .fetchOne();
 
         return Optional.ofNullable(result);
@@ -97,14 +97,14 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         }
 
         List<OrderSpecifier<?>> specifiers = new ArrayList<>();
-        for (Sort.Order sort_order : sort) {
+        for (Sort.Order sortOrder : sort) {
 
             com.querydsl.core.types.Order direction =
-                sort_order.isAscending() ?
+                sortOrder.isAscending() ?
                     com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC;
 
 
-            switch (sort_order.getProperty()) {
+            switch (sortOrder.getProperty()) {
                 case "createdAt" -> specifiers.add(new OrderSpecifier<>(direction, o.createdAt));
                 case "id" -> specifiers.add(new OrderSpecifier<>(direction, o.id));
                 case "orderStatus" -> specifiers.add(new OrderSpecifier<>(direction, o.orderStatus));
