@@ -7,6 +7,7 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -36,10 +37,11 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
     private String address;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus = OrderStatus.PENDING;
+    private OrderStatus orderStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -50,7 +52,7 @@ public class Order extends BaseEntity {
     private Store store;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderMenu> orderMenuList = new ArrayList<>();
+    private List<OrderMenu> orderMenuList;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
@@ -61,7 +63,7 @@ public class Order extends BaseEntity {
         Store store,
         User user) {
         this.address = address;
-        this.orderStatus = orderStatus;
+        this.orderStatus = (orderStatus != null) ? orderStatus : OrderStatus.PENDING;
         this.orderMenuList = orderMenuList != null ? orderMenuList : new ArrayList<>();
         this.store = store;
         this.user = user;
