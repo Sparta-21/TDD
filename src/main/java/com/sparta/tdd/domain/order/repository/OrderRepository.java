@@ -19,9 +19,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, OrderReposi
     @Modifying
     @Query("UPDATE Order o SET o.deletedAt = :deletedAt, o.deletedBy = :deletedBy WHERE o.user.id = :userId AND o.deletedAt IS NULL")
     void bulkSoftDeleteByUserId(
-        @Param("userId") Long userId,
-        @Param("deletedAt") LocalDateTime deletedAt,
-        @Param("deletedBy") Long deletedBy
+            @Param("userId") Long userId,
+            @Param("deletedAt") LocalDateTime deletedAt,
+            @Param("deletedBy") Long deletedBy
     );
 
     @Query("SELECT o.id FROM Order o WHERE o.user.id = :userId AND o.deletedAt IS NULL")
