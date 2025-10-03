@@ -16,18 +16,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID>, OrderRepositoryCustom {
 
-//    @Query("""
-//            select distinct o
-//            from Order o
-//            left join fetch o.user u
-//            left join fetch o.store s
-//            left join fetch o.payment p
-//            left join fetch o.orderMenuList om
-//            left join fetch om.menu m
-//            where o.id = :id
-//        """)
-//    Optional<Order> findDetailById(UUID id);
-
     @Modifying
     @Query("UPDATE Order o SET o.deletedAt = :deletedAt, o.deletedBy = :deletedBy WHERE o.user.id = :userId AND o.deletedAt IS NULL")
     void bulkSoftDeleteByUserId(
@@ -38,14 +26,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, OrderReposi
 
     @Query("SELECT o.id FROM Order o WHERE o.user.id = :userId AND o.deletedAt IS NULL")
     List<UUID> findOrderIdsByUserIdAndDeletedAtIsNull(Long userId);
-
-//    @Query("""
-//          select o.id
-//          from Order o
-//          order by o.createdAt desc
-//        """)
-//    Page<UUID> findPageIds(Pageable pageable, Long targetUserId, LocalDateTime start,
-//        LocalDateTime end, UUID targetStoreId);
 
     @Query("""
           select distinct o
@@ -59,3 +39,28 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, OrderReposi
         """)
     List<Order> findDetailsByIdIn(Collection<UUID> ids);
 }
+
+
+// ---- 아래의 코드는 쿼리DSL로 대체됨 ----
+// 쿼리DSL 관련해서 수정중 문제가 생기면 아래의 JPQL 로 대체하기 위하여 남겨놨습니다
+// 이후 order 와 관련된 내용들이 구현 완료되고 안정화 되면 삭제하도록 하겠습니다
+
+//    @Query("""
+//            select distinct o
+//            from Order o
+//            left join fetch o.user u
+//            left join fetch o.store s
+//            left join fetch o.payment p
+//            left join fetch o.orderMenuList om
+//            left join fetch om.menu m
+//            where o.id = :id
+//        """)
+//    Optional<Order> findDetailById(UUID id);
+
+//    @Query("""
+//          select o.id
+//          from Order o
+//          order by o.createdAt desc
+//        """)
+//    Page<UUID> findPageIds(Pageable pageable, Long targetUserId, LocalDateTime start,
+//        LocalDateTime end, UUID targetStoreId);
