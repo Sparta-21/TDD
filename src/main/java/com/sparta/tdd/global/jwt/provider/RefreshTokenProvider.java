@@ -76,4 +76,30 @@ public class RefreshTokenProvider implements JwtTokenProvider {
             .getPayload()
             .get("tokenType", String.class);
     }
+
+    // reissue 시에만 사용되는 메소드. RT가 재발급 되더라도 유효기간은 동일하게 발급된다.
+    public String generateReissueToken(Long userId, Date expiration) {
+        return Jwts
+            .builder()
+            .header()
+            .type("JWT")
+            .and()
+            .issuer("TDD-BE")
+            .subject(userId.toString())
+            .claim("tokenType", "refresh")
+            .issuedAt(new Date())
+            .expiration(expiration)
+            .signWith(key)
+            .compact();
+    }
+
+    public Date getExpiration(String token) {
+        return Jwts
+            .parser()
+            .verifyWith(key)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .getExpiration();
+    }
 }

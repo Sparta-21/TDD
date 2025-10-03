@@ -3,24 +3,36 @@ package com.sparta.tdd.domain.auth.service;
 import com.sparta.tdd.domain.auth.dto.AuthInfo;
 import com.sparta.tdd.domain.auth.dto.request.LoginRequestDto;
 import com.sparta.tdd.domain.auth.dto.request.SignUpRequestDto;
+import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
-import com.sparta.tdd.global.jwt.provider.JwtTokenProvider;
+import com.sparta.tdd.global.jwt.JwtTokenValidator;
+import com.sparta.tdd.global.jwt.TokenResolver;
+import com.sparta.tdd.global.jwt.provider.AccessTokenProvider;
+import com.sparta.tdd.global.jwt.provider.RefreshTokenProvider;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider accessTokenProvider;
-    private final JwtTokenProvider refreshTokenProvider;
-
+    private final AccessTokenProvider accessTokenProvider;
+    private final RefreshTokenProvider refreshTokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final WithdrawalDataCleanService withdrawalDataCleanService;
+    private final JwtTokenValidator jwtTokenValidator;
 
     @Transactional
     public AuthInfo signUp(SignUpRequestDto request) {
@@ -28,10 +40,10 @@ public class AuthService {
             throw new IllegalArgumentException("이미 존재하는 username 입니다.");
         }
 
-        // authority가 null이면 CUSTOMER, 아니면 요청값 사용
-        UserAuthority userAuthority = request.authority() != null
-            ? request.authority()
-            : UserAuthority.CUSTOMER;
+        UserAuthority userAuthority = null;
+        if (request.authority() != null) {
+            userAuthority = request.authority();
+        }
 
         User newUser = User.builder()
             .username(request.username())
@@ -57,11 +69,69 @@ public class AuthService {
             throw new IllegalArgumentException("올바르지 않은 요청입니다.");
         }
 
-        String accessToken = accessTokenProvider.generateToken(
-            user.getUsername(), user.getId(), user.getAuthority());
-        String refreshToken = refreshTokenProvider.generateToken(
-            user.getUsername(), user.getId(), user.getAuthority());
+        String accessToken = accessTokenProvider.generateToken(user.getUsername(), user.getId(), user.getAuthority());
+        String refreshToken = refreshTokenProvider.generateToken(user.getUsername(), user.getId(), user.getAuthority());
 
         return new AuthInfo(user.getId(), accessToken, refreshToken);
+    }
+
+    public void logout(HttpServletRequest request) {
+        String accessToken = TokenResolver.extractAccessToken(request);
+        String refreshToken = TokenResolver.extractRefreshToken(request);
+
+        tokenBlacklistService.addAccessTokenToBlacklist(accessToken);
+        tokenBlacklistService.addRefreshTokenToBlacklist(refreshToken);
+    }
+
+    @Transactional
+    public void withdrawal(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        LocalDateTime deletedAt = LocalDateTime.now();
+
+        // 가게 사장님이라면, 보유한 모든 음식점 soft delete
+        // 음식점이 삭제되기 떄문에 연관된 메뉴, 리뷰, 리뷰댓글 등도 모두 soft delete
+        if (UserAuthority.isOwner(user.getAuthority())) {
+            withdrawalDataCleanService.deleteOwnerRelatedData(userId, deletedAt);
+        } else {
+            // 리뷰의 경우 음식점 사장님 데이터 제거 시 한 번 호출 돼 if 문 밖에서 호출할 경우 중복호출 발생 가능
+            reviewRepository.bulkSoftDeleteByUserId(userId, deletedAt, userId);
+        }
+        // 유저 개인적인 데이터 삭제
+        withdrawalDataCleanService.deleteCommonUserData(userId, deletedAt);
+
+        user.delete(userId);
+    }
+
+    public void checkUsernameExists(String username) {
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("이미 존재하는 username 입니다.");
+        }
+    }
+
+    // RTR 기법 적용 -> 유효한 RT로 AT 재발급 시 RT도 재발급 대상으로 취급
+    // 유효기간이 긴 RT라는 점을 이용해 탈취당한 RT로 계속해서 AT를 재발급 받는 상황 방지
+    public AuthInfo reissueToken(HttpServletRequest request) {
+        String accessToken = TokenResolver.extractAccessToken(request);
+        String refreshToken = TokenResolver.extractRefreshToken(request);
+
+        jwtTokenValidator.validateRefreshToken(refreshToken);
+
+        if (accessToken != null && !accessToken.isEmpty()) {
+            tokenBlacklistService.addAccessTokenToBlacklist(accessToken);
+        }
+        tokenBlacklistService.addRefreshTokenToBlacklist(refreshToken);
+
+        Claims claims = refreshTokenProvider.getClaims(refreshToken);
+        Long userId = Long.parseLong(claims.getSubject());
+        Date refreshExpiration = refreshTokenProvider.getExpiration(refreshToken);
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 요청입니다."));
+
+        String newAccessToken = accessTokenProvider.generateToken(user.getUsername(), userId, user.getAuthority());
+        String newRefreshToken = refreshTokenProvider.generateReissueToken(userId, refreshExpiration);
+
+        return new AuthInfo(userId, newAccessToken, newRefreshToken);
     }
 }
