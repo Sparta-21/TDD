@@ -16,4 +16,20 @@ public enum UserAuthority {
     public boolean isCustomerOrManager() {
         return this == CUSTOMER || this == MANAGER;
     }
+
+    public static boolean isCustomer(UserAuthority authority) {
+        return authority == CUSTOMER;
+    }
+
+    public static boolean isOwner(UserAuthority authority) {
+        return authority == OWNER;
+    }
+
+    public static boolean isManager(UserAuthority authority) {
+        return authority == MANAGER;
+    }
+
+    public static boolean isMater(UserAuthority authority) {
+        return authority == MASTER;
+    }
 }
