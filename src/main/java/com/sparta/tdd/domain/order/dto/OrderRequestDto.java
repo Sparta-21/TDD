@@ -6,10 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
+import java.util.UUID;
 
 public record OrderRequestDto(
     @NotBlank String address,
     @NotBlank String customerName,
+    @NotBlank UUID  storeId,
     @NotBlank String storeName,
     @PositiveOrZero Integer price,
     @NotEmpty @Valid List<OrderMenuRequestDto> menu

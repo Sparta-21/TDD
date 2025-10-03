@@ -3,6 +3,7 @@ package com.sparta.tdd.domain.order.repository.querydsl;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.menu.entity.QMenu;
+import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.entity.QOrder;
 import com.sparta.tdd.domain.order.repository.OrderRepositoryCustom;
@@ -52,10 +53,14 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     @Override
     public Page<UUID> findPageIds(
         Pageable pageable,
-        Long targetUserId,
-        LocalDateTime start,
-        LocalDateTime end,
-        UUID targetStoreId) {
+        OrderSearchOptionDto searchOption) {
+
+
+        Long targetUserId = searchOption.userId();
+        LocalDateTime start = searchOption.startOrNull();
+        LocalDateTime end =searchOption.endOrNull();
+        UUID targetStoreId =  searchOption.storeId();
+
 
         QOrder o = QOrder.order;
 

@@ -89,13 +89,16 @@ class OrderServiceTest {
         System.out.println("userId: " + user.getId());
 
         // ---- Store ----
+
+        UUID storeUUID = UUID.randomUUID();
+
         Store store = Store.builder()
             .name("치킨집")
             .description("맛집")
             .build();
-        ReflectionTestUtils.setField(store, "id", UUID.randomUUID());
+        ReflectionTestUtils.setField(store, "id", storeUUID);
 
-        when(storeRepository.findByName("치킨집")).thenReturn(Optional.of(store));
+        when(storeRepository.findById(storeUUID)).thenReturn(Optional.of(store));
 
         // ---- Menu ----
         // 후라이드 메뉴
@@ -151,6 +154,7 @@ class OrderServiceTest {
         OrderRequestDto reqDto = new OrderRequestDto(
             "서울시 강남구",
             "tester",
+            storeUUID,
             "치킨집",
             15000 * 2 + 16000 * 3,  // 총액: 15000*2 + 16000*3 = 78000
             List.of(friedReq, seasonedReq)

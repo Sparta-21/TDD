@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,10 +48,7 @@ public class OrderService {
         // 검색조건에 맞는 Id 들을 페이징처리해서 가져옴
         Page<UUID> idPage = orderRepository.findPageIds(
             pageable,
-            searchOption.userId(),
-            searchOption.startOrNull(),
-            searchOption.endOrNull(),
-            searchOption.storeId()
+            searchOption
         );
 
         List<UUID> ids = idPage.getContent();
@@ -73,7 +71,9 @@ public class OrderService {
         return new PageImpl<>(content, pageable, idPage.getTotalElements());
     }
 
-    public OrderResponseDto getOrder(UserDetailsImpl userDetails, UUID orderId) {
+    public OrderResponseDto getOrder(
+        UserDetailsImpl userDetails,
+        UUID orderId) {
         Order order = orderRepository.findDetailById(orderId)
             .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
 
@@ -82,32 +82,47 @@ public class OrderService {
         return resDto;
     }
 
+    // StoreId 도 요청 dto 에서 받아와서 isPresent 메서드로 한번에 해결
     @Transactional
     public OrderResponseDto createOrder(
         UserDetailsImpl userDetails,
         OrderRequestDto reqDto) {
 
-        User foundUser = userRepository.findById(userDetails.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        //region 엔티티 조회
+        // ==== Store, User 조회 및 가져옴 ====
+            User foundUser = isPresent(userRepository, userDetails.getUserId());
+        Store foundStore = isPresent(storeRepository, reqDto.storeId());
 
-        Store foundStore = storeRepository.findByName(reqDto.storeName())
-            .orElseThrow(() -> new IllegalArgumentException("가게이름을 찾을 수 없습니다."));
+        // ==== OrderMenu Entity ====
+        // ==== Required Menu find ====
+        // extract requested menuList from dto
+        List<UUID> menuIds = reqDto.menu().stream()
+            .map(OrderMenuRequestDto::menuId)
+            .toList();
+        // get requested menuList from repo
+        List<Menu> menus = menuRepository.findAllById(menuIds);
+        Map<UUID, Menu> menuMap = menus.stream()
+            .collect(Collectors.toMap(Menu::getId, Function.identity()));
+        //endregion
 
+        // menu verifying (검증)
+        verifyOrderMenus(menuMap, menuIds);
+
+        /*
+        OrderMenuList 인자로 받아서 내부메서드 assignMenu 돌리는걸
+        OrderEntity 도메인 메서드로 만들자
+        Entity 의 책임은 연관관계 설정과 컬렉션 관리라 틀린 부분은 없다고 생각됨
+         */
+        //region 매핑
+        // ==== Order 매핑 ====
         Order order = orderMapper.toOrder(reqDto);
         order.assignUser(foundUser);
         order.assignStore(foundStore);
 
-        List<UUID> menuIds = reqDto.menu().stream()
-            .map(OrderMenuRequestDto::menuId)
-            .toList();
-
-        List<Menu> menus = menuRepository.findAllById(menuIds);
-        Map<UUID, Menu> menuMap = menus.stream()
-                .collect(Collectors.toMap(Menu::getId, Function.identity()));
-
-        // 빠진 메뉴(존재하지 않는 menuId) 검증
-        verifyOrderMenus(menuMap, menuIds);
-
+        // menuToOrderMenu and mapping order.orderMenuList
+        // orderMenu 를 만들고 오더에 각각 매핑중
+        // orderMenuList 를 한번에 만들어서 Order 에 등록하면 안 되는건가?
+        // 안 된다 각 orderMenu 에 Order 외래키 설정 필요
         for (OrderMenuRequestDto om : reqDto.menu()) {
             Menu menu = menuMap.get(om.menuId());
 
@@ -123,9 +138,12 @@ public class OrderService {
 
             order.addOrderMenu(orderMenu);
         }
+        //endregion
 
+        // ====== 저장 ======
         Order savedOrder = orderRepository.save(order);
 
+        // ==== 응답 객체 변환 ====
         OrderResponseDto resDto = orderMapper.toResponse(savedOrder);
 
         return resDto;
@@ -137,6 +155,8 @@ public class OrderService {
      * @param menuIds Dto 에서 넘어온 menuId 들
      */
     private static void verifyOrderMenus(Map<UUID, Menu> menuMap, List<UUID> menuIds) {
+
+        // 이전에 리뷰 받았던 대로 size 비교가 아닌 Set 을 통해 존재하는 Id 인지 확인하도록 변경하기
         if (menuMap.size() != menuIds.size()) {
             // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
             List<UUID> missing = new ArrayList<>(menuIds);
@@ -145,5 +165,19 @@ public class OrderService {
         }
     }
 
-
+    /**
+     * 특정 레포지토리의 id 탐색결과를 Optional로 받아</br>
+     * null 이면 예외를 발생</br>
+     * 값이 존대한다면 Entity 를 반환합니다
+     *
+     * @param jpaRepository
+     * @param id
+     * @return Entity
+     * @param <T>
+     * @param <ID>
+     */
+    private <T, ID> T isPresent(JpaRepository<T, ID> jpaRepository, ID id) {
+        return jpaRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다"));
+    }
 }
