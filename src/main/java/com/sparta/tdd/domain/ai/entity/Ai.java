@@ -46,7 +46,7 @@ public class Ai extends BaseEntity {
         this.user = user;
     }
 
-    public static Ai toEntity(String inputText, String outputText, User user) {
+    public static Ai of(String inputText, String outputText, User user) {
         return Ai.builder()
                 .inputText(inputText)
                 .outputText(outputText)
