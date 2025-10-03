@@ -27,7 +27,7 @@ public abstract class IntegrationTest {
     protected CleanUp cleanUp;
 
     @BeforeEach
-    void setUp() {
+    protected void setUp() {
         cleanUp.all();
     }
 }
