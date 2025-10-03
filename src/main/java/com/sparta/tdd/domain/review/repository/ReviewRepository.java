@@ -1,15 +1,16 @@
 package com.sparta.tdd.domain.review.repository;
 
 import com.sparta.tdd.domain.review.entity.Review;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
@@ -35,4 +36,25 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     // 모든 삭제되지 않은 리뷰 조회
     @Query("SELECT r FROM Review r WHERE r.deletedAt IS NULL")
     List<Review> findAllNotDeleted();
+
+    @Modifying
+    @Query("UPDATE Review r SET r.deletedAt = :deletedAt, r.deletedBy = :deletedBy WHERE r.store.id IN :storeIds AND r.deletedAt IS NULL")
+    void bulkSoftDeleteByStoreIds(
+        @Param("storeIds") List<UUID> storeIds,
+        @Param("deletedAt") LocalDateTime deletedAt,
+        @Param("deletedBy") Long deletedBy
+    );
+
+    @Modifying
+    @Query("UPDATE Review r SET r.deletedAt = :deletedAt, r.deletedBy = :deletedBy WHERE r.user.id = :userId AND r.deletedAt IS NULL")
+    void bulkSoftDeleteByUserId(
+        @Param("userId") Long userId,
+        @Param("deletedAt") LocalDateTime deletedAt,
+        @Param("deletedBy") Long deletedBy
+    );
+
+    @Query("SELECT r.id FROM Review r WHERE r.store.id IN :storeIds AND r.deletedAt IS NULL")
+    List<UUID> findReviewIdsByStoreIds(@Param("storeIds") List<UUID> storeIds);
+
+
 }

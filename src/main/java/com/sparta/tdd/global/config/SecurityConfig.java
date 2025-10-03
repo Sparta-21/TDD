@@ -34,7 +34,6 @@ public class SecurityConfig {
         "/api-docs/**",
         "/v3/api-docs/**",
         "/swagger-ui/**", "/swagger",
-        "/v1/auth/**"
     };
 
 
@@ -52,14 +51,14 @@ public class SecurityConfig {
                 authorizeHttpRequests
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.GET, readOnlyUrl).permitAll()
-                    .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/signup")
-                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/v1/auth/exists").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/signup",
+                        "/v1/auth/token/reissue").permitAll()
                     .anyRequest().authenticated())
             .exceptionHandling(exception ->
                 exception
                     .accessDeniedHandler(new JwtAccessDeniedHandler(objectMapper))
                     .authenticationEntryPoint(new JwtAuthenticationEntryPoint(objectMapper)));
-        ;
 
         return http.build();
     }
