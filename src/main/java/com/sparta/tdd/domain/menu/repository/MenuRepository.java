@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface MenuRepository extends JpaRepository<Menu, UUID> {
+public interface MenuRepository extends JpaRepository<Menu, UUID>, MenuRepositoryCustom {
 
     List<Menu> findAllByStoreId(UUID storeId);
 
