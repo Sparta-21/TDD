@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -61,6 +62,13 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         log.warn("handleIllegalArgumentException : {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(e.getMessage());
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    protected ResponseEntity<String> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        log.warn("handleAuthorizationDeniedException : {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(e.getMessage());
     }
 

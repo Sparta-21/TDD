@@ -66,3 +66,20 @@ logging:
     root: INFO
     org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+jwt:
+  access:
+    secret: testAccessSecrettestAccessSecret
+    expiration: 2000
+  refresh:
+    secret: testRefreshSecrettestRefreshSecret
+    expiration: 2000
