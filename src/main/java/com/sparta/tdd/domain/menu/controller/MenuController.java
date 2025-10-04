@@ -4,11 +4,13 @@ import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.dto.MenuResponseDto;
 import com.sparta.tdd.domain.menu.service.MenuService;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,34 +32,46 @@ public class MenuController {
     @GetMapping("/{storeId}/menu")
     public ResponseEntity<List<MenuResponseDto>> getMenus(@PathVariable UUID storeId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserAuthority authority = userDetails.getUserAuthority();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(menuService.getMenus(storeId));
+            .body(menuService.getMenus(storeId, authority));
     }
 
     @GetMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<MenuResponseDto> getMenu(@PathVariable UUID storeId,
         @PathVariable UUID menuId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserAuthority authority = userDetails.getUserAuthority();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(menuService.getMenu(storeId, menuId));
+            .body(menuService.getMenu(storeId, menuId, authority));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
     @PostMapping("/{storeId}/menu")
     public ResponseEntity<MenuResponseDto> createMenu(@PathVariable UUID storeId,
-        @RequestBody MenuRequestDto menuRequestDto,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        @RequestBody MenuRequestDto menuRequestDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(menuService.createMenu(storeId, menuRequestDto));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
     @PatchMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<Void> updateMenu(@PathVariable UUID storeId, @PathVariable UUID menuId,
-        @RequestBody MenuRequestDto menuRequestDto,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        @RequestBody MenuRequestDto menuRequestDto) {
         menuService.updateMenu(storeId, menuId, menuRequestDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
+    @PatchMapping("/{storeId}/menu/{menuId}/status")
+    public ResponseEntity<Void> updateMenuStatus(@PathVariable UUID storeId,
+        @PathVariable UUID menuId,
+        @RequestParam Boolean status) {
+        menuService.updateMenuStatus(storeId, menuId, status);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
     @DeleteMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<Void> deleteMenu(@PathVariable UUID storeId, @PathVariable UUID menuId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
