@@ -50,6 +50,10 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return Optional.ofNullable(result);
     }
 
+    /**
+     * PageableExecutionUtils 도 있습니다 참고해주세요!(count 쿼리 성능 개선 부분)
+     * <a href = https://junior-datalist.tistory.com/342>참고주소</a>
+     */
     @Override
     public Page<UUID> findPageIds(
         Pageable pageable,
@@ -92,6 +96,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         if (total == null) {
             total = 0L;
         }
+
 
         return new PageImpl<>(ids, pageable, total);
     }

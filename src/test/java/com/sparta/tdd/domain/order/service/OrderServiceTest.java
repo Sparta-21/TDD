@@ -2,6 +2,7 @@ package com.sparta.tdd.domain.order.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
@@ -120,7 +121,7 @@ class OrderServiceTest {
         ReflectionTestUtils.setField(seasonedMenu, "id", seasonedId);
 
         // repository에서 두 메뉴 반환되도록 모킹
-        when(menuRepository.findAllById(any())).thenReturn(List.of(friedMenu, seasonedMenu));
+        when(menuRepository.findAllVaildMenuIds(any(), eq(storeUUID))).thenReturn(List.of(friedMenu, seasonedMenu));
 
         // ---- save() 모킹: Order.id + 각 OrderMenu.id 부여 ----
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
