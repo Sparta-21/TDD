@@ -54,6 +54,9 @@ dependencies {
     implementation("io.github.openfeign.querydsl:querydsl-jpa:7.0")
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.0:jpa")
 
+    // Google GenAi
+    implementation 'com.google.genai:google-genai:1.18.0'
+
     // caffeine cache (local cache)
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
 }
