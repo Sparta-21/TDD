@@ -64,7 +64,7 @@ public class OrderService {
             UserDetailsImpl userDetails,
             OrderSearchOptionDto searchOption) {
 
-        if (userDetails.getUserAuthority() == UserAuthority.CUSTOMER
+        if (UserAuthority.isCustomer(userDetails.getUserAuthority())
         && !userDetails.getUserId().equals(searchOption.userId())) {
             throw new IllegalArgumentException("권한이 없습니다");
         }
@@ -75,7 +75,7 @@ public class OrderService {
             UserDetailsImpl userDetails,
             Long userId) {
 
-        if (userDetails.getUserAuthority() == UserAuthority.CUSTOMER
+        if (UserAuthority.isCustomer(userDetails.getUserAuthority())
                 && !userDetails.getUserId().equals(userId)) {
             throw new IllegalArgumentException("권한이 없습니다");
         }
@@ -132,8 +132,8 @@ public class OrderService {
         OrderRequestDto reqDto) {
 
         //region 엔티티 조회
-        User foundUser = isPresent(userRepository, userDetails.getUserId());
-        Store foundStore = isPresent(storeRepository, reqDto.storeId());
+        User foundUser = findEntity(userRepository, userDetails.getUserId());
+        Store foundStore = findEntity(storeRepository, reqDto.storeId());
         List<Menu> menus = menuRepository.findAllVaildMenuIds(reqDto.getMenuIds(), reqDto.storeId());
         //endregion
 
@@ -204,7 +204,7 @@ public class OrderService {
      * @param id
      * @return Entity
      */
-    private <T, ID> T isPresent(JpaRepository<T, ID> jpaRepository, ID id) {
+    private <T, ID> T findEntity(JpaRepository<T, ID> jpaRepository, ID id) {
         return jpaRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다"));
     }
