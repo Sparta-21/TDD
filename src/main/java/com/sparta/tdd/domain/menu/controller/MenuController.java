@@ -46,7 +46,7 @@ public class MenuController {
             .body(menuService.getMenu(storeId, menuId, authority));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     @PostMapping("/{storeId}/menu")
     public ResponseEntity<MenuResponseDto> createMenu(@PathVariable UUID storeId,
         @RequestBody MenuRequestDto menuRequestDto) {
@@ -54,7 +54,7 @@ public class MenuController {
             .body(menuService.createMenu(storeId, menuRequestDto));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     @PatchMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<Void> updateMenu(@PathVariable UUID storeId, @PathVariable UUID menuId,
         @RequestBody MenuRequestDto menuRequestDto) {
@@ -62,7 +62,7 @@ public class MenuController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     @PatchMapping("/{storeId}/menu/{menuId}/status")
     public ResponseEntity<Void> updateMenuStatus(@PathVariable UUID storeId,
         @PathVariable UUID menuId,
@@ -71,7 +71,7 @@ public class MenuController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_OWNER', 'ROLE_MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     @DeleteMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<Void> deleteMenu(@PathVariable UUID storeId, @PathVariable UUID menuId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
