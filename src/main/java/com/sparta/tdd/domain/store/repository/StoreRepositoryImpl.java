@@ -70,19 +70,28 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
         return PageableExecutionUtils.getPage(stores, pageable, countQuery::fetchOne);
     }
 
-    private BooleanBuilder buildStoreFilter(String keyword, StoreCategory storeCategory,
-        boolean includeStoreName) {
+    private BooleanExpression storeNameLike(String keyword) {
         QStore store = QStore.store;
-        BooleanBuilder builder = new BooleanBuilder();
+        return keyword != null ? store.name.containsIgnoreCase(keyword) : null;
+    }
 
-        if (includeStoreName && keyword != null && !keyword.isBlank()) {
-            builder.and(store.name.containsIgnoreCase(keyword));
-        }
+    private BooleanExpression menuNameLike(String keyword) {
+        QMenu menu = QMenu.menu;
+        return keyword != null ? menu.name.containsIgnoreCase(keyword) : null;
+    }
 
-        if (storeCategory != null) {
-            builder.and(store.category.eq(storeCategory));
-        }
+    private BooleanExpression storeCategoryEq(StoreCategory storeCategory) {
+        QStore store = QStore.store;
+        return storeCategory != null ? store.category.eq(storeCategory) : null;
+    }
 
-        return builder;
+    private BooleanExpression storeIsNotDeleted() {
+        QStore store = QStore.store;
+        return store.deletedAt.isNull();
+    }
+
+    private BooleanExpression menuIsNotHidden() {
+        QMenu menu = QMenu.menu;
+        return menu.isHidden.isFalse();
     }
 }
