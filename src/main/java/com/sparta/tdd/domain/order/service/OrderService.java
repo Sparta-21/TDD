@@ -5,6 +5,7 @@ import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.order.dto.OrderRequestDto;
 import com.sparta.tdd.domain.order.dto.OrderResponseDto;
+import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.mapper.OrderMapper;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
@@ -21,6 +22,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,16 +39,55 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final MenuRepository menuRepository;
 
-    public OrderResponseDto getOrder(UUID orderId) {
-        return null;
+    public Page<OrderResponseDto> getOrders(
+        UserDetailsImpl userDetails,
+        Pageable pageable,
+        OrderSearchOptionDto searchOption) {
+
+        // 검색조건에 맞는 Id 들을 페이징처리해서 가져옴
+        Page<UUID> idPage = orderRepository.findPageIds(
+            pageable,
+            searchOption.userId(),
+            searchOption.startOrNull(),
+            searchOption.endOrNull(),
+            searchOption.storeId()
+        );
+
+        List<UUID> ids = idPage.getContent();
+
+        // In 은 데이터 순서를 보장하지 않음
+        List<Order> loaded = orderRepository.findDetailsByIdIn(ids);
+
+        // id 순서대로 재정렬
+        Map<UUID, Order> byId = loaded.stream()
+            .collect(Collectors.toMap(Order::getId, o -> o));
+        List<Order> ordered = ids.stream()
+            .map(byId::get)
+            .toList();
+
+        List<OrderResponseDto> content = ordered.stream()
+            .map(orderMapper::toResponse)
+            .toList();
+
+
+        return new PageImpl<>(content, pageable, idPage.getTotalElements());
+    }
+
+    public OrderResponseDto getOrder(UserDetailsImpl userDetails, UUID orderId) {
+        Order order = orderRepository.findDetailById(orderId)
+            .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
+
+        OrderResponseDto resDto = orderMapper.toResponse(order);
+
+        return resDto;
     }
 
     @Transactional
     public OrderResponseDto createOrder(
-        Long userId,
+        UserDetailsImpl userDetails,
         OrderRequestDto reqDto) {
 
-        User foundUser = userRepository.findById(userId)
+        User foundUser = userRepository.findById(userDetails.getUserId())
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Store foundStore = storeRepository.findByName(reqDto.storeName())
@@ -63,12 +106,7 @@ public class OrderService {
                 .collect(Collectors.toMap(Menu::getId, Function.identity()));
 
         // 빠진 메뉴(존재하지 않는 menuId) 검증
-        if (menuMap.size() != menuIds.size()) {
-            // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
-            List<UUID> missing = new ArrayList<>(menuIds);
-            missing.removeAll(menuMap.keySet());
-            throw new IllegalArgumentException("존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
-        }
+        verifyOrderMenus(menuMap, menuIds);
 
         for (OrderMenuRequestDto om : reqDto.menu()) {
             Menu menu = menuMap.get(om.menuId());
@@ -92,4 +130,20 @@ public class OrderService {
 
         return resDto;
     }
+
+    /**
+     * Dto 와 repository 조회 결과를 비교해서 누락된 메뉴가 있는지 검증
+     * @param menuMap repository 에서 조회된 menuId, Menu map
+     * @param menuIds Dto 에서 넘어온 menuId 들
+     */
+    private static void verifyOrderMenus(Map<UUID, Menu> menuMap, List<UUID> menuIds) {
+        if (menuMap.size() != menuIds.size()) {
+            // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
+            List<UUID> missing = new ArrayList<>(menuIds);
+            missing.removeAll(menuMap.keySet());
+            throw new IllegalArgumentException("존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
+        }
+    }
+
+
 }

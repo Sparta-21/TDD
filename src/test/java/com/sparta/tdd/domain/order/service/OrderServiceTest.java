@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.menu.repository.MenuRepository;
@@ -19,6 +20,7 @@ import com.sparta.tdd.domain.orderMenu.mapper.OrderMenuMapper;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -77,6 +79,12 @@ class OrderServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserDetailsImpl userDetails = new UserDetailsImpl(
+            1L,                           // userId
+            "testUser",                   // username
+            UserAuthority.CUSTOMER             // enum UserAuthority
+        );
 
         System.out.println("userId: " + user.getId());
 
@@ -148,8 +156,10 @@ class OrderServiceTest {
             List.of(friedReq, seasonedReq)
         );
 
+
+
         // when
-        OrderResponseDto response = orderService.createOrder(user.getId(), reqDto);
+        OrderResponseDto response = orderService.createOrder(userDetails, reqDto);
 
         System.out.println("===== OrderResponseDto =====");
         System.out.println("id = " + response.id());

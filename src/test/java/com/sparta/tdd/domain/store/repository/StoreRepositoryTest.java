@@ -1,11 +1,17 @@
 package com.sparta.tdd.domain.store.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.global.config.AuditConfig;
 import jakarta.persistence.EntityManager;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,13 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @Import(AuditConfig.class)
@@ -37,11 +36,11 @@ class StoreRepositoryTest {
     @BeforeEach
     void setUp() {
         testUser = User.builder()
-                .username("testuser")
-                .password("password123")
-                .nickname("테스트유저")
-                .authority(UserAuthority.CUSTOMER)
-                .build();
+            .username("testuser")
+            .password("password123")
+            .nickname("테스트유저")
+            .authority(UserAuthority.CUSTOMER)
+            .build();
         em.persist(testUser);
         em.flush();
         em.clear();
@@ -53,12 +52,12 @@ class StoreRepositoryTest {
         //given
         User user = em.find(User.class, testUser.getId());
         Store chickenStore = Store.builder()
-                .name("BBQ")
-                .category(StoreCategory.CHICKEN)
-                .description("BBQ 광화문점")
-                .imageUrl("www.test.com")
-                .user(user)
-                .build();
+            .name("BBQ")
+            .category(StoreCategory.CHICKEN)
+            .description("BBQ 광화문점")
+            .imageUrl("www.test.com")
+            .user(user)
+            .build();
 
         Store savedStore = storeRepository.save(chickenStore);
         storeRepository.flush();
@@ -85,22 +84,20 @@ class StoreRepositoryTest {
         User user = em.find(User.class, testUser.getId());
 
         Store chickenStore = Store.builder()
-                .name("BBQ")
-                .category(StoreCategory.CHICKEN)
-                .description("BBQ 광화문점")
-                .imageUrl("www.test.com")
-                .user(user)
-                .build();
+            .name("BBQ")
+            .category(StoreCategory.CHICKEN)
+            .description("BBQ 광화문점")
+            .imageUrl("www.test.com")
+            .user(user)
+            .build();
 
         Store pizzaStore = Store.builder()
-                .name("도미노피자")
-                .category(StoreCategory.PIZZA)
-                .description("도미노피자 광화문점")
-                .imageUrl("www.test.com")
-                .avgRating(BigDecimal.valueOf(4.0))
-                .reviewCount(3)
-                .user(user)
-                .build();
+            .name("도미노피자")
+            .category(StoreCategory.PIZZA)
+            .description("도미노피자 광화문점")
+            .imageUrl("www.test.com")
+            .user(user)
+            .build();
 
         storeRepository.save(chickenStore);
         storeRepository.save(pizzaStore);
@@ -112,9 +109,9 @@ class StoreRepositoryTest {
         // then
         assertEquals(2, stores.size(), "저장된 Store 개수와 조회된 개수가 일치해야 한다.");
         assertTrue(stores.stream()
-                .anyMatch(s -> s.getName().equals("BBQ")));
+            .anyMatch(s -> s.getName().equals("BBQ")));
         assertTrue(stores.stream()
-                .anyMatch(s -> s.getName().equals("도미노피자")));
+            .anyMatch(s -> s.getName().equals("도미노피자")));
     }
 
     @Test
@@ -123,12 +120,12 @@ class StoreRepositoryTest {
         //given
         User user = em.find(User.class, testUser.getId());
         Store chickenStore = Store.builder()
-                .name("BBQ")
-                .category(StoreCategory.CHICKEN)
-                .description("BBQ 광화문점")
-                .imageUrl("www.test.com")
-                .user(user)
-                .build();
+            .name("BBQ")
+            .category(StoreCategory.CHICKEN)
+            .description("BBQ 광화문점")
+            .imageUrl("www.test.com")
+            .user(user)
+            .build();
 
         Store savedStore = storeRepository.save(chickenStore);
         storeRepository.flush();
