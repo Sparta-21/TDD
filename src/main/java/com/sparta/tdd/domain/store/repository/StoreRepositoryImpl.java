@@ -1,19 +1,17 @@
 package com.sparta.tdd.domain.store.repository;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.menu.entity.QMenu;
-import com.sparta.tdd.domain.store.dto.StoreResponseDto;
+import com.sparta.tdd.domain.order.entity.QOrder;
 import com.sparta.tdd.domain.store.entity.QStore;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.QUser;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class StoreRepositoryImpl implements StoreRepositoryCustom {
@@ -21,53 +19,59 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<UUID> findStoreIdsByMenuKeyword(String keyword, StoreCategory storeCategory) {
-        QStore store = new QStore("store");
-        QMenu menu = new QMenu("menu");
+    public List<UUID> findPagedStoreIdsByKeyword(Pageable pageable, String keyword,
+        StoreCategory storeCategory) {
 
-        BooleanBuilder builder = buildStoreFilter(keyword, storeCategory, false);
-
-        return queryFactory
-            .select(store.id)
-            .from(menu)
-            .join(menu.store, store)
-            .where(builder)
-            .fetch();
-    }
-
-    @Override
-    public List<UUID> findStoreIdsByStoreNameKeyword(String keyword, StoreCategory storeCategory) {
         QStore store = QStore.store;
-
-        BooleanBuilder builder = buildStoreFilter(keyword, storeCategory, true);
+        QMenu menu = QMenu.menu;
+        QOrder order = QOrder.order;
 
         return queryFactory
             .select(store.id)
             .from(store)
-            .where(builder)
-            .fetch();
-    }
-
-    @Override
-    public Page<StoreResponseDto> findStoresByIds(List<UUID> storeIds, Pageable pageable) {
-        QStore store = QStore.store;
-        QUser user = QUser.user;
-
-        List<StoreResponseDto> stores = queryFactory
-            .select(StoreResponseDto.qConstructor(store))
-            .from(store)
-            .leftJoin(store.user, user)
-            .where(store.id.in(storeIds))
+            .leftJoin(menu).on(menu.store.eq(store))
+            .where(
+                storeIsNotDeleted(),
+                menuIsNotHidden(),
+                storeCategoryEq(storeCategory),
+                storeNameLike(keyword)
+                    .or(menuNameLike(keyword))
+            )
+            .groupBy(store.id)
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
+    }
 
-        JPAQuery<Long> countQuery = queryFactory
-            .select(store.count())
+    @Override
+    public List<Tuple> findStoresWithMenusByIds(List<UUID> storeIds) {
+        QStore store = QStore.store;
+        QUser user = QUser.user;
+        QMenu menu = QMenu.menu;
+
+        return queryFactory
+            .select(store, menu)
             .from(store)
-            .where(store.id.in(storeIds));
+            .leftJoin(store.user, user).fetchJoin()
+            .leftJoin(menu).on(menu.store.eq(store)).fetchJoin()
+            .where(store.id.in(storeIds))
+            .fetch();
+    }
 
-        return PageableExecutionUtils.getPage(stores, pageable, countQuery::fetchOne);
+    @Override
+    public Long countStoresByKeyword(String keyword, StoreCategory storeCategory) {
+        QStore store = QStore.store;
+        QMenu menu = QMenu.menu;
+
+        return queryFactory
+            .select(store.countDistinct())
+            .from(store)
+            .leftJoin(menu).on(menu.store.eq(store))
+            .where(
+                storeCategoryEq(storeCategory),
+                storeNameLike(keyword).or(menuNameLike(keyword))
+            )
+            .fetchOne();
     }
 
     private BooleanExpression storeNameLike(String keyword) {
