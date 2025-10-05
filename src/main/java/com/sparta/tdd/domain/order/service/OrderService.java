@@ -55,7 +55,7 @@ public class OrderService {
         List<Order> loaded = orderRepository.findDetailsByIdIn(idPage.getContent());
         //endregion
 
-        List<OrderResponseDto> content = mappingOrderResponseDto(loaded, idPage);
+        List<OrderResponseDto> content = orderMapper.toResponseList(loaded, idPage);
 
         return new PageImpl<>(content, pageable, idPage.getTotalElements());
     }
@@ -82,34 +82,6 @@ public class OrderService {
 
     }
 
-    /**
-     * In 으로 받아온 순서보장이 되지않은 Order Entity List 와</br>
-     * Page<UUID> 의 id 순서를 맞춰서 OrderResponseDto List 로 변환합니다
-     * @param loaded List<Order> - In 조회로 받아온 Order List
-     * @param idPage  Page<UUID> - id 순서가 보장된 Page
-     * @return OrderResponseDto List
-     */
-    private List<OrderResponseDto> mappingOrderResponseDto(
-            List<Order> loaded,
-            Page<UUID> idPage) {
-        // id -> Order map 생성
-        Map<UUID, Order> byId = loaded.stream()
-            .collect(Collectors.toMap(Order::getId, o -> o));
-
-        // id 순서대로 재정렬
-        List<Order> ordered = idPage.getContent().stream()
-            .map(byId::get)
-            .toList();
-
-        List<OrderResponseDto> content = ordered.stream()
-            .map(orderMapper::toResponse)
-            .toList();
-
-        return content;
-    }
-
-
-
     public OrderResponseDto getOrder(
         UserDetailsImpl userDetails,
         UUID orderId) {
@@ -124,8 +96,6 @@ public class OrderService {
         return resDto;
     }
 
-
-
     @Transactional
     public OrderResponseDto createOrder(
         UserDetailsImpl userDetails,
@@ -139,7 +109,7 @@ public class OrderService {
 
         verifyOrderMenus(menus, reqDto.getMenuIds());
 
-        Order order = mappingAndRelation(reqDto, menus, foundUser, foundStore);
+        Order order = orderMapper.toOrder(reqDto, menus, foundUser, foundStore);
 
         Order savedOrder = orderRepository.save(order);
 
@@ -147,40 +117,6 @@ public class OrderService {
 
         return resDto;
     }
-
-    /**
-     * OrderRequestDto -> Order Entity 변환 및 연관관계 설정
-     * @param reqDto OrderRequestDto - 주문요청 Dto
-     * @param menus List<Menu> - repository 에서 조회된 Menu Entity List
-     * @param foundUser User - repository 에서 조회된 User Entity
-     * @param foundStore Store - repository 에서 조회된 Store Entity
-     * @return Order
-     */
-    private Order mappingAndRelation(
-            OrderRequestDto reqDto,
-            List<Menu> menus,
-            User foundUser,
-            Store foundStore) {
-        Order order = orderMapper.toOrder(reqDto);
-        order.assignUser(foundUser);
-        order.assignStore(foundStore);
-
-        Map<UUID, Menu> menuMap = menus.stream()
-                .collect(Collectors.toMap(Menu::getId, Function.identity()));
-
-        for (OrderMenuRequestDto om : reqDto.menu()) {
-            OrderMenu orderMenu = OrderMenu.builder()
-                .quantity(om.quantity())
-                .price(om.price())
-                .menu(menuMap.get(om.menuId()))
-                .build();
-
-            order.addOrderMenu(orderMenu);
-        }
-
-        return order;
-    }
-
 
     /**
      * Dto 와 repository 조회 결과를 비교해서 누락된 메뉴가 있는지 검증
