@@ -1,5 +1,7 @@
 package com.sparta.tdd.domain.store.service;
 
+import com.sparta.tdd.domain.menu.dto.MenuWithStoreResponseDto;
+import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.store.dto.StoreRequestDto;
 import com.sparta.tdd.domain.store.dto.StoreResponseDto;
 import com.sparta.tdd.domain.store.entity.Store;
@@ -9,8 +11,13 @@ import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +29,37 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final MenuRepository menuRepository;
 
-    // TODO: 키워드, 카테고리 기반 검색 조건 구현
-    public void getStores(String keyword, StoreCategory storeCategory, Pageable pageable) {
+    // TODO: 정렬 추가 (별점 순)
+    public Page<StoreResponseDto> searchStoresByKeywordAndCategoryWithMenus(String keyword,
+        StoreCategory storeCategory,
+        Pageable pageable) {
 
+        List<UUID> menuMatched = storeRepository.findStoreIdsByMenuKeyword(keyword, storeCategory);
+        List<UUID> storeMatched = storeRepository.findStoreIdsByStoreNameKeyword(keyword,
+            storeCategory);
+
+        LinkedHashSet<UUID> searchedIds = new LinkedHashSet<>();
+        searchedIds.addAll(menuMatched);
+        searchedIds.addAll(storeMatched);
+
+        if (searchedIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        List<UUID> storeIds = new ArrayList<>(searchedIds);
+
+        Page<StoreResponseDto> stores = storeRepository.findStoresByIds(storeIds, pageable);
+
+        List<UUID> pagedStoreIds = stores.getContent().stream()
+            .map(StoreResponseDto::id)
+            .toList();
+
+        Map<UUID, List<MenuWithStoreResponseDto>> menuMap = menuRepository.findByStoreIds(
+            pagedStoreIds);
+
+        return stores.map(store -> store.withMenus(menuMap.getOrDefault(store.id(), List.of())));
     }
 
     @Transactional
@@ -34,15 +68,14 @@ public class StoreService {
         validateStorePermission(user);
 
         Store store = requestDto.toEntity(user);
-        user.addStore(store);
 
         Store savedStore = storeRepository.save(store);
-        return StoreResponseDto.of(savedStore);
+        return StoreResponseDto.from(savedStore);
     }
 
     public StoreResponseDto getStore(UUID storeId) {
         Store store = getStoreById(storeId);
-        return StoreResponseDto.of(store);
+        return StoreResponseDto.from(store);
     }
 
     @Transactional
