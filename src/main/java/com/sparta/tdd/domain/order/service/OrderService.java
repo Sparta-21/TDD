@@ -65,7 +65,7 @@ public class OrderService {
             OrderSearchOptionDto searchOption) {
 
         if (userDetails.getUserAuthority() == UserAuthority.CUSTOMER
-        && userDetails.getUserId().equals(searchOption.userId())) {
+        && !userDetails.getUserId().equals(searchOption.userId())) {
             throw new IllegalArgumentException("권한이 없습니다");
         }
 
