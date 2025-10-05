@@ -3,6 +3,7 @@ package com.sparta.tdd.common.template;
 import com.sparta.tdd.common.config.TestContainerConfig;
 import com.sparta.tdd.common.helper.CleanUp;
 import com.sparta.tdd.global.config.AuditConfig;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -18,6 +19,9 @@ public abstract class RepositoryTest {
 
     @Autowired
     protected CleanUp cleanUp;
+
+    @Autowired
+    protected EntityManager em;
 
     @BeforeEach
     void setUp() {
