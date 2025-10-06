@@ -49,16 +49,20 @@ public class MenuController {
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     @PostMapping("/{storeId}/menu")
     public ResponseEntity<MenuResponseDto> createMenu(@PathVariable UUID storeId,
-        @RequestBody MenuRequestDto menuRequestDto) {
+        @RequestBody MenuRequestDto menuRequestDto,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(menuService.createMenu(storeId, menuRequestDto));
+            .body(menuService.createMenu(storeId, menuRequestDto, userId));
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     @PatchMapping("/{storeId}/menu/{menuId}")
     public ResponseEntity<Void> updateMenu(@PathVariable UUID storeId, @PathVariable UUID menuId,
-        @RequestBody MenuRequestDto menuRequestDto) {
-        menuService.updateMenu(storeId, menuId, menuRequestDto);
+        @RequestBody MenuRequestDto menuRequestDto,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUserId();
+        menuService.updateMenu(storeId, menuId, menuRequestDto, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -66,8 +70,10 @@ public class MenuController {
     @PatchMapping("/{storeId}/menu/{menuId}/status")
     public ResponseEntity<Void> updateMenuStatus(@PathVariable UUID storeId,
         @PathVariable UUID menuId,
-        @RequestParam Boolean status) {
-        menuService.updateMenuStatus(storeId, menuId, status);
+        @RequestParam Boolean status,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUserId();
+        menuService.updateMenuStatus(storeId, menuId, status, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
