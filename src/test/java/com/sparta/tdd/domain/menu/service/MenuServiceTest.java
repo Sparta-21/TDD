@@ -19,6 +19,7 @@ import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
+import com.sparta.tdd.domain.user.repository.UserRepository;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,9 @@ public class MenuServiceTest {
 
     @Mock
     StoreRepository storeRepository;
+
+    @Mock
+    UserRepository userRepository;
 
     User customer;
     User owner;
@@ -195,9 +199,11 @@ public class MenuServiceTest {
         // given
         when(storeRepository.findById(store.getId()))
             .thenReturn(Optional.of(store));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
+        when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 
         // when
-        MenuResponseDto testMenu = menuService.createMenu(store.getId(), dto3);
+        MenuResponseDto testMenu = menuService.createMenu(store.getId(), dto3, 2L);
 
         // then
         assertNotNull(testMenu);
@@ -216,9 +222,11 @@ public class MenuServiceTest {
         // given
         when(menuRepository.findByStoreIdAndId(store.getId(), menu1.getId()))
             .thenReturn(Optional.of(menu1));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
+        when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 
         // when
-        menuService.updateMenu(store.getId(), menu1.getId(), dto3);
+        menuService.updateMenu(store.getId(), menu1.getId(), dto3, 2L);
 
         // then
         verify(menuRepository, times(1)).findByStoreIdAndId(store.getId(), menu1.getId());
@@ -235,9 +243,11 @@ public class MenuServiceTest {
         // given
         when(menuRepository.findByStoreIdAndId(store.getId(), menu1.getId()))
             .thenReturn(Optional.of(menu1));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
+        when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 
         // when
-        menuService.updateMenuStatus(store.getId(), menu1.getId(), Boolean.TRUE);
+        menuService.updateMenuStatus(store.getId(), menu1.getId(), Boolean.TRUE, 2L);
 
         // then
         verify(menuRepository, times(1)).findByStoreIdAndId(store.getId(), menu1.getId());
@@ -250,6 +260,8 @@ public class MenuServiceTest {
         // given
         when(menuRepository.findByStoreIdAndId(store.getId(), menu1.getId()))
             .thenReturn(Optional.of(menu1));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
+        when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 
         // when
         menuService.deleteMenu(store.getId(), menu1.getId(), owner.getId());
