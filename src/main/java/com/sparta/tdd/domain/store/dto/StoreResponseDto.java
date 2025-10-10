@@ -37,6 +37,7 @@ public record StoreResponseDto(
             .imageUrl(store.getImageUrl())
             .avgRating(store.getAvgRating())
             .reviewCount(store.getReviewCount())
+            .menus(new ArrayList<>())
             .build();
     }
 
