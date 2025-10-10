@@ -1,8 +1,10 @@
 package com.sparta.tdd.domain.order.repository.querydsl;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.menu.entity.QMenu;
+import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.entity.QOrder;
 import com.sparta.tdd.domain.order.repository.OrderRepositoryCustom;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
@@ -49,13 +52,21 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return Optional.ofNullable(result);
     }
 
+    /**
+     * PageableExecutionUtils 도 있습니다 참고해주세요!(count 쿼리 성능 개선 부분)
+     * <a href = https://junior-datalist.tistory.com/342>참고주소</a>
+     */
     @Override
     public Page<UUID> findPageIds(
         Pageable pageable,
-        Long targetUserId,
-        LocalDateTime start,
-        LocalDateTime end,
-        UUID targetStoreId) {
+        OrderSearchOptionDto searchOption) {
+
+
+        Long targetUserId = searchOption.userId();
+        LocalDateTime start = searchOption.startOrNull();
+        LocalDateTime end =searchOption.endOrNull();
+        UUID targetStoreId =  searchOption.storeId();
+
 
         QOrder o = QOrder.order;
 
@@ -73,23 +84,23 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        Long total = query
-            .select(o.count())
-            .from(o)
-            .where(
-                o.user.id.eq(targetUserId),
-                o.store.id.eq(targetStoreId),
-                o.createdAt.goe(start),
-                o.createdAt.lt(end)
-            )
-            .fetchOne();
+        JPAQuery<Long> countQuery = query
+                .select(o.count())
+                .from(o)
+                .where(
+                        o.user.id.eq(targetUserId),
+                        o.store.id.eq(targetStoreId),
+                        o.createdAt.goe(start),
+                        o.createdAt.lt(end)
+                );
 
-        if (total == null) {
-            total = 0L;
-        }
-
-        return new PageImpl<>(ids, pageable, total);
+        return PageableExecutionUtils.getPage(
+                ids,
+                pageable,
+                countQuery::fetchOne
+        );
     }
+
 
     private OrderSpecifier<?>[] toOrderSpecifier(Sort sort, QOrder o) {
         if (sort == null || sort.isUnsorted()) {

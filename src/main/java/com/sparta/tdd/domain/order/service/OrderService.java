@@ -14,26 +14,26 @@ import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Service
 public class OrderService {
-
     private final OrderRepository orderRepository;
+
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final OrderMapper orderMapper;
@@ -44,38 +44,52 @@ public class OrderService {
         Pageable pageable,
         OrderSearchOptionDto searchOption) {
 
-        // 검색조건에 맞는 Id 들을 페이징처리해서 가져옴
+        hasPermission(userDetails, searchOption);
+
+        //region 조회
         Page<UUID> idPage = orderRepository.findPageIds(
             pageable,
-            searchOption.userId(),
-            searchOption.startOrNull(),
-            searchOption.endOrNull(),
-            searchOption.storeId()
+            searchOption
         );
 
-        List<UUID> ids = idPage.getContent();
+        List<Order> loaded = orderRepository.findDetailsByIdIn(idPage.getContent());
+        //endregion
 
-        // In 은 데이터 순서를 보장하지 않음
-        List<Order> loaded = orderRepository.findDetailsByIdIn(ids);
-
-        // id 순서대로 재정렬
-        Map<UUID, Order> byId = loaded.stream()
-            .collect(Collectors.toMap(Order::getId, o -> o));
-        List<Order> ordered = ids.stream()
-            .map(byId::get)
-            .toList();
-
-        List<OrderResponseDto> content = ordered.stream()
-            .map(orderMapper::toResponse)
-            .toList();
-
+        List<OrderResponseDto> content = orderMapper.toResponseList(loaded, idPage);
 
         return new PageImpl<>(content, pageable, idPage.getTotalElements());
     }
 
-    public OrderResponseDto getOrder(UserDetailsImpl userDetails, UUID orderId) {
+    private void hasPermission(
+            UserDetailsImpl userDetails,
+            OrderSearchOptionDto searchOption) {
+
+        if (UserAuthority.isCustomer(userDetails.getUserAuthority())
+        && !userDetails.getUserId().equals(searchOption.userId())) {
+            throw new IllegalArgumentException("권한이 없습니다");
+        }
+
+    }
+
+    private void hasPermission(
+            UserDetailsImpl userDetails,
+            Long userId) {
+
+        if (UserAuthority.isCustomer(userDetails.getUserAuthority())
+                && !userDetails.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("권한이 없습니다");
+        }
+
+    }
+
+    public OrderResponseDto getOrder(
+        UserDetailsImpl userDetails,
+        UUID orderId) {
+
         Order order = orderRepository.findDetailById(orderId)
             .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
+
+        hasPermission(userDetails, order.getUser().getId());
 
         OrderResponseDto resDto = orderMapper.toResponse(order);
 
@@ -87,42 +101,15 @@ public class OrderService {
         UserDetailsImpl userDetails,
         OrderRequestDto reqDto) {
 
-        User foundUser = userRepository.findById(userDetails.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        //region 엔티티 조회
+        User foundUser = findEntity(userRepository, userDetails.getUserId());
+        Store foundStore = findEntity(storeRepository, reqDto.storeId());
+        List<Menu> menus = menuRepository.findAllVaildMenuIds(reqDto.getMenuIds(), reqDto.storeId());
+        //endregion
 
-        Store foundStore = storeRepository.findByName(reqDto.storeName())
-            .orElseThrow(() -> new IllegalArgumentException("가게이름을 찾을 수 없습니다."));
+        verifyOrderMenus(menus, reqDto.getMenuIds());
 
-        Order order = orderMapper.toOrder(reqDto);
-        order.assignUser(foundUser);
-        order.assignStore(foundStore);
-
-        List<UUID> menuIds = reqDto.menu().stream()
-            .map(OrderMenuRequestDto::menuId)
-            .toList();
-
-        List<Menu> menus = menuRepository.findAllById(menuIds);
-        Map<UUID, Menu> menuMap = menus.stream()
-                .collect(Collectors.toMap(Menu::getId, Function.identity()));
-
-        // 빠진 메뉴(존재하지 않는 menuId) 검증
-        verifyOrderMenus(menuMap, menuIds);
-
-        for (OrderMenuRequestDto om : reqDto.menu()) {
-            Menu menu = menuMap.get(om.menuId());
-
-            if (!menu.getStore().getId().equals(foundStore.getId())) {
-                throw new IllegalArgumentException("해당 가게의 메뉴가 아닙니다: menuId=" + om.menuId());
-            }
-
-            OrderMenu orderMenu = OrderMenu.builder()
-                .quantity(om.quantity())
-                .price(om.price())
-                .menu(menu)
-                .build();
-
-            order.addOrderMenu(orderMenu);
-        }
+        Order order = orderMapper.toOrder(reqDto, menus, foundUser, foundStore);
 
         Order savedOrder = orderRepository.save(order);
 
@@ -133,17 +120,28 @@ public class OrderService {
 
     /**
      * Dto 와 repository 조회 결과를 비교해서 누락된 메뉴가 있는지 검증
-     * @param menuMap repository 에서 조회된 menuId, Menu map
-     * @param menuIds Dto 에서 넘어온 menuId 들
+     * @param menus repository 에서 조회된 menuId, Menu map
+     * @param menuIdsFromDto Dto 에서 넘어온 menuId 들
      */
-    private static void verifyOrderMenus(Map<UUID, Menu> menuMap, List<UUID> menuIds) {
-        if (menuMap.size() != menuIds.size()) {
-            // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
-            List<UUID> missing = new ArrayList<>(menuIds);
-            missing.removeAll(menuMap.keySet());
-            throw new IllegalArgumentException("존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
+    private void verifyOrderMenus(
+            List<Menu> menus,
+            Set<UUID> menuIdsFromDto) {
+        if (menus.size() != menuIdsFromDto.size()) {
+            throw new IllegalArgumentException("메뉴 정보가 올바르지 않습니다");
         }
     }
 
-
+    /**
+     * 특정 레포지토리의 id 탐색결과를 Optional로 받아</br>
+     * null 이면 예외를 발생</br>
+     * 값이 존재한다면 Entity 를 반환합니다
+     *
+     * @param jpaRepository
+     * @param id
+     * @return Entity
+     */
+    private <T, ID> T findEntity(JpaRepository<T, ID> jpaRepository, ID id) {
+        return jpaRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다"));
+    }
 }
