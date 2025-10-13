@@ -1,6 +1,7 @@
 package com.sparta.tdd.domain.user.controller;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
+import com.sparta.tdd.domain.order.dto.OrderResponseDto;
 import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
 import com.sparta.tdd.domain.user.dto.*;
 import com.sparta.tdd.domain.user.service.UserService;
@@ -76,6 +77,14 @@ public class UserController {
     public ResponseEntity<Page<ReviewResponseDto>> getUserReviewsByUserId(@PathVariable("userId") Long userId,
                                                                           @PageableDefault Pageable pageable) {
         Page<ReviewResponseDto> responseDto = userService.getPersonalReviews(userId, pageable);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/{userId}/orders")
+    @Operation(summary = "유저 주문 목록 조회")
+    public ResponseEntity<Page<OrderResponseDto>> getUserOrdersByUserId(@PathVariable("userId") Long userId,
+                                                                        @PageableDefault Pageable pageable) {
+        Page<OrderResponseDto> responseDto = userService.getPersonalOrders(userId, pageable);
         return ResponseEntity.ok(responseDto);
     }
 }

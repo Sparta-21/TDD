@@ -84,7 +84,7 @@ public class UserService {
     // 리뷰 목록 조회
     public Page<ReviewResponseDto> getPersonalReviews(Long userId, Pageable pageable) {
         List<Review> reviewList = reviewRepository.findByUserIdAndNotDeleted(userId);
-        PageImpl<Review> reviews = new PageImpl<>(reviewList, pageable, reviewList.size());
+        Page<Review> reviews = new PageImpl<>(reviewList, pageable, reviewList.size());
         return reviews.map(ReviewResponseDto::from);
     }
 

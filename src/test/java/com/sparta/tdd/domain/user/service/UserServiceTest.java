@@ -1,6 +1,8 @@
 package com.sparta.tdd.domain.user.service;
 
+import com.sparta.tdd.domain.order.dto.OrderResponseDto;
 import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.order.mapper.OrderMapper;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
 import com.sparta.tdd.domain.review.entity.Review;
 import com.sparta.tdd.domain.review.repository.ReviewRepository;
@@ -33,6 +35,8 @@ class UserServiceTest {
     UserRepository userRepository;
     @Mock
     ReviewRepository reviewRepository;
+    @Mock
+    OrderMapper orderMapper;
     @Mock
     OrderRepository orderRepository;
     @InjectMocks
@@ -200,43 +204,30 @@ class UserServiceTest {
     public void findOrdersByUserSuccess() {
         // given
         User user = mock(User.class);
-        Pageable pageable = mock(Pageable.class);
-        Order order1 = mock(Order.class);
-        Order order2 = mock(Order.class);
-        Order order3 = mock(Order.class);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Order order1 = new Order();
+        Order order2 = new Order();
+        List<Order> orderList = List.of(order1, order2);
+        Page<Order> orders = new PageImpl<>(orderList, pageable, orderList.size());
+
 
         when(user.getId()).thenReturn(1L);
-        when(orderRepository.findOrdersByUserIdAndNotDeleted(anyLong())).thenReturn(List.of(order1, order2, order3));
-
+        when(orderRepository.findOrdersByUserIdAndNotDeleted(user.getId(), pageable))
+                .thenReturn(orders);
+        when(orderMapper.toResponse(order1)).thenReturn(mock(OrderResponseDto.class));
+        when(orderMapper.toResponse(order2)).thenReturn(mock(OrderResponseDto.class));
         // when
-        List<Order> orderList = orderRepository.findOrdersByUserIdAndNotDeleted(user.getId());
-        PageImpl<Order> orders = new PageImpl<>(orderList, pageable, orderList.size());
+        Page<OrderResponseDto> personalOrders = userService.getPersonalOrders(user.getId(), pageable);
 
         // then
-        assertEquals(orders.getTotalElements(), 3);
+        assertEquals(2, personalOrders.getContent().size());
+        verify(orderRepository, times(1)).findOrdersByUserIdAndNotDeleted(user.getId(), pageable);
+        verify(orderMapper, times(1)).toResponse(order1);
+        verify(orderMapper, times(1)).toResponse(order2);
 
     }
 
-    @Test
-    @DisplayName("유저 주문 목록 조회 실패")
-    public void findOrdersByUserFail() {
-        // given
-        User user = mock(User.class);
-        Pageable pageable = mock(Pageable.class);
-        Order order1 = mock(Order.class);
-        Order order2 = mock(Order.class);
-        Order order3 = mock(Order.class);
-
-        when(user.getId()).thenReturn(1L);
-        when(orderRepository.findOrdersByUserIdAndNotDeleted(anyLong())).thenReturn(List.of(order1, order2, order3));
-
-        // when
-        List<Order> orderList = orderRepository.findOrdersByUserIdAndNotDeleted(user.getId());
-        PageImpl<Order> orders = new PageImpl<>(orderList, pageable, orderList.size());
-
-        // then
-        assertFalse(orders.getTotalElements() == 2);
-    }
     User createUser(String username, String password, String nickname, UserAuthority authority) {
         return User.builder()
                 .username(username)
