@@ -22,7 +22,6 @@ import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -253,7 +252,6 @@ public class MenuIntegrationTest extends IntegrationTest {
     class deleteMenu {
 
         @Test
-        @Disabled
         @CustomWithMockUser(userId = 2L, username = "owner", authority = UserAuthority.OWNER)
         @DisplayName("OWNER 메뉴 삭제 성공")
         void ownerDeletesMenu() throws Exception {
@@ -267,11 +265,11 @@ public class MenuIntegrationTest extends IntegrationTest {
                         .with(csrf()))
                 .andExpectAll(status().isNoContent());
 
-            // then todo: GET 메서드 수정 후 적용해야함
+            // then
             mockMvc.perform(
-                    patch("/v1/store/{storeId}/menu/{menuId}", storeId, menuId)
+                    get("/v1/store/{storeId}/menu/{menuId}", storeId, menuId)
                         .with(csrf()))
-                .andExpectAll(status().isNotFound());
+                .andExpectAll(status().isBadRequest());
         }
 
         @Test
