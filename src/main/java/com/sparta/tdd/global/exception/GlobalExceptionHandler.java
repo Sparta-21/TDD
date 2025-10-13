@@ -22,40 +22,50 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
         log.warn("handleBusinessException : {}", e.getMessage());
-        
+
         ErrorResponse errorResponse = ErrorResponse.of(e.getErrorCode().name(), e.getMessage());
 
         return ResponseEntity.status(e.getErrorCode().getStatus())
             .body(errorResponse);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.warn("handleMethodArgumentNotValidException : {}", e.getMessage());
+
+        String errorMessage = e.getBindingResult().getFieldErrors().stream()
+            .map(fieldError -> fieldError.getDefaultMessage())
+            .findFirst()
+            .orElse("잘못된 요청입니다.");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(errorMessage);
+    }
+
+    @ExceptionHandler(BindException.class)
+    protected ResponseEntity<String> handleBindException(BindException e) {
+        log.warn("handleBindException : {}", e.getMessage());
+
+        String errorMessage = e.getBindingResult().getFieldErrors().stream()
+            .map(fieldError -> fieldError.getDefaultMessage())
+            .findFirst()
+            .orElse("잘못된 요청입니다.");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(errorMessage);
+    }
+
     @ExceptionHandler({
-        MethodArgumentNotValidException.class,
         MissingServletRequestParameterException.class,
         MissingRequestHeaderException.class,
-        BindException.class,
         TypeMismatchException.class,
         MethodArgumentTypeMismatchException.class
     })
     protected ResponseEntity<String> handleValidException(Exception e) {
         log.warn("handleValidException : {}", e.getMessage());
 
-        String errorMessage = "잘못된 요청입니다.";
-
-        if (e instanceof MethodArgumentNotValidException validException) {
-            errorMessage = validException.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> fieldError.getDefaultMessage())
-                .findFirst()
-                .orElse("잘못된 요청입니다.");
-        } else if (e instanceof BindException bindException) {
-            errorMessage = bindException.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> fieldError.getDefaultMessage())
-                .findFirst()
-                .orElse("잘못된 요청입니다.");
-        }
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(errorMessage);
+            .body("잘못된 요청입니다.");
     }
 
     @ExceptionHandler({
