@@ -19,6 +19,8 @@ import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import com.sparta.tdd.global.jwt.JwtTokenValidator;
 import com.sparta.tdd.global.jwt.provider.AccessTokenProvider;
 import com.sparta.tdd.global.jwt.provider.RefreshTokenProvider;
@@ -115,8 +117,8 @@ public class AuthServiceUnitTest {
 
             // when
             assertThatThrownBy(() -> authService.signUp(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 존재하는 username 입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.NICKNAME_ALREADY_EXISTS.getMessage());
 
             verify(userRepository, never()).save(any(User.class));
         }
@@ -163,8 +165,8 @@ public class AuthServiceUnitTest {
 
             // when & then
             assertThatThrownBy(() -> authService.login(requestDto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("올바르지 않은 요청입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
         }
 
         @Test
@@ -183,8 +185,8 @@ public class AuthServiceUnitTest {
 
             // when & then
             assertThatThrownBy(() -> authService.login(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("올바르지 않은 요청입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.INVALID_LOGIN_CREDENTIALS.getMessage());
         }
     }
 
@@ -213,8 +215,8 @@ public class AuthServiceUnitTest {
 
             // when & then
             assertThatThrownBy(() -> authService.checkUsernameExists(username))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 존재하는 username 입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.USERNAME_ALREADY_EXISTS.getMessage());
         }
     }
 
@@ -309,8 +311,8 @@ public class AuthServiceUnitTest {
 
             // when & then
             assertThatThrownBy(() -> authService.withdrawal(userId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("존재하지 않는 사용자입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
 
             verify(reviewRepository, never()).bulkSoftDeleteByUserId(any(), any(), any());
             verify(withdrawalDataCleanService, never()).deleteOwnerRelatedData(any(), any());
@@ -419,13 +421,13 @@ public class AuthServiceUnitTest {
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
 
-            doThrow(new IllegalArgumentException("금지된 리프레시 토큰입니다."))
+            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_BLACKLISTED))
                 .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("금지된 리프레시 토큰입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.REFRESH_TOKEN_BLACKLISTED.getMessage());
 
             verify(tokenBlacklistService, never()).addRefreshTokenToBlacklist(anyString());
         }
@@ -436,13 +438,13 @@ public class AuthServiceUnitTest {
             // given
             when(request.getCookies()).thenReturn(null);
 
-            doThrow(new IllegalArgumentException("리프레시 토큰이 존재하지 않습니다."))
+            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_NOT_FOUND))
                 .when(jwtTokenValidator).validateRefreshToken(null);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("리프레시 토큰이 존재하지 않습니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
         }
 
         @Test
@@ -453,13 +455,13 @@ public class AuthServiceUnitTest {
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
 
-            doThrow(new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."))
+            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_INVALID))
                 .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("유효하지 않은 리프레시 토큰입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.REFRESH_TOKEN_INVALID.getMessage());
         }
 
         @Test
@@ -470,13 +472,13 @@ public class AuthServiceUnitTest {
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
 
-            doThrow(new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."))
+            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_INVALID))
                 .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("유효하지 않은 리프레시 토큰입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.REFRESH_TOKEN_INVALID.getMessage());
         }
 
         @Test
@@ -496,8 +498,8 @@ public class AuthServiceUnitTest {
 
             // when & then
             assertThatThrownBy(() -> authService.reissueToken(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("올바르지 않은 요청입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
         }
     }
 }
