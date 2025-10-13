@@ -88,7 +88,7 @@ public class AuthService {
     @Transactional
     public void withdrawal(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         LocalDateTime deletedAt = LocalDateTime.now();
 
