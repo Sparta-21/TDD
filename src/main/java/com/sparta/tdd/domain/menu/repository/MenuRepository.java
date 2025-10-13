@@ -17,6 +17,8 @@ public interface MenuRepository extends JpaRepository<Menu, UUID>, MenuRepositor
 
     Optional<Menu> findByStoreIdAndId(UUID storeId, UUID menuId);
 
+    List<Menu> findAllByStoreIdAndIsHiddenFalse(UUID storeId);
+
     @Modifying
     @Query("UPDATE Menu m SET m.deletedAt = :deletedAt, m.deletedBy = :deletedBy WHERE m.store.id IN :storeIds AND m.deletedAt IS NULL")
     void bulkSoftDeleteByStoreIds(
