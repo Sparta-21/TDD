@@ -37,7 +37,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run test
+      - name: Run build
         env:
           SPRING_PROFILES_ACTIVE: test
         run: ./gradlew build
