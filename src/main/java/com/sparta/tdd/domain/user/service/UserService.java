@@ -1,5 +1,9 @@
 package com.sparta.tdd.domain.user.service;
 
+import com.sparta.tdd.domain.order.dto.OrderResponseDto;
+import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.order.mapper.OrderMapper;
+import com.sparta.tdd.domain.order.repository.OrderRepository;
 import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
 import com.sparta.tdd.domain.review.entity.Review;
 import com.sparta.tdd.domain.review.repository.ReviewRepository;
@@ -22,6 +26,8 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final OrderMapper orderMapper;
+    private final OrderRepository orderRepository;
     private final PasswordEncoder passwordEncoder;
     // 회원 목록 조회
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
@@ -80,6 +86,11 @@ public class UserService {
         List<Review> reviewList = reviewRepository.findByUserIdAndNotDeleted(userId);
         PageImpl<Review> reviews = new PageImpl<>(reviewList, pageable, reviewList.size());
         return reviews.map(ReviewResponseDto::from);
+    }
+
+    public Page<OrderResponseDto> getPersonalOrders(Long userId, Pageable pageable) {
+        Page<Order> orderList = orderRepository.findOrdersByUserIdAndNotDeleted(userId, pageable);
+        return orderList.map(orderMapper::toResponse);
     }
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(
