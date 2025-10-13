@@ -35,6 +35,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
@@ -53,6 +55,9 @@ dependencies {
     implementation("io.github.openfeign.querydsl:querydsl-core:7.0")
     implementation("io.github.openfeign.querydsl:querydsl-jpa:7.0")
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.0:jpa")
+
+    // Google GenAi
+    implementation 'com.google.genai:google-genai:1.18.0'
 
     // caffeine cache (local cache)
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
