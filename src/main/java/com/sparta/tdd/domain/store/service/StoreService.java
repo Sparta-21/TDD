@@ -9,7 +9,8 @@ import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -102,23 +103,23 @@ public class StoreService {
 
     private Store getStoreById(UUID storeId) {
         return storeRepository.findByStoreIdAndNotDeleted(storeId)
-            .orElseThrow(() -> new EntityNotFoundException("상점이 존재하지 않습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private void validateStorePermission(User user) {
         if (!user.isOwnerLevel()) {
-            throw new IllegalArgumentException("상점 관련 작업을 수행할 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
         }
     }
 
     private void validateStoreOwnership(User user, Store store) {
         if (!store.isOwner(user) && !user.isManagerLevel()) {
-            throw new IllegalArgumentException("본인의 상점만 수정/삭제할 수 있습니다.");
+            throw new BusinessException(ErrorCode.STORE_OWNERSHIP_DENIED);
         }
     }
 }

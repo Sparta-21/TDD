@@ -15,6 +15,8 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +77,7 @@ public class OrderService {
 
     public OrderResponseDto getOrder(UserDetailsImpl userDetails, UUID orderId) {
         Order order = orderRepository.findDetailById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
         OrderResponseDto resDto = orderMapper.toResponse(order);
 
@@ -88,10 +90,10 @@ public class OrderService {
         OrderRequestDto reqDto) {
 
         User foundUser = userRepository.findById(userDetails.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Store foundStore = storeRepository.findByName(reqDto.storeName())
-            .orElseThrow(() -> new IllegalArgumentException("가게이름을 찾을 수 없습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
         Order order = orderMapper.toOrder(reqDto);
         order.assignUser(foundUser);
@@ -112,7 +114,7 @@ public class OrderService {
             Menu menu = menuMap.get(om.menuId());
 
             if (!menu.getStore().getId().equals(foundStore.getId())) {
-                throw new IllegalArgumentException("해당 가게의 메뉴가 아닙니다: menuId=" + om.menuId());
+                throw new BusinessException(ErrorCode.MENU_NOT_IN_STORE, "해당 가게의 메뉴가 아닙니다: menuId=" + om.menuId());
             }
 
             OrderMenu orderMenu = OrderMenu.builder()
@@ -141,7 +143,7 @@ public class OrderService {
             // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
             List<UUID> missing = new ArrayList<>(menuIds);
             missing.removeAll(menuMap.keySet());
-            throw new IllegalArgumentException("존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
+            throw new BusinessException(ErrorCode.MENU_NOT_FOUND, "존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
         }
     }
 

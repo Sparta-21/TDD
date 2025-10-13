@@ -7,6 +7,8 @@ import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import com.sparta.tdd.global.jwt.JwtTokenValidator;
 import com.sparta.tdd.global.jwt.TokenResolver;
 import com.sparta.tdd.global.jwt.provider.AccessTokenProvider;
@@ -37,7 +39,7 @@ public class AuthService {
     @Transactional
     public AuthInfo signUp(SignUpRequestDto request) {
         if (userRepository.existsByUsername(request.username())) {
-            throw new IllegalArgumentException("이미 존재하는 username 입니다.");
+            throw new BusinessException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
         UserAuthority userAuthority = null;
@@ -63,10 +65,10 @@ public class AuthService {
 
     public AuthInfo login(LoginRequestDto request) {
         User user = userRepository.findByUsername(request.username())
-            .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 요청입니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new IllegalArgumentException("올바르지 않은 요청입니다.");
+            throw new BusinessException(ErrorCode.INVALID_LOGIN_CREDENTIALS);
         }
 
         String accessToken = accessTokenProvider.generateToken(user.getUsername(), user.getId(), user.getAuthority());
@@ -106,7 +108,7 @@ public class AuthService {
 
     public void checkUsernameExists(String username) {
         if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("이미 존재하는 username 입니다.");
+            throw new BusinessException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
     }
 
@@ -127,7 +129,7 @@ public class AuthService {
         Long userId = Long.parseLong(claims.getSubject());
         Date refreshExpiration = refreshTokenProvider.getExpiration(refreshToken);
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 요청입니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = accessTokenProvider.generateToken(user.getUsername(), userId, user.getAuthority());
         String newRefreshToken = refreshTokenProvider.generateReissueToken(userId, refreshExpiration);
