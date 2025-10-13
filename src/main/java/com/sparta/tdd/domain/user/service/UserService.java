@@ -1,14 +1,14 @@
 package com.sparta.tdd.domain.user.service;
 
+import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
+import com.sparta.tdd.domain.review.entity.Review;
+import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.dto.*;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
     // 회원 목록 조회
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
@@ -73,6 +74,12 @@ public class UserService {
         user.updateAuthority(UserAuthority.MANAGER);
 
         return UserResponseDto.from(user);
+    }
+    // 리뷰 목록 조회
+    public Page<ReviewResponseDto> getPersonalReviews(Long userId, Pageable pageable) {
+        List<Review> reviewList = reviewRepository.findByUserIdAndNotDeleted(userId);
+        PageImpl<Review> reviews = new PageImpl<>(reviewList, pageable, reviewList.size());
+        return reviews.map(ReviewResponseDto::from);
     }
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(
