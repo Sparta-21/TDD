@@ -1,5 +1,7 @@
 package com.sparta.tdd.domain.user.service;
 
+import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.order.repository.OrderRepository;
 import com.sparta.tdd.domain.review.entity.Review;
 import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.dto.UserNicknameRequestDto;
@@ -31,6 +33,8 @@ class UserServiceTest {
     UserRepository userRepository;
     @Mock
     ReviewRepository reviewRepository;
+    @Mock
+    OrderRepository orderRepository;
     @InjectMocks
     UserService userService;
 
@@ -189,6 +193,49 @@ class UserServiceTest {
         assertFalse(reviews.stream().anyMatch(review -> {
             return review.getContent().equals("맛있는지 모르겠어요.");
         }));
+    }
+
+    @Test
+    @DisplayName("유저 주문 목록 조회 성공")
+    public void findOrdersByUserSuccess() {
+        // given
+        User user = mock(User.class);
+        Pageable pageable = mock(Pageable.class);
+        Order order1 = mock(Order.class);
+        Order order2 = mock(Order.class);
+        Order order3 = mock(Order.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(orderRepository.findOrdersByUserIdAndNotDeleted(anyLong())).thenReturn(List.of(order1, order2, order3));
+
+        // when
+        List<Order> orderList = orderRepository.findOrdersByUserIdAndNotDeleted(user.getId());
+        PageImpl<Order> orders = new PageImpl<>(orderList, pageable, orderList.size());
+
+        // then
+        assertEquals(orders.getTotalElements(), 3);
+
+    }
+
+    @Test
+    @DisplayName("유저 주문 목록 조회 실패")
+    public void findOrdersByUserFail() {
+        // given
+        User user = mock(User.class);
+        Pageable pageable = mock(Pageable.class);
+        Order order1 = mock(Order.class);
+        Order order2 = mock(Order.class);
+        Order order3 = mock(Order.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(orderRepository.findOrdersByUserIdAndNotDeleted(anyLong())).thenReturn(List.of(order1, order2, order3));
+
+        // when
+        List<Order> orderList = orderRepository.findOrdersByUserIdAndNotDeleted(user.getId());
+        PageImpl<Order> orders = new PageImpl<>(orderList, pageable, orderList.size());
+
+        // then
+        assertFalse(orders.getTotalElements() == 2);
     }
     User createUser(String username, String password, String nickname, UserAuthority authority) {
         return User.builder()
