@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.cart.entity;
 
+import com.sparta.tdd.domain.cart.dto.request.CartItemRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.global.model.BaseEntity;
@@ -41,12 +42,21 @@ public class CartItem extends BaseEntity {
     private Integer price;
 
     @Builder
-    public CartItem(Cart cart, Menu menu, Store store, Integer quantity, Integer price) {
+    private CartItem(Cart cart, Menu menu, Store store, Integer quantity, Integer price) {
         this.cart = cart;
         this.menu = menu;
         this.store = store;
         this.quantity = quantity;
         this.price = price;
+    }
+
+    public static CartItem of(Menu menu, CartItemRequestDto request) {
+        return CartItem.builder()
+                .menu(menu)
+                .store(menu.getStore())
+                .quantity(request.quantity())
+                .price(menu.getPrice())
+                .build();
     }
 
     public void assignCart(Cart cart) {
@@ -56,4 +66,5 @@ public class CartItem extends BaseEntity {
     public void updateQuantity(Integer quantity) {
         this.quantity = quantity;
     }
+
 }

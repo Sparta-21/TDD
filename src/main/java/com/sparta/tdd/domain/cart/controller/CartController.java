@@ -1,8 +1,8 @@
 package com.sparta.tdd.domain.cart.controller;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
-import com.sparta.tdd.domain.cart.dto.CartItemRequestDto;
-import com.sparta.tdd.domain.cart.dto.CartResponseDto;
+import com.sparta.tdd.domain.cart.dto.request.CartItemRequestDto;
+import com.sparta.tdd.domain.cart.dto.response.CartResponseDto;
 import com.sparta.tdd.domain.cart.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

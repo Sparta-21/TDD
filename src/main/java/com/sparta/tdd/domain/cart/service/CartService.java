@@ -1,7 +1,7 @@
 package com.sparta.tdd.domain.cart.service;
 
-import com.sparta.tdd.domain.cart.dto.CartItemRequestDto;
-import com.sparta.tdd.domain.cart.dto.CartResponseDto;
+import com.sparta.tdd.domain.cart.dto.request.CartItemRequestDto;
+import com.sparta.tdd.domain.cart.dto.response.CartResponseDto;
 import com.sparta.tdd.domain.cart.entity.Cart;
 import com.sparta.tdd.domain.cart.entity.CartItem;
 import com.sparta.tdd.domain.cart.repository.CartItemRepository;
@@ -39,12 +39,7 @@ public class CartService {
         Menu menu = getMenuById(request.menuId());
 
         // 장바구니에 이미 다른 가게의 메뉴가 있는지 확인
-        if (!cart.getCartItems().isEmpty()) {
-            UUID existingStoreId = cart.getCartItems().get(0).getStore().getId();
-            if (!existingStoreId.equals(menu.getStore().getId())) {
-                throw new IllegalArgumentException("장바구니에는 한 가게의 메뉴만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요.");
-            }
-        }
+        validateSameStore(cart, menu);
 
         // 이미 존재하는 메뉴인 경우 수량 업데이트
         CartItem existingItem = cartItemRepository
@@ -115,6 +110,42 @@ public class CartService {
                             .build();
                     return cartRepository.save(newCart);
                 });
+    }
+
+
+     // 장바구니에 다른 가게의 메뉴가 있는지 검증
+    private void validateSameStore(Cart cart, Menu menu) {
+        if (cart.getCartItems().isEmpty()) {
+            return;
+        }
+
+        UUID existingStoreId = cart.getCartItems().get(0).getStore().getId();
+        UUID newStoreId = menu.getStore().getId();
+
+        if (!existingStoreId.equals(newStoreId)) {
+            throw new IllegalArgumentException(
+                    "장바구니에는 한 가게의 메뉴만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요."
+            );
+        }
+    }
+    
+    private void tmp (Cart cart, Menu menu, CartItemRequestDto request) {
+        CartItem existingItem = isExistingItem(cart, menu);
+        
+        if (existingItem != null) {
+            existingItem.updateQuantity(existingItem.getQuantity() + request.quantity());
+        } else {
+            CartItem cartItem = CartItem.of(menu,request);
+            cart.addCartItem(cartItem);
+        }
+        
+    } 
+    
+    private CartItem isExistingItem (Cart cart, Menu menu) {
+        CartItem existingItem = cartItemRepository
+                .findByCartIdAndMenuId(cart.getId(), menu.getId())
+                .orElse(null);
+        return existingItem;
     }
 
     private Cart getCartByUserId(Long userId) {

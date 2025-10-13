@@ -1,4 +1,4 @@
-package com.sparta.tdd.domain.cart.dto;
+package com.sparta.tdd.domain.cart.dto.response;
 
 import com.sparta.tdd.domain.cart.entity.Cart;
 import java.util.List;

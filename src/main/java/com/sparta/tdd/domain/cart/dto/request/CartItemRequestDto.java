@@ -1,4 +1,4 @@
-package com.sparta.tdd.domain.cart.dto;
+package com.sparta.tdd.domain.cart.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
