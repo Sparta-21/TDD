@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.order.repository;
 
+import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -23,9 +24,6 @@ public interface OrderRepositoryCustom {
      */
     Page<UUID> findPageIds(
         Pageable pageable,
-        Long targetUserId,
-        LocalDateTime start,
-        LocalDateTime end,
-        UUID targetStoreId);
+        OrderSearchOptionDto searchOption);
 
 }
