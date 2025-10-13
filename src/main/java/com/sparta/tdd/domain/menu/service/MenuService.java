@@ -27,7 +27,8 @@ public class MenuService {
     public List<MenuResponseDto> getMenus(UUID storeId, UserAuthority authority) {
         List<Menu> menus;
         if (authority.isCustomerOrManager()) {
-            menus = menuRepository.findAllByStoreIdAndIsHiddenFalse(storeId);
+            menus = menuRepository.findAllByStoreIdAndIsHiddenFalseAndIsDeletedFalse(
+                storeId);
         } else {
             menus = menuRepository.findAllByStoreId(storeId);
         }
@@ -87,7 +88,7 @@ public class MenuService {
     }
 
     private Menu findMenu(UUID storeId, UUID menuId) {
-        return menuRepository.findByStoreIdAndId(storeId, menuId)
+        return menuRepository.findByStoreIdAndIdAndIsDeletedFalse(storeId, menuId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
     }
 
