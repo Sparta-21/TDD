@@ -1,0 +1,134 @@
+package com.sparta.tdd.domain.cart.service;
+
+import com.sparta.tdd.domain.cart.dto.CartItemRequestDto;
+import com.sparta.tdd.domain.cart.dto.CartResponseDto;
+import com.sparta.tdd.domain.cart.entity.Cart;
+import com.sparta.tdd.domain.cart.entity.CartItem;
+import com.sparta.tdd.domain.cart.repository.CartItemRepository;
+import com.sparta.tdd.domain.cart.repository.CartRepository;
+import com.sparta.tdd.domain.menu.entity.Menu;
+import com.sparta.tdd.domain.menu.repository.MenuRepository;
+import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class CartService {
+
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
+    private final MenuRepository menuRepository;
+    private final UserRepository userRepository;
+
+    // 장바구니 조회
+    public CartResponseDto getCart(Long userId) {
+        Cart cart = getOrCreateCart(userId);
+        return CartResponseDto.from(cart);
+    }
+
+    // 장바구니에 아이템 추가
+    @Transactional
+    public CartResponseDto addItemToCart(Long userId, CartItemRequestDto request) {
+        Cart cart = getOrCreateCart(userId);
+        Menu menu = getMenuById(request.menuId());
+
+        // 장바구니에 이미 다른 가게의 메뉴가 있는지 확인
+        if (!cart.getCartItems().isEmpty()) {
+            UUID existingStoreId = cart.getCartItems().get(0).getStore().getId();
+            if (!existingStoreId.equals(menu.getStore().getId())) {
+                throw new IllegalArgumentException("장바구니에는 한 가게의 메뉴만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요.");
+            }
+        }
+
+        // 이미 존재하는 메뉴인 경우 수량 업데이트
+        CartItem existingItem = cartItemRepository
+                .findByCartIdAndMenuId(cart.getId(), menu.getId())
+                .orElse(null);
+
+        if (existingItem != null) {
+            existingItem.updateQuantity(existingItem.getQuantity() + request.quantity());
+        } else {
+            CartItem cartItem = CartItem.builder()
+                    .menu(menu)
+                    .store(menu.getStore())
+                    .quantity(request.quantity())
+                    .price(menu.getPrice())
+                    .build();
+
+            cart.addCartItem(cartItem);
+        }
+
+        return CartResponseDto.from(cart);
+    }
+
+    // 장바구니 아이템 수량 수정
+    @Transactional
+    public CartResponseDto updateCartItemQuantity(Long userId, UUID cartItemId, Integer quantity) {
+        Cart cart = getCartByUserId(userId);
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다."));
+
+        if (!cartItem.getCart().getId().equals(cart.getId())) {
+            throw new IllegalArgumentException("본인의 장바구니 아이템만 수정할 수 있습니다.");
+        }
+
+        cartItem.updateQuantity(quantity);
+        return CartResponseDto.from(cart);
+    }
+
+    // 장바구니 아이템 삭제
+    @Transactional
+    public CartResponseDto removeCartItem(Long userId, UUID cartItemId) {
+        Cart cart = getCartByUserId(userId);
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다."));
+
+        if (!cartItem.getCart().getId().equals(cart.getId())) {
+            throw new IllegalArgumentException("본인의 장바구니 아이템만 삭제할 수 있습니다.");
+        }
+
+        cartItem.delete(userId);
+        return CartResponseDto.from(cart);
+    }
+
+    // 장바구니 전체 비우기
+    @Transactional
+    public void clearCart(Long userId) {
+        Cart cart = getCartByUserId(userId);
+        cart.clearCart();
+    }
+
+    private Cart getOrCreateCart(Long userId) {
+        return cartRepository.findByUserIdWithItems(userId)
+                .orElseGet(() -> {
+                    User user = getUserById(userId);
+                    Cart newCart = Cart.builder()
+                            .user(user)
+                            .build();
+                    return cartRepository.save(newCart);
+                });
+    }
+
+    private Cart getCartByUserId(Long userId) {
+        return cartRepository.findByUserIdWithItems(userId)
+                .orElseThrow(() -> new IllegalArgumentException("장바구니를 찾을 수 없습니다."));
+    }
+
+    private Menu getMenuById(UUID menuId) {
+        return menuRepository.findById(menuId)
+                .orElseThrow(() -> new IllegalArgumentException("메뉴를 찾을 수 없습니다."));
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+}
