@@ -1,5 +1,7 @@
 package com.sparta.tdd.domain.user.service;
 
+import com.sparta.tdd.domain.review.entity.Review;
+import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.dto.UserNicknameRequestDto;
 import com.sparta.tdd.domain.user.dto.UserResponseDto;
 import com.sparta.tdd.domain.user.entity.User;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +29,8 @@ class UserServiceTest {
 
     @Mock
     UserRepository userRepository;
-
+    @Mock
+    ReviewRepository reviewRepository;
     @InjectMocks
     UserService userService;
 
@@ -139,6 +143,53 @@ class UserServiceTest {
         });
     }
 
+    @Test
+    @DisplayName("유저가 작성한 리뷰 조회 성공")
+    void findReviewByUserSuccess() {
+        // given
+        User user1 = mock(User.class);
+        Pageable pageable = mock(Pageable.class);
+        Review review1 = new Review(user1, null, null, null, null, "맛없어요ㅠ");
+        Review review2 = new Review(user1, null, null, null, null, "맛있어요!");
+
+        List<Review> reviewList = List.of(review1, review2);
+        when(user1.getId()).thenReturn(1L);
+        when(reviewRepository.findByUserIdAndNotDeleted(user1.getId())).thenReturn(reviewList);
+
+        // when
+        List<Review> byUserIdAndNotDeleted = reviewRepository.findByUserIdAndNotDeleted(user1.getId());
+        Page<Review> reviews = new PageImpl<>(byUserIdAndNotDeleted, pageable, byUserIdAndNotDeleted.size());
+
+        // then
+        assertEquals(reviews.getTotalElements(), 2);
+        assertTrue(reviews.stream().anyMatch(review -> {
+            return review.getContent().equals("맛있어요!");
+        }));
+    }
+
+    @Test
+    @DisplayName("유저가 작성한 리뷰 조회 실패")
+    void findReviewByUserFail() {
+        // given
+        User user1 = mock(User.class);
+        Pageable pageable = mock(Pageable.class);
+        Review review1 = new Review(user1, null, null, null, null, "맛없어요ㅠ");
+        Review review2 = new Review(user1, null, null, null, null, "맛있어요!");
+
+        List<Review> reviewList = List.of(review1, review2);
+        when(user1.getId()).thenReturn(1L);
+        when(reviewRepository.findByUserIdAndNotDeleted(user1.getId())).thenReturn(reviewList);
+
+        // when
+        List<Review> byUserIdAndNotDeleted = reviewRepository.findByUserIdAndNotDeleted(user1.getId());
+        Page<Review> reviews = new PageImpl<>(byUserIdAndNotDeleted, pageable, byUserIdAndNotDeleted.size());
+
+        // then
+        assertEquals(reviews.getTotalElements(), 2);
+        assertFalse(reviews.stream().anyMatch(review -> {
+            return review.getContent().equals("맛있는지 모르겠어요.");
+        }));
+    }
     User createUser(String username, String password, String nickname, UserAuthority authority) {
         return User.builder()
                 .username(username)
