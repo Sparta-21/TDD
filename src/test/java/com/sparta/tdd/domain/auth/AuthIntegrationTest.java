@@ -7,42 +7,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.tdd.common.template.IntegrationTest;
 import com.sparta.tdd.domain.auth.dto.request.LoginRequestDto;
 import com.sparta.tdd.domain.auth.dto.request.SignUpRequestDto;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
-import com.sparta.tdd.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
-@ActiveProfiles("local")
-class AuthIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll();
-    }
+class AuthIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("회원가입 후 발급받은 토큰으로 UserDetailsImpl에 올바른 데이터가 담기는지 확인")
@@ -58,7 +32,7 @@ class AuthIntegrationTest {
         // when
         MvcResult signUpResult = mockMvc.perform(post("/v1/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUpRequest)))
+                .content(mapper.writeValueAsString(signUpRequest)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(header().exists("Authorization"))
@@ -90,7 +64,7 @@ class AuthIntegrationTest {
 
         mockMvc.perform(post("/v1/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUpRequest)))
+                .content(mapper.writeValueAsString(signUpRequest)))
             .andExpect(status().isOk());
 
         LoginRequestDto loginRequest = new LoginRequestDto(
@@ -101,7 +75,7 @@ class AuthIntegrationTest {
         // when
         MvcResult loginResult = mockMvc.perform(post("/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+                .content(mapper.writeValueAsString(loginRequest)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(header().exists("Authorization"))
