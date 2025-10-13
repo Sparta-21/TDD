@@ -18,6 +18,16 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(BusinessException.class)
+    protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        log.warn("handleBusinessException : {}", e.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.of(e.getErrorCode().name(), e.getMessage());
+
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+            .body(errorResponse);
+    }
+
     @ExceptionHandler({
         MethodArgumentNotValidException.class,
         MissingServletRequestParameterException.class,
