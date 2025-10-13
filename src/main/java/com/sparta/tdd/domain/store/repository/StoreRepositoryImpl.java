@@ -1,17 +1,23 @@
 package com.sparta.tdd.domain.store.repository;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.menu.entity.QMenu;
 import com.sparta.tdd.domain.order.entity.QOrder;
 import com.sparta.tdd.domain.store.entity.QStore;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.QUser;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
 public class StoreRepositoryImpl implements StoreRepositoryCustom {
@@ -31,13 +37,12 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
             .from(store)
             .leftJoin(menu).on(menu.store.eq(store))
             .where(
-                storeIsNotDeleted(),
-                menuIsNotHidden(),
                 storeCategoryEq(storeCategory),
                 storeNameLike(keyword)
                     .or(menuNameLike(keyword))
             )
             .groupBy(store.id)
+            .orderBy(toOrderSpecifiers(pageable, store, order))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
@@ -89,13 +94,36 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
         return storeCategory != null ? store.category.eq(storeCategory) : null;
     }
 
-    private BooleanExpression storeIsNotDeleted() {
-        QStore store = QStore.store;
-        return store.deletedAt.isNull();
-    }
+    private OrderSpecifier<?>[] toOrderSpecifiers(Pageable pageable, QStore store, QOrder order) {
+        Sort sort = pageable.getSort();
 
-    private BooleanExpression menuIsNotHidden() {
-        QMenu menu = QMenu.menu;
-        return menu.isHidden.isFalse();
+        if (sort.isUnsorted()) {
+            return new OrderSpecifier[]{store.avgRating.desc()};
+        }
+
+        List<OrderSpecifier<?>> orders = new ArrayList<>();
+
+        for (Sort.Order sortOrder : sort) {
+            boolean asc = sortOrder.isAscending();
+            String property = sortOrder.getProperty();
+
+            switch (property) {
+                case "avgRating" ->
+                    orders.add(asc ? store.avgRating.asc() : store.avgRating.desc());
+                case "reviewCount" ->
+                    orders.add(asc ? store.reviewCount.asc() : store.reviewCount.desc());
+                case "createdAt" ->
+                    orders.add(asc ? store.createdAt.asc() : store.createdAt.desc());
+                case "orderCount" -> {
+                    Expression<Long> orderCountExpr = JPAExpressions
+                        .select(order.count())
+                        .from(order)
+                        .where(order.store.id.eq(store.id));
+                    orders.add(new OrderSpecifier<>(asc ? Order.ASC : Order.DESC, orderCountExpr));
+                }
+            }
+        }
+
+        return orders.toArray(new OrderSpecifier[0]);
     }
 }
