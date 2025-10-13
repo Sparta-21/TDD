@@ -14,6 +14,7 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
     CONFLICT(HttpStatus.CONFLICT, "요청이 현재 서버 상태와 충돌합니다."),
+    ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 id 입니다."),
 
     // AUTH 도메인 관련
     ACCESS_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "액세스 토큰이 존재하지 않습니다."),
@@ -38,8 +39,10 @@ public enum ErrorCode {
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상점입니다."),
 
     // ORDER 도메인 관련
+    ORDER_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
     MENU_NOT_IN_STORE(HttpStatus.BAD_REQUEST, "해당 가게의 메뉴가 아닙니다."),
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 메뉴가 포함되어 있습니다."),
+    MENU_INVALID_INFO(HttpStatus.BAD_REQUEST, "메뉴 정보가 올바르지 않습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
 
     // MENU 도메인 관련
