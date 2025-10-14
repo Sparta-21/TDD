@@ -11,7 +11,6 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
-import com.sparta.tdd.global.config.QueryDSLConfig;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,12 +20,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-
-@Import(QueryDSLConfig.class)
 
 @DisplayName("StoreRepositoryImpl 커스텀 쿼리 테스트")
 class StoreRepositoryImplTest extends RepositoryTest {
@@ -41,7 +37,7 @@ class StoreRepositoryImplTest extends RepositoryTest {
     private Pageable pageable;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testUser = User.builder()
             .username("testuser")
             .password("password123")
