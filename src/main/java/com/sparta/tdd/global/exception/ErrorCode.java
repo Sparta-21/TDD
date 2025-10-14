@@ -46,6 +46,8 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
 
     // MENU 도메인 관련
+    MENU_HIDDEN(HttpStatus.FORBIDDEN, "숨겨진 메뉴입니다."),
+    MENU_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 메뉴에 대한 권한이 없습니다."),
 
     // REVIEW 도메인 관련
     REVIEW_NOT_OWNED(HttpStatus.FORBIDDEN, "본인의 리뷰만 수정/삭제할 수 있습니다."),

@@ -20,6 +20,7 @@ import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
@@ -171,7 +172,7 @@ public class MenuServiceTest {
                 .thenReturn(Optional.of(menu2));
 
             // when & then
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(BusinessException.class,
                 () -> menuService.getMenu(store.getId(), menu2.getId(),
                     customer.getAuthority()));
             verify(menuRepository, times(1)).findByStoreIdAndIdAndIsDeletedFalse(store.getId(),
