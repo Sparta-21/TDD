@@ -15,7 +15,7 @@ public interface MenuRepository extends JpaRepository<Menu, UUID>, MenuRepositor
 
     List<Menu> findAllByStoreId(UUID storeId);
 
-    Optional<Menu> findByStoreIdAndIdAndIsDeletedFalse(UUID storeId, UUID menuId);
+    Optional<Menu> findByStoreIdAndMenuIdAndIsDeletedFalse(UUID storeId, UUID menuId);
 
     List<Menu> findAllByStoreIdAndIsHiddenFalseAndIsDeletedFalse(UUID storeId);
 
@@ -28,9 +28,9 @@ public interface MenuRepository extends JpaRepository<Menu, UUID>, MenuRepositor
     );
 
     /**
-     * DTO로부터 전달받은 메뉴 ID들중
-     * 해당 가게에 존재하고, 숨김처리 되지않은 Menu 엔티티들을 조회
-     * @param storeId 가게 ID
+     * DTO로부터 전달받은 메뉴 ID들중 해당 가게에 존재하고, 숨김처리 되지않은 Menu 엔티티들을 조회
+     *
+     * @param storeId        가게 ID
      * @param menuIdsFromDto DTO로부터 전달받은 메뉴 ID들
      * @return List<Menu> Entity List
      */
@@ -41,5 +41,5 @@ public interface MenuRepository extends JpaRepository<Menu, UUID>, MenuRepositor
             AND m.store.id = :storeId
             AND m.isHidden = false
         """)
-   List<Menu> findAllVaildMenuIds(Set<UUID> menuIdsFromDto, UUID storeId);
+    List<Menu> findAllVaildMenuIds(Set<UUID> menuIdsFromDto, UUID storeId);
 }

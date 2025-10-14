@@ -166,14 +166,15 @@ public class MenuServiceTest {
         @DisplayName("Customer 메뉴 상세 테스트")
         void getMenusCustomerTest() {
             //given
-            when(menuRepository.findByStoreIdAndIdAndIsDeletedFalse(store.getId(), menu2.getId()))
+            when(menuRepository.findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(),
+                menu2.getId()))
                 .thenReturn(Optional.of(menu2));
 
             // when & then
             assertThrows(IllegalArgumentException.class,
                 () -> menuService.getMenu(store.getId(), menu2.getId(),
                     customer.getAuthority()));
-            verify(menuRepository, times(1)).findByStoreIdAndIdAndIsDeletedFalse(store.getId(),
+            verify(menuRepository, times(1)).findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(),
                 menu2.getId());
         }
 
@@ -181,7 +182,8 @@ public class MenuServiceTest {
         @DisplayName("OWNER 메뉴 상세 테스트")
         void getMenusOwnerTest() {
             //given
-            when(menuRepository.findByStoreIdAndIdAndIsDeletedFalse(store.getId(), menu2.getId()))
+            when(menuRepository.findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(),
+                menu2.getId()))
                 .thenReturn(Optional.of(menu2));
 
             // when
@@ -191,7 +193,7 @@ public class MenuServiceTest {
             // then
             assertNotNull(testMenu);
             assertEquals(menu2.getId(), testMenu.menuId());
-            verify(menuRepository, times(1)).findByStoreIdAndIdAndIsDeletedFalse(store.getId(),
+            verify(menuRepository, times(1)).findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(),
                 menu2.getId());
         }
 
@@ -224,7 +226,7 @@ public class MenuServiceTest {
     @DisplayName("메뉴 수정 테스트")
     void updateMenuSuccessTest() {
         // given
-        when(menuRepository.findByStoreIdAndIdAndIsDeletedFalse(store.getId(), menu1.getId()))
+        when(menuRepository.findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(), menu1.getId()))
             .thenReturn(Optional.of(menu1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
         when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
@@ -233,7 +235,7 @@ public class MenuServiceTest {
         menuService.updateMenu(store.getId(), menu1.getId(), dto3, 2L);
 
         // then
-        verify(menuRepository, times(1)).findByStoreIdAndIdAndIsDeletedFalse(store.getId(),
+        verify(menuRepository, times(1)).findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(),
             menu1.getId());
         assertEquals(dto3.name(), menu1.getName());
         assertEquals(dto3.description(), menu1.getDescription());
@@ -246,7 +248,7 @@ public class MenuServiceTest {
     @DisplayName("메뉴 상태 수정 테스트")
     void updateMenuStatusSuccessTest() {
         // given
-        when(menuRepository.findByStoreIdAndIdAndIsDeletedFalse(store.getId(), menu1.getId()))
+        when(menuRepository.findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(), menu1.getId()))
             .thenReturn(Optional.of(menu1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
         when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
@@ -255,7 +257,7 @@ public class MenuServiceTest {
         menuService.updateMenuStatus(store.getId(), menu1.getId(), Boolean.TRUE, 2L);
 
         // then
-        verify(menuRepository, times(1)).findByStoreIdAndIdAndIsDeletedFalse(store.getId(),
+        verify(menuRepository, times(1)).findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(),
             menu1.getId());
         assertTrue(menu1.isHidden());
     }
@@ -264,7 +266,7 @@ public class MenuServiceTest {
     @DisplayName("메뉴 삭제 테스트(soft delete)")
     void deleteMenuSuccessTest() {
         // given
-        when(menuRepository.findByStoreIdAndIdAndIsDeletedFalse(store.getId(), menu1.getId()))
+        when(menuRepository.findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(), menu1.getId()))
             .thenReturn(Optional.of(menu1));
         when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
         when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
@@ -273,7 +275,7 @@ public class MenuServiceTest {
         menuService.deleteMenu(store.getId(), menu1.getId(), owner.getId());
 
         // then
-        verify(menuRepository, times(1)).findByStoreIdAndIdAndIsDeletedFalse(store.getId(),
+        verify(menuRepository, times(1)).findByStoreIdAndMenuIdAndIsDeletedFalse(store.getId(),
             menu1.getId());
         assertNotNull(menu1.getDeletedAt());
         assertEquals(owner.getId(), menu1.getDeletedBy());
