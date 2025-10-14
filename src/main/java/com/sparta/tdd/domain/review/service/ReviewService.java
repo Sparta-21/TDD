@@ -13,8 +13,15 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,8 +114,8 @@ public class ReviewService {
     public void deleteReview(UUID reviewId, Long userId) {
         Review review = findReviewById(reviewId);
 
-        if (!isQualified(review,userId)) {
-            throw new IllegalArgumentException("본인의 리뷰만 삭제할 수 있습니다.");
+        if (!isQualified(review, userId)) {
+            throw new BusinessException(ErrorCode.REVIEW_NOT_OWNED);
         }
 
         review.delete(userId);
@@ -116,26 +123,26 @@ public class ReviewService {
 
     private Review findReviewById(UUID reviewId) {
         return reviewRepository.findByIdAndNotDeleted(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
     }
 
     // 자격확인 메서드
-    private boolean isQualified(Review review,Long userId) {
+    private boolean isQualified(Review review, Long userId) {
         return review.getUserId().equals(userId);
     }
 
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private Store findStoreById(UUID storeId) {
         return storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 
     private Order findOrderById(UUID orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
     }
 }

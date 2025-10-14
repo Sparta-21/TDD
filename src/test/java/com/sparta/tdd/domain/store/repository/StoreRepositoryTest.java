@@ -3,11 +3,11 @@ package com.sparta.tdd.domain.store.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
-import com.sparta.tdd.global.config.AuditConfig;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,14 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
-@DataJpaTest
-@Import(AuditConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class StoreRepositoryTest {
+class StoreRepositoryTest extends RepositoryTest {
 
     @Autowired
     private StoreRepository storeRepository;

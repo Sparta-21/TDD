@@ -1,7 +1,10 @@
 package com.sparta.tdd.domain.store.service;
 
+import static com.sparta.tdd.domain.store.entity.QStore.store;
+
+import com.querydsl.core.Tuple;
 import com.sparta.tdd.domain.menu.dto.MenuWithStoreResponseDto;
-import com.sparta.tdd.domain.menu.repository.MenuRepository;
+import com.sparta.tdd.domain.menu.entity.QMenu;
 import com.sparta.tdd.domain.store.dto.StoreRequestDto;
 import com.sparta.tdd.domain.store.dto.StoreResponseDto;
 import com.sparta.tdd.domain.store.entity.Store;
@@ -9,15 +12,17 @@ import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,37 +34,48 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
-    private final MenuRepository menuRepository;
 
-    // TODO: 정렬 추가 (별점 순)
     public Page<StoreResponseDto> searchStoresByKeywordAndCategoryWithMenus(String keyword,
         StoreCategory storeCategory,
         Pageable pageable) {
 
-        List<UUID> menuMatched = storeRepository.findStoreIdsByMenuKeyword(keyword, storeCategory);
-        List<UUID> storeMatched = storeRepository.findStoreIdsByStoreNameKeyword(keyword,
+        List<UUID> storeIds = storeRepository.findPagedStoreIdsByKeyword(pageable, keyword,
             storeCategory);
 
-        LinkedHashSet<UUID> searchedIds = new LinkedHashSet<>();
-        searchedIds.addAll(menuMatched);
-        searchedIds.addAll(storeMatched);
-
-        if (searchedIds.isEmpty()) {
+        if (storeIds.isEmpty()) {
             return Page.empty(pageable);
         }
 
-        List<UUID> storeIds = new ArrayList<>(searchedIds);
+        List<Tuple> tuples = storeRepository.findStoresWithMenusByIds(storeIds);
 
-        Page<StoreResponseDto> stores = storeRepository.findStoresByIds(storeIds, pageable);
+        Map<UUID, List<MenuWithStoreResponseDto>> menus = tuples.stream()
+            .filter(tuple -> Objects.nonNull(tuple.get(QMenu.menu)))
+            .collect(Collectors.groupingBy(
+                tuple -> Objects.requireNonNull(tuple.get(store)).getId(),
+                Collectors.mapping(
+                    tuple -> MenuWithStoreResponseDto.from(
+                        Objects.requireNonNull(tuple.get(QMenu.menu))),
+                    Collectors.toList()
+                )
+            ));
 
-        List<UUID> pagedStoreIds = stores.getContent().stream()
-            .map(StoreResponseDto::id)
+        List<StoreResponseDto> stores = tuples.stream()
+            .map(tuple -> tuple.get(store))
+            .filter(Objects::nonNull)
+            .distinct()
+            .map(StoreResponseDto::from)
+            .map(storeResponseDto -> storeResponseDto.withMenus(
+                menus.getOrDefault(storeResponseDto.id(), List.of())))
             .toList();
 
-        Map<UUID, List<MenuWithStoreResponseDto>> menuMap = menuRepository.findByStoreIds(
-            pagedStoreIds);
+        long totalCount;
+        if (stores.size() < pageable.getPageSize()) {
+            totalCount = pageable.getOffset() + stores.size();
+        } else {
+            totalCount = storeRepository.countStoresByKeyword(keyword, storeCategory);
+        }
 
-        return stores.map(store -> store.withMenus(menuMap.getOrDefault(store.id(), List.of())));
+        return new PageImpl<>(stores, pageable, totalCount);
     }
 
     @Transactional
@@ -102,23 +118,23 @@ public class StoreService {
 
     private Store getStoreById(UUID storeId) {
         return storeRepository.findByStoreIdAndNotDeleted(storeId)
-            .orElseThrow(() -> new EntityNotFoundException("상점이 존재하지 않습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private void validateStorePermission(User user) {
         if (!user.isOwnerLevel()) {
-            throw new IllegalArgumentException("상점 관련 작업을 수행할 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
         }
     }
 
     private void validateStoreOwnership(User user, Store store) {
         if (!store.isOwner(user) && !user.isManagerLevel()) {
-            throw new IllegalArgumentException("본인의 상점만 수정/삭제할 수 있습니다.");
+            throw new BusinessException(ErrorCode.STORE_OWNERSHIP_DENIED);
         }
     }
 }

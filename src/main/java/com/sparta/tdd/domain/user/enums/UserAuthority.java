@@ -13,6 +13,10 @@ public enum UserAuthority {
 
     private final String description;
 
+    public boolean isCustomerOrManager() {
+        return this == CUSTOMER || this == MANAGER;
+    }
+
     public static boolean isCustomer(UserAuthority authority) {
         return authority == CUSTOMER;
     }

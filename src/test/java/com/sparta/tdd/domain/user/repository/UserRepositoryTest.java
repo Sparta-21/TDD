@@ -1,22 +1,15 @@
 package com.sparta.tdd.domain.user.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("local")
-class UserRepositoryTest {
+class UserRepositoryTest extends RepositoryTest {
 
     private User user;
     @Autowired
@@ -25,12 +18,13 @@ class UserRepositoryTest {
     @BeforeEach
     void init() {
         user = User.builder()
-                .username("test01")
-                .password("test12345")
-                .nickname("test")
-                .authority(UserAuthority.CUSTOMER)
-                .build();
+            .username("test01")
+            .password("test12345")
+            .nickname("test")
+            .authority(UserAuthority.CUSTOMER)
+            .build();
     }
+
     @Test
     void signup() {
         //when
@@ -39,6 +33,7 @@ class UserRepositoryTest {
         //then
         assertEquals(true, userRepository.existsByUsername("test01"));
     }
+
     @Test
     void readUserProfile() {
         //given
@@ -52,6 +47,7 @@ class UserRepositoryTest {
         assertEquals(user.getUsername(), findUser.getUsername());
         assertEquals(UserAuthority.CUSTOMER, findUser.getAuthority());
     }
+
     @Test
     void updateUserProfile() {
         //given
@@ -68,6 +64,7 @@ class UserRepositoryTest {
         assertEquals(findUser.getNickname(), updatedUser.getNickname());
         assertEquals(findUser.getAuthority(), updatedUser.getAuthority());
     }
+
     @Test
     void deleteUser() {
         //given

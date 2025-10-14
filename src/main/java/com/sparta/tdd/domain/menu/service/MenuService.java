@@ -6,9 +6,11 @@ import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
+import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
+import com.sparta.tdd.domain.user.repository.UserRepository;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,49 +22,89 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
 
-    public List<MenuResponseDto> getMenus(UUID storeId) {
-        List<Menu> menus = menuRepository.findAllByStoreId(storeId);
+    public List<MenuResponseDto> getMenus(UUID storeId, UserAuthority authority) {
+        List<Menu> menus;
+        if (authority.isCustomerOrManager()) {
+            menus = menuRepository.findAllByStoreIdAndIsHiddenFalseAndIsDeletedFalse(
+                storeId);
+        } else {
+            menus = menuRepository.findAllByStoreId(storeId);
+        }
         return menus.stream()
             .map(MenuResponseDto::from)
-            .collect(Collectors.toList());
+            .toList();
     }
 
-    public MenuResponseDto getMenu(UUID storeId, UUID menuId) {
-        Menu menu = menuRepository.findByStoreIdAndId(storeId, menuId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+    public MenuResponseDto getMenu(UUID storeId, UUID menuId, UserAuthority authority) {
+        Menu menu = findMenu(storeId, menuId);
+        if (authority.isCustomerOrManager() && menu.isHidden()) {
+            throw new IllegalArgumentException("숨겨진 메뉴입니다.");
+        }
         return MenuResponseDto.from(menu);
     }
 
     @Transactional
-    public MenuResponseDto createMenu(UUID storeId, MenuRequestDto menuRequestDto) {
-        Menu menu = Menu.builder()
-            .dto(menuRequestDto)
-            .store(findStore(storeId)).build();
+    public MenuResponseDto createMenu(UUID storeId, MenuRequestDto menuRequestDto, Long userId) {
+        User user = findUser(userId);
+        Store store = findStore(storeId);
+        validateUserOnMenu(user, store);
+
+        Menu menu = menuRequestDto.toEntity(store);
         menuRepository.save(menu);
 
         return MenuResponseDto.from(menu);
     }
 
     @Transactional
-    public void updateMenu(UUID storeId, UUID menuId, MenuRequestDto menuRequestDto) {
+    public void updateMenu(UUID storeId, UUID menuId, MenuRequestDto menuRequestDto, Long userId) {
+        User user = findUser(userId);
+        Store store = findStore(storeId);
+        validateUserOnMenu(user, store);
+
         Menu menu = findMenu(storeId, menuId);
         menu.update(menuRequestDto);
     }
 
     @Transactional
+    public void updateMenuStatus(UUID storeId, UUID menuId, Boolean status, Long userId) {
+        User user = findUser(userId);
+        Store store = findStore(storeId);
+        validateUserOnMenu(user, store);
+
+        Menu menu = findMenu(storeId, menuId);
+        menu.updateStatus(status);
+    }
+
+    @Transactional
     public void deleteMenu(UUID storeId, UUID menuId, Long userId) {
+        User user = findUser(userId);
+        Store store = findStore(storeId);
+        validateUserOnMenu(user, store);
+
         Menu menu = findMenu(storeId, menuId);
         menu.delete(userId);
     }
 
     private Menu findMenu(UUID storeId, UUID menuId) {
-        return menuRepository.findByStoreIdAndId(storeId, menuId)
+        return menuRepository.findByIdAndStoreIdAndIsDeletedFalse(menuId, storeId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
     }
 
     private Store findStore(UUID storeId) {
         return storeRepository.findById(storeId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 가게입니다."));
+    }
+
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    }
+
+    private void validateUserOnMenu(User user, Store store) {
+        if (!store.isOwner(user)) {
+            throw new IllegalArgumentException("권한이 없는 사용자입니다.");
+        }
     }
 }

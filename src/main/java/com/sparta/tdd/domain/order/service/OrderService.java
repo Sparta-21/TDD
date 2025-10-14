@@ -6,31 +6,30 @@ import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.order.dto.OrderRequestDto;
 import com.sparta.tdd.domain.order.dto.OrderResponseDto;
 import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
+import com.sparta.tdd.domain.order.dto.OrderStatusRequestDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.mapper.OrderMapper;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
-import com.sparta.tdd.domain.orderMenu.dto.OrderMenuRequestDto;
-import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
+
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -44,42 +43,42 @@ public class OrderService {
         Pageable pageable,
         OrderSearchOptionDto searchOption) {
 
-        // 검색조건에 맞는 Id 들을 페이징처리해서 가져옴
+        hasPermission(userDetails, searchOption.userId());
+
+        //region 조회
         Page<UUID> idPage = orderRepository.findPageIds(
             pageable,
-            searchOption.userId(),
-            searchOption.startOrNull(),
-            searchOption.endOrNull(),
-            searchOption.storeId()
+            searchOption
         );
 
-        List<UUID> ids = idPage.getContent();
+        List<Order> loaded = orderRepository.findDetailsByIdIn(idPage.getContent());
+        //endregion
 
-        // In 은 데이터 순서를 보장하지 않음
-        List<Order> loaded = orderRepository.findDetailsByIdIn(ids);
-
-        // id 순서대로 재정렬
-        Map<UUID, Order> byId = loaded.stream()
-            .collect(Collectors.toMap(Order::getId, o -> o));
-        List<Order> ordered = ids.stream()
-            .map(byId::get)
-            .toList();
-
-        List<OrderResponseDto> content = ordered.stream()
-            .map(orderMapper::toResponse)
-            .toList();
-
-
+        List<OrderResponseDto> content = orderMapper.toResponseList(loaded, idPage);
         return new PageImpl<>(content, pageable, idPage.getTotalElements());
     }
 
-    public OrderResponseDto getOrder(UserDetailsImpl userDetails, UUID orderId) {
+    private void hasPermission(
+            UserDetailsImpl userDetails,
+            Long userId) {
+
+        if (UserAuthority.isCustomer(userDetails.getUserAuthority())
+                && !userDetails.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.ORDER_PERMISSION_DENIED);
+        }
+
+    }
+
+    public OrderResponseDto getOrder(
+        UserDetailsImpl userDetails,
+        UUID orderId) {
+
         Order order = orderRepository.findDetailById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
-        OrderResponseDto resDto = orderMapper.toResponse(order);
+        hasPermission(userDetails, order.getUser().getId());
 
-        return resDto;
+        return orderMapper.toResponse(order);
     }
 
     @Transactional
@@ -87,63 +86,82 @@ public class OrderService {
         UserDetailsImpl userDetails,
         OrderRequestDto reqDto) {
 
-        User foundUser = userRepository.findById(userDetails.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        //region 엔티티 조회
+        User foundUser = findEntity(userRepository, userDetails.getUserId());
+        Store foundStore = findEntity(storeRepository, reqDto.storeId());
+        List<Menu> menus = menuRepository.findAllVaildMenuIds(reqDto.getMenuIds(),
+            reqDto.storeId());
+        //endregion
 
-        Store foundStore = storeRepository.findByName(reqDto.storeName())
-            .orElseThrow(() -> new IllegalArgumentException("가게이름을 찾을 수 없습니다."));
+        verifyOrderMenus(menus, reqDto.getMenuIds());
 
-        Order order = orderMapper.toOrder(reqDto);
-        order.assignUser(foundUser);
-        order.assignStore(foundStore);
-
-        List<UUID> menuIds = reqDto.menu().stream()
-            .map(OrderMenuRequestDto::menuId)
-            .toList();
-
-        List<Menu> menus = menuRepository.findAllById(menuIds);
-        Map<UUID, Menu> menuMap = menus.stream()
-                .collect(Collectors.toMap(Menu::getId, Function.identity()));
-
-        // 빠진 메뉴(존재하지 않는 menuId) 검증
-        verifyOrderMenus(menuMap, menuIds);
-
-        for (OrderMenuRequestDto om : reqDto.menu()) {
-            Menu menu = menuMap.get(om.menuId());
-
-            if (!menu.getStore().getId().equals(foundStore.getId())) {
-                throw new IllegalArgumentException("해당 가게의 메뉴가 아닙니다: menuId=" + om.menuId());
-            }
-
-            OrderMenu orderMenu = OrderMenu.builder()
-                .quantity(om.quantity())
-                .price(om.price())
-                .menu(menu)
-                .build();
-
-            order.addOrderMenu(orderMenu);
-        }
+        Order order = orderMapper.toOrder(reqDto, menus, foundUser, foundStore);
 
         Order savedOrder = orderRepository.save(order);
 
-        OrderResponseDto resDto = orderMapper.toResponse(savedOrder);
+        return orderMapper.toResponse(savedOrder);
+    }
 
-        return resDto;
+    @Transactional
+    public OrderResponseDto nextOrderStatus(UUID orderId, UserDetailsImpl userDetails) {
+        Order targetOrder = findAccessibleOrder(orderId, userDetails);
+
+        targetOrder.nextStatus();
+
+        return orderMapper.toResponse(targetOrder);
+    }
+
+    @Transactional
+    public OrderResponseDto changeOrderStatus(UUID orderId, OrderStatusRequestDto reqDto) {
+        Order targetOrder = findEntity(orderRepository, orderId);
+
+        targetOrder.changeOrderStatus(reqDto.orderStatus());
+
+        return orderMapper.toResponse(targetOrder);
     }
 
     /**
      * Dto 와 repository 조회 결과를 비교해서 누락된 메뉴가 있는지 검증
-     * @param menuMap repository 에서 조회된 menuId, Menu map
-     * @param menuIds Dto 에서 넘어온 menuId 들
+     *
+     * @param menus          repository 에서 조회된 menuId, Menu map
+     * @param menuIdsFromDto Dto 에서 넘어온 menuId 들
      */
-    private static void verifyOrderMenus(Map<UUID, Menu> menuMap, List<UUID> menuIds) {
-        if (menuMap.size() != menuIds.size()) {
-            // 어떤 id가 빠졌는지 알려주면 디버깅에 좋음
-            List<UUID> missing = new ArrayList<>(menuIds);
-            missing.removeAll(menuMap.keySet());
-            throw new IllegalArgumentException("존재하지 않는 메뉴가 포함되어 있습니다: " + missing);
+    private void verifyOrderMenus(
+        List<Menu> menus,
+        Set<UUID> menuIdsFromDto) {
+        if (menus.size() != menuIdsFromDto.size()) {
+            throw new BusinessException(ErrorCode.MENU_INVALID_INFO);
         }
     }
 
+    /**
+     * 특정 레포지토리의 id 탐색결과를 Optional로 받아</br> null 이면 예외를 발생</br> 값이 존재한다면 Entity 를 반환합니다
+     *
+     * @param jpaRepository
+     * @param id
+     * @return Entity
+     */
+    private <T, ID> T findEntity(JpaRepository<T, ID> jpaRepository, ID id) {
+        return jpaRepository.findById(id)
+            .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+    }
 
+    /**
+     * OWNER 권한을 가진 유저 - Store.User.id 를 비교하여 동일하지 않으면 예외처리 (repo 에서 가져온 order 가 없음) </br> MANAGER,
+     * MASTER - 별도 join 쿼리 없이 order 객체 조회
+     *
+     * @param orderId
+     * @param userDetails
+     * @return Entity
+     */
+    private Order findAccessibleOrder(UUID orderId, UserDetailsImpl userDetails) {
+        if (UserAuthority.isOwner(userDetails.getUserAuthority())) {
+            return orderRepository.findOrderByIdAndStoreUserId(orderId,
+                    userDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("본인 가게의 주문만 접근 가능합니다"));
+        }
+        return orderRepository.findDetailById(orderId)
+            .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
+
+    }
 }

@@ -2,6 +2,7 @@ package com.sparta.tdd.domain.orderMenu.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.order.entity.Order;
@@ -10,7 +11,6 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
-import com.sparta.tdd.global.config.AuditConfig;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,14 +18,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(AuditConfig.class)
-class OrderMenuRepositoryTest {
+class OrderMenuRepositoryTest extends RepositoryTest {
 
     @Autowired
     private OrderMenuRepository orderMenuRepository;
@@ -57,6 +51,7 @@ class OrderMenuRepositoryTest {
         em.persist(testStore);
 
         testOrder = Order.builder()
+            .address("서울시 강남구 테스트동 123")
             .user(testUser)
             .store(testStore)
             .build();
