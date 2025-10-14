@@ -55,6 +55,9 @@ public enum ErrorCode {
     REVIEW_REPLY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답글입니다."),
 
     // PAYMENT 도메인 관련
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 결제 내역입니다."),
+    INVALID_CARD_COMPANY(HttpStatus.BAD_REQUEST, "유효하지 않은 카드사입니다."),
+    GET_STORE_PAYMENT_DENIED(HttpStatus.FORBIDDEN, "본인의 상점의 결제 내역만 조회할 수 있습니다."),
 
     // AI 도메인 관련
     ;
