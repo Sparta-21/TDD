@@ -11,6 +11,7 @@ import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.global.config.AuditConfig;
+import com.sparta.tdd.global.config.QueryDSLConfig;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(AuditConfig.class)
+@Import({AuditConfig.class, QueryDSLConfig.class})
 class OrderMenuRepositoryTest {
 
     @Autowired
