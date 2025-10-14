@@ -421,7 +421,7 @@ public class AuthServiceUnitTest {
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
 
-            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_BLACKLISTED))
+            doThrow(new BusinessException(ErrorCode.REFRESH_TOKEN_BLACKLISTED))
                 .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
@@ -438,7 +438,7 @@ public class AuthServiceUnitTest {
             // given
             when(request.getCookies()).thenReturn(null);
 
-            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_NOT_FOUND))
+            doThrow(new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND))
                 .when(jwtTokenValidator).validateRefreshToken(null);
 
             // when & then
@@ -455,7 +455,7 @@ public class AuthServiceUnitTest {
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
 
-            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_INVALID))
+            doThrow(new BusinessException(ErrorCode.REFRESH_TOKEN_INVALID))
                 .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
@@ -472,7 +472,7 @@ public class AuthServiceUnitTest {
             Cookie refreshCookie = new Cookie("Refresh-Token", refreshToken);
             when(request.getCookies()).thenReturn(new Cookie[]{refreshCookie});
 
-            doThrow(new BusinessException(com.sparta.tdd.global.exception.ErrorCode.REFRESH_TOKEN_INVALID))
+            doThrow(new BusinessException(ErrorCode.REFRESH_TOKEN_INVALID))
                 .when(jwtTokenValidator).validateRefreshToken(refreshToken);
 
             // when & then
