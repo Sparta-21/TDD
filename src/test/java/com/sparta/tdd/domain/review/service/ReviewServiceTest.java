@@ -16,6 +16,8 @@ import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -183,8 +185,8 @@ class ReviewServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewService.createReview(userId, orderId, requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 사용자입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
 
             verify(userRepository).findById(userId);
             verify(reviewRepository, never()).save(any());
@@ -206,8 +208,8 @@ class ReviewServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewService.createReview(userId, orderId, requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 가게입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.STORE_NOT_FOUND.getMessage());
 
             verify(reviewRepository, never()).save(any());
         }
@@ -229,8 +231,8 @@ class ReviewServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewService.createReview(userId, orderId, requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 주문입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.ORDER_NOT_FOUND.getMessage());
 
             verify(reviewRepository, never()).save(any());
         }
@@ -274,8 +276,8 @@ class ReviewServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewService.updateReview(reviewId, userId, updateDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 리뷰입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_NOT_FOUND.getMessage());
         }
 
         @Test
@@ -293,8 +295,8 @@ class ReviewServiceTest {
             Long anotherUserId = userId + 3;
             // when & then
             assertThatThrownBy(() -> reviewService.updateReview(reviewId, anotherUserId, updateDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("본인의 리뷰만 수정할 수 있습니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_NOT_OWNED.getMessage());
         }
     }
 
@@ -351,8 +353,8 @@ class ReviewServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewService.getReview(reviewId))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 리뷰입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_NOT_FOUND.getMessage());
         }
     }
 
@@ -439,8 +441,8 @@ class ReviewServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewService.deleteReview(reviewId, userId))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 리뷰입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_NOT_FOUND.getMessage());
         }
 
         @Test
@@ -451,8 +453,8 @@ class ReviewServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewService.deleteReview(reviewId, 999L))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("본인의 리뷰만 삭제할 수 있습니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_NOT_OWNED.getMessage());
         }
     }
 }
