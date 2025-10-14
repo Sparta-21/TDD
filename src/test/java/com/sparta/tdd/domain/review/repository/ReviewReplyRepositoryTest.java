@@ -44,10 +44,8 @@ class ReviewReplyRepositoryTest extends RepositoryTest {
     private Review testReview;
     private ReviewReply testReply;
 
-    @Override
     @BeforeEach
     protected void setUp() {
-        super.setUp();
         // 고객 사용자 생성
         customer = User.builder()
             .username("customer")

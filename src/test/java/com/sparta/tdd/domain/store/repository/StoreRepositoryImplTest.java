@@ -41,7 +41,7 @@ class StoreRepositoryImplTest extends RepositoryTest {
     private Pageable pageable;
 
     @BeforeEach
-    void setUp() throws Exception {
+    public void setUp() {
         testUser = User.builder()
             .username("testuser")
             .password("password123")

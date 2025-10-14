@@ -44,10 +44,8 @@ public class MenuIntegrationTest extends IntegrationTest {
     Store store;
     Menu menu;
 
-    @Override
     @BeforeEach
     public void setUp() {
-        super.cleanUp.all();
         customer = User.builder()
             .username("customer")
             .password("password1")
