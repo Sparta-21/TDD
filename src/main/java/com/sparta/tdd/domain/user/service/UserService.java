@@ -1,5 +1,12 @@
 package com.sparta.tdd.domain.user.service;
 
+import com.sparta.tdd.domain.order.dto.OrderResponseDto;
+import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.order.mapper.OrderMapper;
+import com.sparta.tdd.domain.order.repository.OrderRepository;
+import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
+import com.sparta.tdd.domain.review.entity.Review;
+import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.dto.UserNicknameRequestDto;
 import com.sparta.tdd.domain.user.dto.UserPasswordRequestDto;
 import com.sparta.tdd.domain.user.dto.UserResponseDto;
@@ -9,11 +16,14 @@ import com.sparta.tdd.domain.user.repository.UserRepository;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
+    private final OrderMapper orderMapper;
+    private final OrderRepository orderRepository;
     private final PasswordEncoder passwordEncoder;
 
     // 회원 목록 조회
@@ -78,6 +91,18 @@ public class UserService {
         user.updateAuthority(UserAuthority.MANAGER);
 
         return UserResponseDto.from(user);
+    }
+
+    // 리뷰 목록 조회
+    public Page<ReviewResponseDto> getPersonalReviews(Long userId, Pageable pageable) {
+        List<Review> reviewList = reviewRepository.findByUserIdAndNotDeleted(userId);
+        Page<Review> reviews = new PageImpl<>(reviewList, pageable, reviewList.size());
+        return reviews.map(ReviewResponseDto::from);
+    }
+
+    public Page<OrderResponseDto> getPersonalOrders(Long userId, Pageable pageable) {
+        Page<Order> orderList = orderRepository.findOrdersByUserIdAndNotDeleted(userId, pageable);
+        return orderList.map(orderMapper::toResponse);
     }
 
     private User getUserById(Long userId) {

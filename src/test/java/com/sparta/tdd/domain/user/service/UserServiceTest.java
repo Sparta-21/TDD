@@ -1,5 +1,11 @@
 package com.sparta.tdd.domain.user.service;
 
+import com.sparta.tdd.domain.order.dto.OrderResponseDto;
+import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.order.mapper.OrderMapper;
+import com.sparta.tdd.domain.order.repository.OrderRepository;
+import com.sparta.tdd.domain.review.entity.Review;
+import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.dto.UserNicknameRequestDto;
 import com.sparta.tdd.domain.user.dto.UserResponseDto;
 import com.sparta.tdd.domain.user.entity.User;
@@ -15,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +34,12 @@ class UserServiceTest {
 
     @Mock
     UserRepository userRepository;
-
+    @Mock
+    ReviewRepository reviewRepository;
+    @Mock
+    OrderMapper orderMapper;
+    @Mock
+    OrderRepository orderRepository;
     @InjectMocks
     UserService userService;
 
@@ -138,6 +150,83 @@ class UserServiceTest {
             //when
             userService.updateUserNickname(1L, 1L, requestDto);
         });
+    }
+
+    @Test
+    @DisplayName("유저가 작성한 리뷰 조회 성공")
+    void findReviewByUserSuccess() {
+        // given
+        User user1 = mock(User.class);
+        Pageable pageable = mock(Pageable.class);
+        Review review1 = new Review(user1, null, null, null, null, "맛없어요ㅠ");
+        Review review2 = new Review(user1, null, null, null, null, "맛있어요!");
+
+        List<Review> reviewList = List.of(review1, review2);
+        when(user1.getId()).thenReturn(1L);
+        when(reviewRepository.findByUserIdAndNotDeleted(user1.getId())).thenReturn(reviewList);
+
+        // when
+        List<Review> byUserIdAndNotDeleted = reviewRepository.findByUserIdAndNotDeleted(user1.getId());
+        Page<Review> reviews = new PageImpl<>(byUserIdAndNotDeleted, pageable, byUserIdAndNotDeleted.size());
+
+        // then
+        assertEquals(reviews.getTotalElements(), 2);
+        assertTrue(reviews.stream().anyMatch(review -> {
+            return review.getContent().equals("맛있어요!");
+        }));
+    }
+
+    @Test
+    @DisplayName("유저가 작성한 리뷰 조회 실패")
+    void findReviewByUserFail() {
+        // given
+        User user1 = mock(User.class);
+        Pageable pageable = mock(Pageable.class);
+        Review review1 = new Review(user1, null, null, null, null, "맛없어요ㅠ");
+        Review review2 = new Review(user1, null, null, null, null, "맛있어요!");
+
+        List<Review> reviewList = List.of(review1, review2);
+        when(user1.getId()).thenReturn(1L);
+        when(reviewRepository.findByUserIdAndNotDeleted(user1.getId())).thenReturn(reviewList);
+
+        // when
+        List<Review> byUserIdAndNotDeleted = reviewRepository.findByUserIdAndNotDeleted(user1.getId());
+        Page<Review> reviews = new PageImpl<>(byUserIdAndNotDeleted, pageable, byUserIdAndNotDeleted.size());
+
+        // then
+        assertEquals(reviews.getTotalElements(), 2);
+        assertFalse(reviews.stream().anyMatch(review -> {
+            return review.getContent().equals("맛있는지 모르겠어요.");
+        }));
+    }
+
+    @Test
+    @DisplayName("유저 주문 목록 조회 성공")
+    public void findOrdersByUserSuccess() {
+        // given
+        User user = mock(User.class);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Order order1 = new Order();
+        Order order2 = new Order();
+        List<Order> orderList = List.of(order1, order2);
+        Page<Order> orders = new PageImpl<>(orderList, pageable, orderList.size());
+
+
+        when(user.getId()).thenReturn(1L);
+        when(orderRepository.findOrdersByUserIdAndNotDeleted(user.getId(), pageable))
+                .thenReturn(orders);
+        when(orderMapper.toResponse(order1)).thenReturn(mock(OrderResponseDto.class));
+        when(orderMapper.toResponse(order2)).thenReturn(mock(OrderResponseDto.class));
+        // when
+        Page<OrderResponseDto> personalOrders = userService.getPersonalOrders(user.getId(), pageable);
+
+        // then
+        assertEquals(2, personalOrders.getContent().size());
+        verify(orderRepository, times(1)).findOrdersByUserIdAndNotDeleted(user.getId(), pageable);
+        verify(orderMapper, times(1)).toResponse(order1);
+        verify(orderMapper, times(1)).toResponse(order2);
+
     }
 
     User createUser(String username, String password, String nickname, UserAuthority authority) {

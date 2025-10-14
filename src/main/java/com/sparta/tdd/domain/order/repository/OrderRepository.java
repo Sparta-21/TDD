@@ -6,6 +6,9 @@ import java.util.List;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,6 +41,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, OrderReposi
           where o.id in :ids
         """)
     List<Order> findDetailsByIdIn(Collection<UUID> ids);
+
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND o.deletedAt IS NULL")
+    Page<Order> findOrdersByUserIdAndNotDeleted(@Param("userId") Long userId, Pageable pageable);
 }
 
 
