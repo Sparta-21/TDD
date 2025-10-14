@@ -157,8 +157,9 @@ public class OrderService {
     }
 
     /**
-     * OWNER 권한을 가진 유저 - Store.User.id 를 비교하여 동일하지 않으면 예외처리 (repo 에서 가져온 order 가 없음) </br>
-     * MANAGER, MASTER - 별도 join 쿼리 없이 order 객체 조회
+     * OWNER 권한을 가진 유저 - Store.User.id 를 비교하여 동일하지 않으면 예외처리 (repo 에서 가져온 order 가 없음) </br> MANAGER,
+     * MASTER - 별도 join 쿼리 없이 order 객체 조회
+     *
      * @param orderId
      * @param userDetails
      * @return Entity
@@ -168,9 +169,8 @@ public class OrderService {
             return orderRepository.findOrderByIdAndStoreUserId(orderId,
                     userDetails.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("본인 가게의 주문만 접근 가능합니다"));
-        } else {
-            return orderRepository.findDetailById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
         }
+        return orderRepository.findDetailById(orderId)
+            .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
     }
 }
