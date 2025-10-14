@@ -37,6 +37,8 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
             .from(store)
             .leftJoin(menu).on(menu.store.eq(store))
             .where(
+                storeIsNotDeleted(),
+                menuIsNotHidden(),
                 storeCategoryEq(storeCategory),
                 storeNameLike(keyword)
                     .or(menuNameLike(keyword))
@@ -77,6 +79,16 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
                 storeNameLike(keyword).or(menuNameLike(keyword))
             )
             .fetchOne();
+    }
+
+    private BooleanExpression storeIsNotDeleted() {
+        QStore store = QStore.store;
+        return store.deletedAt.isNull();
+    }
+
+    private BooleanExpression menuIsNotHidden() {
+        QMenu menu = QMenu.menu;
+        return menu.isHidden.isFalse();
     }
 
     private BooleanExpression storeNameLike(String keyword) {
