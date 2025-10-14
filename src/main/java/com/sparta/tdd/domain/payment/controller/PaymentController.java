@@ -90,7 +90,7 @@ public class PaymentController {
         summary = "결제 상태 변경",
         description = "관리자 권한일 경우, 결제 상태를 변경할 수 있습니다."
     )
-    @PreAuthorize("hasAnyRole('MANAGER', 'OWNER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @PatchMapping("/status/{paymentId}")
     public ResponseEntity<?> changeHistoryStatus(
         @PathVariable UUID paymentId,
