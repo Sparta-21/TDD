@@ -112,13 +112,10 @@ public class MenuIntegrationTest extends IntegrationTest {
                         .content(mapper.writeValueAsString(dto))
                         .with(csrf()))
                 .andExpectAll(status().isCreated(),
-                    jsonPath("$.name").value("menu1"),
-                    jsonPath("$.description").value("this is menu1"),
-                    jsonPath("$.price").value(15000),
-                    jsonPath("$.imageUrl").value("this is image url"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                    jsonPath("$.name").value(dto.name()),
+                    jsonPath("$.description").value(dto.description()),
+                    jsonPath("$.price").value(dto.price()),
+                    jsonPath("$.imageUrl").value(dto.imageUrl()));
         }
 
         @Test
@@ -177,10 +174,10 @@ public class MenuIntegrationTest extends IntegrationTest {
                     get("/v1/store/{storeId}/menu/{menuId}", storeId, menuId)
                         .with(csrf()))
                 .andExpectAll(status().isOk(),
-                    jsonPath("$.name").value("menu update"),
-                    jsonPath("$.description").value("this is menu update"),
-                    jsonPath("$.price").value(10000),
-                    jsonPath("$.imageUrl").value("this is image url update"));
+                    jsonPath("$.name").value(dto.name()),
+                    jsonPath("$.description").value(dto.description()),
+                    jsonPath("$.price").value(dto.price()),
+                    jsonPath("$.imageUrl").value(dto.imageUrl()));
         }
 
         @Test
