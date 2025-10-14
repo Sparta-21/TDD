@@ -12,9 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
@@ -99,7 +102,7 @@ class PaymentServiceTest {
 
         // Menu
         menu = Menu.builder()
-            .dto(new com.sparta.tdd.domain.menu.dto.MenuRequestDto(
+            .dto(new MenuRequestDto(
                 "김치찌개",
                 "맛있는 김치찌개",
                 11000,
@@ -234,6 +237,7 @@ class PaymentServiceTest {
                 .hasMessage(ErrorCode.GET_STORE_PAYMENT_DENIED.getMessage());
 
             verify(storeRepository).existsByIdAndUserIdAndDeletedAtIsNull(storeId, 1L);
+            verify(paymentRepository, never()).findPaymentsByStoreId(storeId, null, pageable);
         }
     }
 
@@ -273,7 +277,6 @@ class PaymentServiceTest {
         void getPaymentHistoryDetail_notFound() {
             // given
             UUID paymentId = UUID.randomUUID();
-
             when(paymentRepository.findPaymentDetailById(paymentId))
                 .thenReturn(Optional.empty());
 
@@ -345,6 +348,7 @@ class PaymentServiceTest {
             // given
             UUID paymentId = UUID.randomUUID();
             UpdatePaymentStatusRequest request = new UpdatePaymentStatusRequest(COMPLETED);
+            Payment mockPayment = mock(Payment.class);
 
             when(paymentRepository.findById(paymentId))
                 .thenReturn(Optional.empty());
@@ -355,6 +359,7 @@ class PaymentServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_NOT_FOUND);
 
             verify(paymentRepository).findById(paymentId);
+            verify(mockPayment, never()).updateStatus(any());
         }
     }
 

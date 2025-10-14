@@ -146,11 +146,10 @@ class PaymentRepositoryTest extends RepositoryTest {
             Store store = createStore("맛집", "맛있는 식당", owner);
             em.persist(store);
 
-            Order order = createOrder(customer, store, "서울시 강남구");
-            em.persist(order);
-
-            // 3개의 결제 생성
             for (int i = 1; i <= 3; i++) {
+                Order order = createOrder(customer, store, "서울시 강남구");
+                em.persist(order);
+
                 Payment payment = Payment.builder()
                     .number("TEST-PAY-" + i)
                     .amount(10000L * i)

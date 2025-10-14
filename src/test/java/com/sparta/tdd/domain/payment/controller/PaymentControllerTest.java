@@ -103,8 +103,8 @@ class PaymentControllerTest {
     class ChangePaymentStatusTest {
 
         @Test
-        @CustomWithMockUser(userId = 2L, authority = UserAuthority.OWNER)
-        @DisplayName("OWNER 권한으로 결제 상태 변경 성공")
+        @CustomWithMockUser(userId = 2L, authority = UserAuthority.MANAGER)
+        @DisplayName("MANAGER 권한으로 결제 상태 변경 성공")
         void changePaymentStatus_owner_success() throws Exception {
             // given
             UpdatePaymentStatusRequest request = new UpdatePaymentStatusRequest(
@@ -123,8 +123,8 @@ class PaymentControllerTest {
         }
 
         @Test
-        @CustomWithMockUser(userId = 3L, authority = UserAuthority.MANAGER)
-        @DisplayName("MANAGER 권한으로 결제 상태 변경 성공")
+        @CustomWithMockUser(userId = 3L, authority = UserAuthority.MASTER)
+        @DisplayName("MASTER 권한으로 결제 상태 변경 성공")
         void changePaymentStatus_manager_success() throws Exception {
             // given
             UpdatePaymentStatusRequest request = new UpdatePaymentStatusRequest(
