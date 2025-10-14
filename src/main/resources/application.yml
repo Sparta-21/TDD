@@ -30,6 +30,10 @@ jwt:
     secret: ${JWT_REFRESH_SECRET}
     expiration: ${JWT_REFRESH_EXPIRED}
 
+ai:
+  google:
+    api-key: ${GOOGLE_API_KEY}
+
 ---
 spring:
   config:
@@ -75,6 +79,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
 
 jwt:
   access:
@@ -83,3 +91,7 @@ jwt:
   refresh:
     secret: testRefreshSecrettestRefreshSecret
     expiration: 2000
+
+ai:
+  google:
+    api-key: testApiKey

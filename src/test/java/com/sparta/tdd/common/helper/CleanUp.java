@@ -21,7 +21,7 @@ public class CleanUp {
     }
 
     @Transactional
-    public void all() {
+    public void tearDown() {
         Set<String> tables = entityManager.getMetamodel().getEntities().stream()
             .filter(entity -> entity.getJavaType().getAnnotation(Entity.class) != null)
             .map(entity -> {

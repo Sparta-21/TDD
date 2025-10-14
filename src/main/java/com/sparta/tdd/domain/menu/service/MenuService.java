@@ -88,7 +88,7 @@ public class MenuService {
     }
 
     private Menu findMenu(UUID storeId, UUID menuId) {
-        return menuRepository.findByStoreIdAndMenuIdAndIsDeletedFalse(storeId, menuId)
+        return menuRepository.findByIdAndStoreIdAndIsDeletedFalse(menuId, storeId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
     }
 
