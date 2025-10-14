@@ -134,6 +134,7 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
                         .where(order.store.id.eq(store.id));
                     orders.add(new OrderSpecifier<>(asc ? Order.ASC : Order.DESC, orderCountExpr));
                 }
+                default -> store.avgRating.desc();
             }
         }
 
