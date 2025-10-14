@@ -2,13 +2,15 @@ package com.sparta.tdd.domain.menu.dto;
 
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.store.entity.Store;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
 public record MenuRequestDto(
-    String name,
+    @NotNull @Size(max = 20) String name,
     String description,
-    Integer price,
+    @NotNull Integer price,
     String imageUrl
 ) {
 

@@ -5,6 +5,7 @@ import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.dto.MenuResponseDto;
 import com.sparta.tdd.domain.menu.service.MenuService;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class MenuController {
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     @PostMapping("/{storeId}/menu")
     public ResponseEntity<MenuResponseDto> createMenu(@PathVariable UUID storeId,
-        @RequestBody MenuRequestDto menuRequestDto,
+        @Valid @RequestBody MenuRequestDto menuRequestDto,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.CREATED)
