@@ -40,4 +40,4 @@ jobs:
       - name: Run build
         env:
           SPRING_PROFILES_ACTIVE: test
-        run: ./gradlew build
+        run: ./gradlew build > /dev/null 2>&1
