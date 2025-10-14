@@ -43,7 +43,7 @@ public class OrderService {
         Pageable pageable,
         OrderSearchOptionDto searchOption) {
 
-        hasPermission(userDetails, searchOption);
+        hasPermission(userDetails, searchOption.userId());
 
         //region 조회
         Page<UUID> idPage = orderRepository.findPageIds(
@@ -56,17 +56,6 @@ public class OrderService {
 
         List<OrderResponseDto> content = orderMapper.toResponseList(loaded, idPage);
         return new PageImpl<>(content, pageable, idPage.getTotalElements());
-    }
-
-    private void hasPermission(
-            UserDetailsImpl userDetails,
-            OrderSearchOptionDto searchOption) {
-
-        if (UserAuthority.isCustomer(userDetails.getUserAuthority())
-        && !userDetails.getUserId().equals(searchOption.userId())) {
-            throw new BusinessException(ErrorCode.ORDER_PERMISSION_DENIED);
-        }
-
     }
 
     private void hasPermission(

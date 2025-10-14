@@ -5,7 +5,6 @@ import static com.sparta.tdd.domain.store.entity.QStore.store;
 import com.querydsl.core.Tuple;
 import com.sparta.tdd.domain.menu.dto.MenuWithStoreResponseDto;
 import com.sparta.tdd.domain.menu.entity.QMenu;
-import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.store.dto.StoreRequestDto;
 import com.sparta.tdd.domain.store.dto.StoreResponseDto;
 import com.sparta.tdd.domain.store.entity.Store;
@@ -35,7 +34,6 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
-    private final MenuRepository menuRepository;
 
     public Page<StoreResponseDto> searchStoresByKeywordAndCategoryWithMenus(String keyword,
         StoreCategory storeCategory,
