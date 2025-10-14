@@ -5,6 +5,7 @@ import static com.sparta.tdd.domain.user.enums.UserAuthority.CUSTOMER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.order.entity.Order;
@@ -12,8 +13,6 @@ import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.user.entity.User;
-import com.sparta.tdd.global.config.AuditConfig;
-import com.sparta.tdd.global.config.QueryDSLConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
 import java.util.ArrayList;
@@ -23,14 +22,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({AuditConfig.class, QueryDSLConfig.class})
-class OrderRepositoryTest {
+class OrderRepositoryTest extends RepositoryTest {
 
     @Autowired
     private OrderRepository orderRepository;
@@ -46,6 +39,7 @@ class OrderRepositoryTest {
         @DisplayName("ID 로 주문 조회")
         void findId() {
             Order order = Order.builder()
+                .address("서울시 강남구 테스트동 123")
                 .build();
             Order saved = orderRepository.save(order);
 
@@ -59,6 +53,7 @@ class OrderRepositoryTest {
         @DisplayName("Dirty Checking 확인")
         void update() {
             Order order = Order.builder()
+                .address("서울시 강남구 테스트동 123")
                 .build();
             Order saved = orderRepository.save(order);
 
@@ -74,6 +69,7 @@ class OrderRepositoryTest {
         @DisplayName("Id 로 삭제상태 변경 확인")
         void delete() {
             Order order = Order.builder()
+                .address("서울시 강남구 테스트동 123")
                 .build();
             Order saved = orderRepository.save(order);
 
@@ -173,7 +169,6 @@ class OrderRepositoryTest {
                     ", qty=" + om.getQuantity()
             );
         }
-
 
         // 연관 로딩 검증
         assertThat(util.isLoaded(found.getUser())).isTrue();
