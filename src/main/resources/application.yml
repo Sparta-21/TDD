@@ -91,6 +91,7 @@ logging:
     org.hibernate: WARN
     org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
+    org.hibernate.tool.hbm2ddl: OFF
 
 jwt:
   access:
