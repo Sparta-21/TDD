@@ -3,6 +3,7 @@ package com.sparta.tdd.common.template;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.tdd.common.config.TestContainerConfig;
 import com.sparta.tdd.common.helper.CleanUp;
+import com.sparta.tdd.global.config.QueryDSLConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@Import(TestContainerConfig.class)
+@Import({TestContainerConfig.class, QueryDSLConfig.class})
 public abstract class IntegrationTest {
 
     @Autowired

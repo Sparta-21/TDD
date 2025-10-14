@@ -11,6 +11,7 @@ import com.sparta.tdd.domain.user.dto.UserResponseDto;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,7 @@ class UserServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BusinessException.class, () -> {
             // when
             userService.grantUserManagerAuthority(1L);
         });
@@ -117,7 +118,7 @@ class UserServiceTest {
         User user = createUser("test01", "1234", "test1", UserAuthority.CUSTOMER);
 
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BusinessException.class, () -> {
             // when
             userService.grantUserManagerAuthority(1L);
         });
@@ -145,7 +146,7 @@ class UserServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
 
         //then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BusinessException.class, () -> {
             //when
             userService.updateUserNickname(1L, 1L, requestDto);
         });

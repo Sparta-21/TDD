@@ -1,5 +1,8 @@
 package com.sparta.tdd.domain.review.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
@@ -10,28 +13,19 @@ import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@DataJpaTest
 @DisplayName("ReviewRepository 테스트")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@EnableJpaAuditing
-class ReviewRepositoryTest {
+class ReviewRepositoryTest extends RepositoryTest {
 
     @Autowired
     private ReviewRepository reviewRepository;
@@ -51,40 +45,40 @@ class ReviewRepositoryTest {
     void 필요세팅() {
         // 테스트용 사용자 생성
         testUser = User.builder()
-                .username("testuser")
-                .password("password123")
-                .nickname("테스트유저")
-                .authority(UserAuthority.CUSTOMER)
-                .build();
+            .username("testuser")
+            .password("password123")
+            .nickname("테스트유저")
+            .authority(UserAuthority.CUSTOMER)
+            .build();
         testUser = userRepository.save(testUser);
 
         // 테스트용 가게 생성
         testStore = Store.builder()
-                .name("테스트 가게")
-                .category(StoreCategory.KOREAN)
-                .description("맛있는 한식당")
-                .user(testUser)
-                .build();
+            .name("테스트 가게")
+            .category(StoreCategory.KOREAN)
+            .description("맛있는 한식당")
+            .user(testUser)
+            .build();
         testStore = storeRepository.save(testStore);
 
         // 테스트용 주문 생성
         testOrder = Order.builder()
-                .address("서울시 강남구")
-                .orderStatus(OrderStatus.DELIVERED)
-                .store(testStore)
-                .user(testUser)
-                .build();
+            .address("서울시 강남구")
+            .orderStatus(OrderStatus.DELIVERED)
+            .store(testStore)
+            .user(testUser)
+            .build();
         testOrder = orderRepository.save(testOrder);
 
         // 테스트용 리뷰 생성
         testReview = Review.builder()
-                .user(testUser)
-                .store(testStore)
-                .order(testOrder)
-                .rating(5)
-                .imageUrl("http://example.com/image.jpg")
-                .content("정말 맛있어요!")
-                .build();
+            .user(testUser)
+            .store(testStore)
+            .order(testOrder)
+            .rating(5)
+            .imageUrl("http://example.com/image.jpg")
+            .content("정말 맛있어요!")
+            .build();
         testReview = reviewRepository.save(testReview);
     }
 
@@ -119,13 +113,21 @@ class ReviewRepositoryTest {
     @DisplayName("특정 유저의 삭제되지 않은 리뷰 목록 조회")
     void 리뷰조회() {
         // given
+        Order order2 = Order.builder()
+            .address("서울시 서초구")
+            .orderStatus(OrderStatus.DELIVERED)
+            .store(testStore)
+            .user(testUser)
+            .build();
+        order2 = orderRepository.save(order2);
+
         Review review2 = Review.builder()
-                .user(testUser)
-                .store(testStore)
-                .order(testOrder)
-                .rating(4)
-                .content("두 번째 리뷰")
-                .build();
+            .user(testUser)
+            .store(testStore)
+            .order(order2)
+            .rating(4)
+            .content("두 번째 리뷰")
+            .build();
         reviewRepository.save(review2);
 
         // when
@@ -134,20 +136,28 @@ class ReviewRepositoryTest {
         // then
         assertThat(result).hasSize(2);
         assertThat(result).extracting(Review::getUserId)
-                .containsOnly(testUser.getId());
+            .containsOnly(testUser.getId());
     }
 
     @Test
     @DisplayName("특정 가게의 삭제되지 않은 리뷰 목록 조회")
     void 리뷰목록조회() {
         // given
+        Order order2 = Order.builder()
+            .address("서울시 송파구")
+            .orderStatus(OrderStatus.DELIVERED)
+            .store(testStore)
+            .user(testUser)
+            .build();
+        order2 = orderRepository.save(order2);
+
         Review review2 = Review.builder()
-                .user(testUser)
-                .store(testStore)
-                .order(testOrder)
-                .rating(3)
-                .content("보통이에요")
-                .build();
+            .user(testUser)
+            .store(testStore)
+            .order(order2)
+            .rating(3)
+            .content("보통이에요")
+            .build();
         reviewRepository.save(review2);
 
         // when
@@ -156,7 +166,7 @@ class ReviewRepositoryTest {
         // then
         assertThat(result).hasSize(2);
         assertThat(result).extracting(Review::getStoreId)
-                .containsOnly(testStore.getId());
+            .containsOnly(testStore.getId());
     }
 
     @Test
@@ -164,13 +174,21 @@ class ReviewRepositoryTest {
     void 리뷰페이징() {
         // given
         for (int i = 0; i < 15; i++) {
+            Order order = Order.builder()
+                .address("서울시 관악구 " + i)
+                .orderStatus(OrderStatus.DELIVERED)
+                .store(testStore)
+                .user(testUser)
+                .build();
+            order = orderRepository.save(order);
+
             Review review = Review.builder()
-                    .user(testUser)
-                    .store(testStore)
-                    .order(testOrder)
-                    .rating(4)
-                    .content("리뷰 " + i)
-                    .build();
+                .user(testUser)
+                .store(testStore)
+                .order(order)
+                .rating(4)
+                .content("리뷰 " + i)
+                .build();
             reviewRepository.save(review);
         }
 
@@ -189,13 +207,21 @@ class ReviewRepositoryTest {
     @DisplayName("특정 가게의 평균 평점 조회")
     void 평균조회() {
         // given
+        Order order2 = Order.builder()
+            .address("서울시 마포구")
+            .orderStatus(OrderStatus.DELIVERED)
+            .store(testStore)
+            .user(testUser)
+            .build();
+        order2 = orderRepository.save(order2);
+
         Review review2 = Review.builder()
-                .user(testUser)
-                .store(testStore)
-                .order(testOrder)
-                .rating(3)
-                .content("보통이에요")
-                .build();
+            .user(testUser)
+            .store(testStore)
+            .order(order2)
+            .rating(3)
+            .content("보통이에요")
+            .build();
         reviewRepository.save(review2);
 
         // when
@@ -210,10 +236,10 @@ class ReviewRepositoryTest {
     void 빵점조회() {
         // given
         Store newStore = Store.builder()
-                .name("새로운 가게")
-                .category(StoreCategory.CHINESE)
-                .user(testUser)
-                .build();
+            .name("새로운 가게")
+            .category(StoreCategory.CHINESE)
+            .user(testUser)
+            .build();
         newStore = storeRepository.save(newStore);
 
         // when
