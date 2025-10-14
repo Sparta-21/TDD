@@ -14,6 +14,8 @@ import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -180,8 +182,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, owner.getId(), requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 리뷰입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_NOT_FOUND.getMessage());
 
             verify(reviewReplyRepository, never()).save(any());
         }
@@ -199,8 +201,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, owner.getId(), requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("이미 답글이 존재합니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_ALREADY_EXISTS.getMessage());
 
             verify(reviewReplyRepository, never()).save(any());
         }
@@ -224,8 +226,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, 3L, requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_PERMISSION_DENIED.getMessage());
 
             verify(reviewReplyRepository, never()).save(any());
         }
@@ -241,8 +243,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, owner.getId(), requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 가게입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.STORE_NOT_FOUND.getMessage());
 
             verify(reviewReplyRepository, never()).save(any());
         }
@@ -259,8 +261,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, owner.getId(), requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 사용자입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
 
             verify(reviewReplyRepository, never()).save(any());
         }
@@ -302,8 +304,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.updateReply(reviewId, owner.getId(), requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 답글입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_NOT_FOUND.getMessage());
         }
 
         @Test
@@ -325,8 +327,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.updateReply(reviewId, 3L, requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_PERMISSION_DENIED.getMessage());
         }
     }
 
@@ -359,8 +361,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.deleteReply(reviewId, owner.getId()))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("존재하지 않는 답글입니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_NOT_FOUND.getMessage());
         }
 
         @Test
@@ -381,8 +383,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.deleteReply(reviewId, 3L))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_PERMISSION_DENIED.getMessage());
         }
     }
 
@@ -466,8 +468,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.updateReply(reviewId, 3L, requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_PERMISSION_DENIED.getMessage());
         }
 
         @Test
@@ -505,8 +507,8 @@ class ReviewReplyServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reviewReplyService.createReply(reviewId, customer.getId(), requestDto))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("해당 가게의 소유자만 답글을 작성할 수 있습니다.");
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.REVIEW_REPLY_PERMISSION_DENIED.getMessage());
 
             verify(reviewReplyRepository, never()).save(any());
         }

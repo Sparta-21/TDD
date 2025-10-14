@@ -16,6 +16,8 @@ import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 
 import java.util.*;
 import java.util.function.Function;
@@ -56,7 +58,6 @@ public class OrderService {
         //endregion
 
         List<OrderResponseDto> content = orderMapper.toResponseList(loaded, idPage);
-
         return new PageImpl<>(content, pageable, idPage.getTotalElements());
     }
 
@@ -66,7 +67,7 @@ public class OrderService {
 
         if (UserAuthority.isCustomer(userDetails.getUserAuthority())
         && !userDetails.getUserId().equals(searchOption.userId())) {
-            throw new IllegalArgumentException("권한이 없습니다");
+            throw new BusinessException(ErrorCode.ORDER_PERMISSION_DENIED);
         }
 
     }
@@ -77,7 +78,7 @@ public class OrderService {
 
         if (UserAuthority.isCustomer(userDetails.getUserAuthority())
                 && !userDetails.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("권한이 없습니다");
+            throw new BusinessException(ErrorCode.ORDER_PERMISSION_DENIED);
         }
 
     }
@@ -87,7 +88,7 @@ public class OrderService {
         UUID orderId) {
 
         Order order = orderRepository.findDetailById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
         hasPermission(userDetails, order.getUser().getId());
 
@@ -127,7 +128,7 @@ public class OrderService {
             List<Menu> menus,
             Set<UUID> menuIdsFromDto) {
         if (menus.size() != menuIdsFromDto.size()) {
-            throw new IllegalArgumentException("메뉴 정보가 올바르지 않습니다");
+            throw new BusinessException(ErrorCode.MENU_INVALID_INFO);
         }
     }
 
@@ -142,6 +143,6 @@ public class OrderService {
      */
     private <T, ID> T findEntity(JpaRepository<T, ID> jpaRepository, ID id) {
         return jpaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 id 입니다"));
+            .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
     }
 }
