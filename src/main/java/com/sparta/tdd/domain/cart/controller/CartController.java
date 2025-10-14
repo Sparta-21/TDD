@@ -16,7 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/v1/cart")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('CUSTOMER')")
+@PreAuthorize("hasAnyRole('CUSTOMER','MANAGER','MASTER')")
 public class CartController {
 
     private final CartService cartService;

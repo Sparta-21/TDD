@@ -41,23 +41,8 @@ public class CartService {
         // 장바구니에 이미 다른 가게의 메뉴가 있는지 확인
         validateSameStore(cart, menu);
 
-        // 이미 존재하는 메뉴인 경우 수량 업데이트
-        CartItem existingItem = cartItemRepository
-                .findByCartIdAndMenuId(cart.getId(), menu.getId())
-                .orElse(null);
-
-        if (existingItem != null) {
-            existingItem.updateQuantity(existingItem.getQuantity() + request.quantity());
-        } else {
-            CartItem cartItem = CartItem.builder()
-                    .menu(menu)
-                    .store(menu.getStore())
-                    .quantity(request.quantity())
-                    .price(menu.getPrice())
-                    .build();
-
-            cart.addCartItem(cartItem);
-        }
+        // 기존 아이템이 있으면 수량 증가, 없으면 새로 추가
+        addOrUpdateCartItem(cart, menu, request);
 
         return CartResponseDto.from(cart);
     }
@@ -66,13 +51,10 @@ public class CartService {
     @Transactional
     public CartResponseDto updateCartItemQuantity(Long userId, UUID cartItemId, Integer quantity) {
         Cart cart = getCartByUserId(userId);
+        CartItem cartItem = getCartItemById(cartItemId);
 
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다."));
-
-        if (!cartItem.getCart().getId().equals(cart.getId())) {
-            throw new IllegalArgumentException("본인의 장바구니 아이템만 수정할 수 있습니다.");
-        }
+        // 카트 소유권 확인
+        validateCartOwnership(cart, cartItem);
 
         cartItem.updateQuantity(quantity);
         return CartResponseDto.from(cart);
@@ -82,13 +64,9 @@ public class CartService {
     @Transactional
     public CartResponseDto removeCartItem(Long userId, UUID cartItemId) {
         Cart cart = getCartByUserId(userId);
+        CartItem cartItem = getCartItemById(cartItemId);
 
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다."));
-
-        if (!cartItem.getCart().getId().equals(cart.getId())) {
-            throw new IllegalArgumentException("본인의 장바구니 아이템만 삭제할 수 있습니다.");
-        }
+        validateCartOwnership(cart, cartItem);
 
         cartItem.delete(userId);
         return CartResponseDto.from(cart);
@@ -101,19 +79,35 @@ public class CartService {
         cart.clearCart();
     }
 
-    private Cart getOrCreateCart(Long userId) {
-        return cartRepository.findByUserIdWithItems(userId)
-                .orElseGet(() -> {
-                    User user = getUserById(userId);
-                    Cart newCart = Cart.builder()
-                            .user(user)
-                            .build();
-                    return cartRepository.save(newCart);
-                });
+    // 기존 아이템이 있으면 수량 증가, 없으면 새로 추가
+    private void addOrUpdateCartItem(Cart cart, Menu menu, CartItemRequestDto request) {
+        CartItem existingItem = findExistingCartItem(cart, menu);
+
+        if (existingItem != null) {
+            // 기존 아이템의 수량 증가
+            existingItem.updateQuantity(existingItem.getQuantity() + request.quantity());
+        } else {
+            // 새로운 아이템 추가
+            CartItem newCartItem = CartItem.of(menu, request);
+            cart.addCartItem(newCartItem);
+        }
     }
 
+    // 장바구니에서 해당 메뉴의 기존 아이템 찾기
+    private CartItem findExistingCartItem(Cart cart, Menu menu) {
+        return cartItemRepository
+                .findByCartIdAndMenuId(cart.getId(), menu.getId())
+                .orElse(null);
+    }
 
-     // 장바구니에 다른 가게의 메뉴가 있는지 검증
+    // 장바구니 소유권 검증
+    private void validateCartOwnership(Cart cart, CartItem cartItem) {
+        if (!cartItem.getCart().getId().equals(cart.getId())) {
+            throw new IllegalArgumentException("본인의 장바구니 아이템만 수정할 수 있습니다.");
+        }
+    }
+
+    // 장바구니에 다른 가게의 메뉴가 있는지 검증
     private void validateSameStore(Cart cart, Menu menu) {
         if (cart.getCartItems().isEmpty()) {
             return;
@@ -128,29 +122,26 @@ public class CartService {
             );
         }
     }
-    
-    private void tmp (Cart cart, Menu menu, CartItemRequestDto request) {
-        CartItem existingItem = isExistingItem(cart, menu);
-        
-        if (existingItem != null) {
-            existingItem.updateQuantity(existingItem.getQuantity() + request.quantity());
-        } else {
-            CartItem cartItem = CartItem.of(menu,request);
-            cart.addCartItem(cartItem);
-        }
-        
-    } 
-    
-    private CartItem isExistingItem (Cart cart, Menu menu) {
-        CartItem existingItem = cartItemRepository
-                .findByCartIdAndMenuId(cart.getId(), menu.getId())
-                .orElse(null);
-        return existingItem;
+
+    private Cart getOrCreateCart(Long userId) {
+        return cartRepository.findByUserIdWithItems(userId)
+                .orElseGet(() -> {
+                    User user = getUserById(userId);
+                    Cart newCart = Cart.builder()
+                            .user(user)
+                            .build();
+                    return cartRepository.save(newCart);
+                });
     }
 
     private Cart getCartByUserId(Long userId) {
         return cartRepository.findByUserIdWithItems(userId)
                 .orElseThrow(() -> new IllegalArgumentException("장바구니를 찾을 수 없습니다."));
+    }
+
+    private CartItem getCartItemById(UUID cartItemId) {
+        return cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다."));
     }
 
     private Menu getMenuById(UUID menuId) {
