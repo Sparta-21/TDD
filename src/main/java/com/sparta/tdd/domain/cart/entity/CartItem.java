@@ -64,6 +64,9 @@ public class CartItem extends BaseEntity {
     }
 
     public void updateQuantity(Integer quantity) {
+        if(quantity <= 0) {
+            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+        }
         this.quantity = quantity;
     }
 

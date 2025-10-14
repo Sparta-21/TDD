@@ -13,6 +13,7 @@ public record CartResponseDto(
 ) {
     public static CartResponseDto from(Cart cart) {
         List<CartItemResponseDto> items = cart.getCartItems().stream()
+                .filter(item -> !item.isDeleted())
                 .map(CartItemResponseDto::from)
                 .toList();
 

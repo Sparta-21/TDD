@@ -13,11 +13,12 @@ public interface CartRepository extends JpaRepository<Cart, UUID> {
     Optional<Cart> findByUserIdAndNotDeleted(@Param("userId") Long userId);
 
     @Query("""
-        SELECT c FROM Cart c
-        LEFT JOIN FETCH c.cartItems ci
-        LEFT JOIN FETCH ci.menu m
-        LEFT JOIN FETCH ci.store s
-        WHERE c.user.id = :userId AND c.deletedAt IS NULL
+    SELECT DISTINCT c FROM Cart c
+    LEFT JOIN FETCH c.cartItems ci
+    LEFT JOIN FETCH ci.menu m
+    LEFT JOIN FETCH ci.store s
+    WHERE c.user.id = :userId 
+    AND c.deletedAt IS NULL
     """)
     Optional<Cart> findByUserIdWithItems(@Param("userId") Long userId);
 }
