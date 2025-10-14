@@ -45,7 +45,7 @@ public class MenuIntegrationTest extends IntegrationTest {
     Menu menu;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         customer = User.builder()
             .username("customer")
             .password("password1")

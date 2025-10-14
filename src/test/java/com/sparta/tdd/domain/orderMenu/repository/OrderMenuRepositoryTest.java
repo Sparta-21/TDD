@@ -33,7 +33,7 @@ class OrderMenuRepositoryTest extends RepositoryTest {
     private Menu testMenu;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testUser = User.builder()
             .username("testuser")
             .password("password123")
