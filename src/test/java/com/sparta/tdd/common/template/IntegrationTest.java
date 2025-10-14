@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.tdd.common.config.TestContainerConfig;
 import com.sparta.tdd.common.helper.CleanUp;
 import com.sparta.tdd.global.config.QueryDSLConfig;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,8 +27,8 @@ public abstract class IntegrationTest {
     @Autowired
     protected CleanUp cleanUp;
 
-    @BeforeEach
-    protected void setUp() {
-        cleanUp.all();
+    @AfterEach
+    protected void tearDown() {
+        cleanUp.tearDown();
     }
 }
