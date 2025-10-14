@@ -5,7 +5,7 @@ import com.sparta.tdd.common.helper.CleanUp;
 import com.sparta.tdd.global.config.AuditConfig;
 import com.sparta.tdd.global.config.QueryDSLConfig;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -24,8 +24,8 @@ public abstract class RepositoryTest {
     @Autowired
     protected EntityManager em;
 
-    @BeforeEach
-    protected void setUp() {
-        cleanUp.all();
+    @AfterEach
+    protected void tearDown() {
+        cleanUp.tearDown();
     }
 }
