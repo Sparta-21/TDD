@@ -26,10 +26,11 @@ public class WebConfig implements WebMvcConfigurer {
         return sortHandlerMethodArgumentResolver;
     }
 
-    private final CustomPageableResolver customPageableResolver;
-
-    public WebConfig(CustomPageableResolver customPageableResolver) {
-        this.customPageableResolver = customPageableResolver;
+    @Bean
+    public CustomPageableResolver customPageableResolver(
+        SortHandlerMethodArgumentResolver sortHandlerMethodArgumentResolver
+    ) {
+        return new CustomPageableResolver(sortHandlerMethodArgumentResolver);
     }
 
     @Override

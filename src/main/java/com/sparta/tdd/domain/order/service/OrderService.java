@@ -135,7 +135,8 @@ public class OrderService {
     }
 
     /**
-     * 특정 레포지토리의 id 탐색결과를 Optional로 받아</br> null 이면 예외를 발생</br> 값이 존재한다면 Entity 를 반환합니다
+     * 특정 레포지토리의 id 탐색결과를 Optional로 받아 null 이면 예외를 발생<br>
+     * 값이 존재한다면 Entity 를 반환합니다
      *
      * @param jpaRepository
      * @param id
@@ -147,7 +148,7 @@ public class OrderService {
     }
 
     /**
-     * OWNER 권한을 가진 유저 - Store.User.id 를 비교하여 동일하지 않으면 예외처리 (repo 에서 가져온 order 가 없음) </br>
+     * OWNER 권한을 가진 유저 - Store.User.id 를 비교하여 동일하지 않으면 예외처리 (repo 에서 가져온 order 가 없음) <br>
      * MANAGER, MASTER - 별도 join 쿼리 없이 order 객체 조회
      *
      * @param orderId
