@@ -52,9 +52,9 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
     // QueryDSL JPA
-    implementation "io.github.openfeign.querydsl:querydsl-core:7.0"
-    implementation "io.github.openfeign.querydsl:querydsl-jpa:7.0"
-    annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:7.0:jpa"
+    implementation 'io.github.openfeign.querydsl:querydsl-core:7.0'
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.0'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.0:jpa'
 
     // Google GenAi
     implementation 'com.google.genai:google-genai:1.18.0'
