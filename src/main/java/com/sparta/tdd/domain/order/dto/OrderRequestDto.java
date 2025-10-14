@@ -4,6 +4,7 @@ import com.sparta.tdd.domain.orderMenu.dto.OrderMenuRequestDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.UUID;
 public record OrderRequestDto(
     @NotBlank String address,
     @NotBlank String customerName,
-    @NotBlank UUID  storeId,
+    @NotNull UUID  storeId,
     @NotBlank String storeName,
     @PositiveOrZero Integer price,
     @NotEmpty @Valid List<OrderMenuRequestDto> menu
