@@ -83,4 +83,8 @@ public class Coupon extends BaseEntity {
         this.expiredAt = dto.expiredAt();
     }
 
+    public void issuedCount() {
+        this.issuedCount++;
+    }
+
 }

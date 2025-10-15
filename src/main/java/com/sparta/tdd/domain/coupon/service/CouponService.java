@@ -26,8 +26,7 @@ public class CouponService {
     private final UserRepository userRepository;
 
     public List<CouponResponseDto> getStoreCoupons(UUID storeId) {
-        List<Coupon> coupons;
-        coupons = couponRepository.findAllByStoreIdAndDeletedAtIsNull(storeId);
+        List<Coupon> coupons = couponRepository.findAllByStoreIdAndDeletedAtIsNull(storeId);
 
         return coupons.stream()
             .map(CouponResponseDto::from)
@@ -94,7 +93,7 @@ public class CouponService {
     }
 
     private Coupon findCoupon(UUID couponId) {
-        return couponRepository.findById(couponId)
+        return couponRepository.findByIdAndDeletedAtIsNull(couponId)
             .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
     }
 
