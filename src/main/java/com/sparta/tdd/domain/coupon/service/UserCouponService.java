@@ -1,8 +1,12 @@
 package com.sparta.tdd.domain.coupon.service;
 
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.coupon.dto.UserCouponResponseDto;
 import com.sparta.tdd.domain.coupon.entity.Coupon;
+import com.sparta.tdd.domain.coupon.entity.QUserCoupon;
 import com.sparta.tdd.domain.coupon.entity.UserCoupon;
+import com.sparta.tdd.domain.coupon.enums.Status;
 import com.sparta.tdd.domain.coupon.repository.CouponRepository;
 import com.sparta.tdd.domain.coupon.repository.UserCouponRepository;
 import com.sparta.tdd.domain.user.entity.User;
@@ -23,9 +27,20 @@ public class UserCouponService {
     private final UserCouponRepository userCouponRepository;
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
+    private final JPAQueryFactory query;
 
     public List<UserCouponResponseDto> getMyCoupons(Long userId) {
-        List<UserCoupon> coupons = userCouponRepository.findAllByUserId(userId);
+        QUserCoupon uc = QUserCoupon.userCoupon;
+
+        List<UserCoupon> coupons = query.selectFrom(uc)
+            .where(uc.user.id.eq(userId))
+            .orderBy(
+                new CaseBuilder()
+                    .when(uc.status.eq(Status.ACTIVE)).then(1)
+                    .otherwise(2).asc(),
+                uc.createdAt.desc()
+            )
+            .fetch();
 
         return coupons.stream()
             .map(UserCouponResponseDto::from)
