@@ -29,6 +29,7 @@ public class CartService {
     private final UserRepository userRepository;
 
     // 장바구니 조회
+    @Transactional
     public CartResponseDto getCart(Long userId) {
         Cart cart = getOrCreateCart(userId);
         return CartResponseDto.from(cart);
@@ -39,9 +40,6 @@ public class CartService {
     public CartResponseDto addItemToCart(Long userId, CartItemRequestDto request) {
         Cart cart = getOrCreateCart(userId);
         Menu menu = getMenuById(request.menuId());
-
-        // 장바구니에 이미 다른 가게의 메뉴가 있는지 확인
-        validateSameStore(cart, menu);
 
         // 기존 아이템이 있으면 수량 증가, 없으면 새로 추가
         addOrUpdateCartItem(cart, menu, request);
@@ -71,6 +69,10 @@ public class CartService {
         validateCartOwnership(cart, cartItem);
 
         cartItem.delete(userId);
+
+        // 마지막 아이템 삭제 시 가게 정보도 초기화
+        cart.checkAndClearStoreIfEmpty();
+
         return CartResponseDto.from(cart);
     }
 
@@ -78,6 +80,7 @@ public class CartService {
     @Transactional
     public void clearCart(Long userId) {
         Cart cart = getCartByUserId(userId);
+        // store도 함께 null로 설정됨
         cart.clearCart();
     }
 
@@ -88,11 +91,12 @@ public class CartService {
         if (existingItem != null) {
             // 기존 아이템의 수량 증가
             existingItem.updateQuantity(existingItem.getQuantity() + request.quantity());
-        } else {
-            // 새로운 아이템 추가
-            CartItem newCartItem = CartItem.of(menu, request);
-            cart.addCartItem(newCartItem);
+            return;
         }
+
+        // 새로운 아이템 추가 (Cart의 addCartItem이 가게 제약 검증함)
+        CartItem newCartItem = CartItem.of(menu, request);
+        cart.addCartItem(newCartItem, menu.getStore());
     }
 
     // 장바구니에서 해당 메뉴의 기존 아이템 찾기
@@ -106,20 +110,6 @@ public class CartService {
     private void validateCartOwnership(Cart cart, CartItem cartItem) {
         if (!cartItem.getCart().getId().equals(cart.getId())) {
             throw new BusinessException(ErrorCode.CART_ITEM_NOT_OWNED);
-        }
-    }
-
-    // 장바구니에 다른 가게의 메뉴가 있는지 검증
-    private void validateSameStore(Cart cart, Menu menu) {
-        if (cart.getCartItems().isEmpty()) {
-            return;
-        }
-
-        UUID existingStoreId = cart.getCartItems().get(0).getStore().getId();
-        UUID newStoreId = menu.getStore().getId();
-
-        if (!existingStoreId.equals(newStoreId)) {
-            throw new BusinessException(ErrorCode.CART_DIFFERENT_STORE);
         }
     }
 

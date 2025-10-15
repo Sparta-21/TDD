@@ -33,10 +33,6 @@ public class CartItem extends BaseEntity {
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id", nullable = false)
-    private Store store;
-
     @Column(nullable = false)
     private Integer quantity;
 
@@ -44,18 +40,17 @@ public class CartItem extends BaseEntity {
     private Integer price;
 
     @Builder
-    private CartItem(Cart cart, Menu menu, Store store, Integer quantity, Integer price) {
+    private CartItem(Cart cart, Menu menu, Integer quantity, Integer price) {
         this.cart = cart;
         this.menu = menu;
-        this.store = store;
         this.quantity = quantity;
         this.price = price;
     }
 
+
     public static CartItem of(Menu menu, CartItemRequestDto request) {
         return CartItem.builder()
                 .menu(menu)
-                .store(menu.getStore())
                 .quantity(request.quantity())
                 .price(menu.getPrice())
                 .build();
@@ -72,4 +67,7 @@ public class CartItem extends BaseEntity {
         this.quantity = quantity;
     }
 
+    public Store getStore() {
+        return this.menu.getStore();
+    }
 }
