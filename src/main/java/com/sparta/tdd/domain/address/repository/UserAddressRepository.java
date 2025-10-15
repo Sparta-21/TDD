@@ -9,6 +9,6 @@ import java.util.UUID;
 
 public interface UserAddressRepository extends JpaRepository<UserAddress, UUID> {
 
-    @Query("SELECT ua FROM UserAddress ua WHERE ua.user.id = :userId")
+    @Query("SELECT ua FROM UserAddress ua WHERE ua.user.id = :userId AND ua.deletedAt IS NULL")
     List<UserAddress> findAllByUserId(Long userId);
 }
