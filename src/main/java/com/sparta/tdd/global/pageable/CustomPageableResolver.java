@@ -62,9 +62,8 @@ public class CustomPageableResolver extends PageableHandlerMethodArgumentResolve
         WebDataBinderFactory binderFactory) {
         Pageable base = super.resolveArgument(methodParameter, mavContainer, webRequest,
             binderFactory);
-        int capped = Math.min(base.getPageSize(), MAX_SIZE);
-        int normalized = ALLOWED.contains(capped)
-            ? capped
+        int normalized = ALLOWED.contains(base.getPageSize())
+            ? base.getPageSize()
             : DEFAULT_PAGE_SIZE;
         if (normalized == base.getPageSize()) {
             return base;
