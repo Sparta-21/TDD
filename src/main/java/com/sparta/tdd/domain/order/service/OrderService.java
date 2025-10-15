@@ -159,10 +159,10 @@ public class OrderService {
         if (UserAuthority.isOwner(userDetails.getUserAuthority())) {
             return orderRepository.findOrderByIdAndStoreUserId(orderId,
                     userDetails.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("본인 가게의 주문만 접근 가능합니다"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_PERMISSION_DENIED));
         }
         return orderRepository.findDetailById(orderId)
-            .orElseThrow(() -> new IllegalArgumentException("주문내역을 찾을 수 없습니다"));
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
     }
 }
