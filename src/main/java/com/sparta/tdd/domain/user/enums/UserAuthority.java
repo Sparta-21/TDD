@@ -30,7 +30,7 @@ public enum UserAuthority {
         return authority == MANAGER;
     }
 
-    public static boolean isMater(UserAuthority authority) {
+    public static boolean isMaster(UserAuthority authority) {
         return authority == MASTER;
     }
 
