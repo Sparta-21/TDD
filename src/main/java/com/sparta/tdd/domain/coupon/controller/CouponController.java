@@ -29,10 +29,9 @@ public class CouponController {
     private final CouponService couponService;
 
     @GetMapping("/list/{storeId}")
-    public ResponseEntity<List<CouponResponseDto>> getStoreCoupons(@PathVariable UUID storeId,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<List<CouponResponseDto>> getStoreCoupons(@PathVariable UUID storeId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(couponService.getStoreCoupons(storeId, userDetails.getUserAuthority()));
+            .body(couponService.getStoreCoupons(storeId));
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")

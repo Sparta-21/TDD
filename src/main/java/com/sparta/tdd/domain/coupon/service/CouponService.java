@@ -7,7 +7,6 @@ import com.sparta.tdd.domain.coupon.repository.CouponRepository;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
-import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
@@ -26,13 +25,10 @@ public class CouponService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
 
-    public List<CouponResponseDto> getStoreCoupons(UUID storeId, UserAuthority authority) {
+    public List<CouponResponseDto> getStoreCoupons(UUID storeId) {
         List<Coupon> coupons;
-        if (UserAuthority.isCustomer(authority)) {
-            coupons = couponRepository.findAllByStoreIdAndDeletedAtIsNull(storeId);
-        } else {
-            coupons = couponRepository.findAllByStoreId(storeId);
-        }
+        coupons = couponRepository.findAllByStoreIdAndDeletedAtIsNull(storeId);
+
         return coupons.stream()
             .map(CouponResponseDto::from)
             .toList();
