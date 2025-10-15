@@ -16,7 +16,8 @@ public class UserAddress extends BaseAddress {
     @Comment("주소별칭")
     @Column(name = "alias")
     private String alias;
-
+    @Column(name = "is_primary")
+    private Boolean isPrimary;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -25,6 +26,7 @@ public class UserAddress extends BaseAddress {
         super(address, roadAddress, detailAddress, latitude, longitude);
         this.alias = alias;
         this.user = user;
+        this.isPrimary = false;
     }
 
     public void updateUserAddress(String jibunAddress, String roadAddress, String detailAddress,
@@ -34,5 +36,8 @@ public class UserAddress extends BaseAddress {
     }
     public void updateAlias(String alias) {
         this.alias = alias;
+    }
+    public void updatePrimary() {
+        this.isPrimary = !isPrimary;
     }
 }
