@@ -18,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
-@Slf4j
 public class NaverMapService {
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -29,7 +28,7 @@ public class NaverMapService {
     @Value("${NAVER_CLIENT_SECRET}")
     private String secretId;
 
-    public Page<NaverAddress> getAddress(String address, Pageable pageable) {
+    public Page<AddressResponseDto> getAddress(String address, Pageable pageable) {
         String url = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query=" + address;
 
         HttpHeaders header = new HttpHeaders();
@@ -41,6 +40,6 @@ public class NaverMapService {
 
         List<NaverAddress> addresses = response.getBody().addresses();
         Page<NaverAddress> naverAddresses = new PageImpl<>(addresses, pageable, addresses.size());
-        return naverAddresses;
+        return naverAddresses.map(AddressResponseDto::from);
     }
 }
