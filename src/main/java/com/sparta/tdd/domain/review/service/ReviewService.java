@@ -61,7 +61,7 @@ public class ReviewService {
         Review review = findReviewById(reviewId);
 
         if (!isQualified(review,userId)) {
-            throw new IllegalArgumentException("본인의 리뷰만 수정할 수 있습니다.");
+            throw new BusinessException(ErrorCode.REVIEW_NOT_OWNED);
         }
 
         review.updateContent(request.rating(), request.photos(), request.content());
