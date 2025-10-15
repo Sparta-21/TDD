@@ -103,7 +103,7 @@ public class CouponService {
     }
 
     private Store findStore(UUID storeId) {
-        return storeRepository.findById(storeId)
+        return storeRepository.findByStoreIdAndNotDeleted(storeId)
             .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 
