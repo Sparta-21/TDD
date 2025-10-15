@@ -11,6 +11,7 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
@@ -133,7 +134,7 @@ public class StoreService {
     }
 
     private void validateStoreOwnership(User user, Store store) {
-        if (!store.isOwner(user) && !user.isManagerLevel()) {
+        if (!store.isOwner(user) && !UserAuthority.isManagerLevel(user.getAuthority())) {
             throw new BusinessException(ErrorCode.STORE_OWNERSHIP_DENIED);
         }
     }

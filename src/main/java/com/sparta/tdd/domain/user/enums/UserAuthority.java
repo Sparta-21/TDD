@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.user.enums;
 
+import java.util.EnumSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -31,5 +32,9 @@ public enum UserAuthority {
 
     public static boolean isMater(UserAuthority authority) {
         return authority == MASTER;
+    }
+
+    public static boolean isManagerLevel(UserAuthority authority) {
+        return EnumSet.of(UserAuthority.MANAGER, UserAuthority.MASTER).contains(authority);
     }
 }

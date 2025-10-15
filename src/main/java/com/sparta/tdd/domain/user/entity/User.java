@@ -10,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.EnumSet;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,15 +45,6 @@ public class User extends BaseEntity {
         this.password = password;
         this.nickname = nickname;
         this.authority = authority;
-    }
-
-    public boolean isOwnerLevel() {
-        return EnumSet.of(UserAuthority.OWNER, UserAuthority.MANAGER, UserAuthority.MASTER)
-            .contains(this.authority);
-    }
-
-    public boolean isManagerLevel() {
-        return EnumSet.of(UserAuthority.MANAGER, UserAuthority.MASTER).contains(this.authority);
     }
 
     public void updateNickname(String nickname) {
