@@ -1,5 +1,7 @@
 package com.sparta.tdd.domain.address.dto;
 
+import com.sparta.tdd.domain.address.dto.naver.NaverAddress;
+
 public record AddressResponseDto(
         String jibunAddress,
         String roadAddress,

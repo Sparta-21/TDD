@@ -1,4 +1,6 @@
-package com.sparta.tdd.domain.address.dto;
+package com.sparta.tdd.domain.address.dto.naver;
+
+import com.sparta.tdd.domain.address.dto.naver.NaverAddressElement;
 
 import java.util.List;
 

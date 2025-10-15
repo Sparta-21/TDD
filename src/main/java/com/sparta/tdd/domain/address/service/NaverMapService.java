@@ -1,9 +1,8 @@
 package com.sparta.tdd.domain.address.service;
 
 import com.sparta.tdd.domain.address.dto.AddressResponseDto;
-import com.sparta.tdd.domain.address.dto.NaverAddress;
-import com.sparta.tdd.domain.address.dto.NaverAddressResponse;
-import lombok.extern.slf4j.Slf4j;
+import com.sparta.tdd.domain.address.dto.naver.NaverAddress;
+import com.sparta.tdd.domain.address.dto.naver.NaverAddressResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
