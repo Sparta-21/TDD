@@ -5,12 +5,17 @@ import com.sparta.tdd.domain.address.dto.NaverAddress;
 import com.sparta.tdd.domain.address.dto.NaverAddressResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -24,7 +29,7 @@ public class NaverMapService {
     @Value("${NAVER_CLIENT_SECRET}")
     private String secretId;
 
-    public NaverAddressResponse getAddress(String address) {
+    public Page<NaverAddress> getAddress(String address, Pageable pageable) {
         String url = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query=" + address;
 
         HttpHeaders header = new HttpHeaders();
@@ -34,6 +39,8 @@ public class NaverMapService {
         HttpEntity<Object> httpEntity = new HttpEntity<>(header);
         ResponseEntity<NaverAddressResponse> response = restTemplate.exchange(url, HttpMethod.GET, httpEntity, NaverAddressResponse.class);
 
-        return response.getBody();
+        List<NaverAddress> addresses = response.getBody().addresses();
+        Page<NaverAddress> naverAddresses = new PageImpl<>(addresses, pageable, addresses.size());
+        return naverAddresses;
     }
 }
