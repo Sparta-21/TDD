@@ -2,6 +2,7 @@ package com.sparta.tdd.domain.coupon.entity;
 
 import com.sparta.tdd.domain.coupon.enums.Status;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,7 +29,7 @@ import lombok.NoArgsConstructor;
 })
 @Getter
 @NoArgsConstructor
-public class UserCoupon {
+public class UserCoupon extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,7 +38,7 @@ public class UserCoupon {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status;
+    private Status status = Status.ACTIVE;
 
     @Column(name = "used_at")
     private LocalDateTime usedAt;
@@ -49,4 +51,13 @@ public class UserCoupon {
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
+    @Builder
+    public UserCoupon(User user, Coupon coupon) {
+        this.user = user;
+        this.coupon = coupon;
+    }
+
+    public void updateStatus(Status newStatus) {
+        this.status = newStatus;
+    }
 }

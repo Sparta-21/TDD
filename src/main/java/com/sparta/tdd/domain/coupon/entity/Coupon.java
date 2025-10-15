@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.coupon.entity;
 
+import com.sparta.tdd.domain.coupon.dto.CouponRequestDto;
 import com.sparta.tdd.domain.coupon.enums.Scope;
 import com.sparta.tdd.domain.coupon.enums.Type;
 import com.sparta.tdd.domain.store.entity.Store;
@@ -16,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -51,7 +53,7 @@ public class Coupon extends BaseEntity {
     private int quantity;
 
     @Column(name = "issued_count", nullable = false)
-    private int issuedCount;
+    private int issuedCount = 0;
 
     @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
@@ -60,5 +62,16 @@ public class Coupon extends BaseEntity {
     @JoinColumn(name = "store_id")
     private Store store;
 
+    @Builder
+    public Coupon(CouponRequestDto dto, Store store) {
+        this.name = dto.name();
+        this.type = dto.type();
+        this.scope = dto.scope();
+        this.discountValue = dto.discountValue();
+        this.minOrderPrice = dto.minOrderPrice();
+        this.quantity = dto.quantity();
+        this.expiredAt = dto.expiredAt();
+        this.store = store;
+    }
 
 }
