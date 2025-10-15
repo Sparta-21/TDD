@@ -26,4 +26,12 @@ public record CouponRequestDto(
             .store(store)
             .build();
     }
+
+    public boolean masterScope() {
+        return scope() == Scope.MASTER;
+    }
+
+    public boolean storeScope() {
+        return scope() == Scope.STORE;
+    }
 }

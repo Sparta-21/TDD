@@ -74,4 +74,13 @@ public class Coupon extends BaseEntity {
         this.store = store;
     }
 
+    public void update(CouponRequestDto dto) {
+        this.name = dto.name();
+        this.type = dto.type();
+        this.discountValue = dto.discountValue();
+        this.minOrderPrice = dto.minOrderPrice();
+        this.quantity = dto.quantity();
+        this.expiredAt = dto.expiredAt();
+    }
+
 }
