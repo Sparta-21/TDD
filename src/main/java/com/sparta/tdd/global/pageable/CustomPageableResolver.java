@@ -56,10 +56,10 @@ public class CustomPageableResolver extends PageableHandlerMethodArgumentResolve
      */
     @Override
     public Pageable resolveArgument(
-        @Nullable MethodParameter methodParameter,
-        ModelAndViewContainer mavContainer,
-        @Nullable NativeWebRequest webRequest,
-        WebDataBinderFactory binderFactory) {
+        MethodParameter methodParameter,
+        @Nullable ModelAndViewContainer mavContainer,
+        NativeWebRequest webRequest,
+        @Nullable WebDataBinderFactory binderFactory) {
         Pageable base = super.resolveArgument(methodParameter, mavContainer, webRequest,
             binderFactory);
         int normalized = ALLOWED.contains(base.getPageSize())
