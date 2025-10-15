@@ -40,7 +40,7 @@ public class Coupon extends BaseEntity {
     private Type type;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "scope", nullable = false)
+    @Column(name = "scope", nullable = false, updatable = false)
     private Scope scope;
 
     @Column(name = "discount_value", nullable = false)
