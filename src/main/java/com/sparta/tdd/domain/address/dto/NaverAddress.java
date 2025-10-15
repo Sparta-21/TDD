@@ -1,2 +1,14 @@
-package com.sparta.tdd.domain.address.dto;public record NaverAddress() {
+package com.sparta.tdd.domain.address.dto;
+
+import java.util.List;
+
+public record NaverAddress(
+        String roadAddress,
+        String jibunAddress,
+        String englishAddress,
+        List<NaverAddressElement> addressElements,
+        String x,
+        String y,
+        Double distance
+) {
 }
