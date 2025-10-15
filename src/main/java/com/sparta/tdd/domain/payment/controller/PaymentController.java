@@ -8,8 +8,6 @@ import com.sparta.tdd.domain.payment.dto.UpdatePaymentStatusRequest;
 import com.sparta.tdd.domain.payment.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,7 +52,7 @@ public class PaymentController {
     )
     @GetMapping("/store/{storeId}")
     @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
-    public ResponseEntity<?> getStorePaymentHistory(
+    public ResponseEntity<Page<PaymentListResponseDto>> getStorePaymentHistory(
         @AuthenticationPrincipal UserDetailsImpl userDetails,
         @PathVariable(name = "storeId") UUID storeId,
         @PageableDefault Pageable pageable,
@@ -64,10 +62,7 @@ public class PaymentController {
             pageable,
             keyword);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("data", response);
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(
@@ -75,15 +70,12 @@ public class PaymentController {
         description = "해당하는 paymentId에 대한 결제 상세 내역을 확인할 수 있습니다."
     )
     @GetMapping("/{paymentId}")
-    public ResponseEntity<?> getPaymentHistoryDetail(
+    public ResponseEntity<PaymentDetailResponseDto> getPaymentHistoryDetail(
         @PathVariable UUID paymentId
     ) {
         PaymentDetailResponseDto response = paymentService.getPaymentHistoryDetail(paymentId);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("data", response);
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(
@@ -92,7 +84,7 @@ public class PaymentController {
     )
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @PatchMapping("/status/{paymentId}")
-    public ResponseEntity<?> changeHistoryStatus(
+    public ResponseEntity<Void> changeHistoryStatus(
         @PathVariable UUID paymentId,
         @Valid @RequestBody UpdatePaymentStatusRequest request
     ) {
