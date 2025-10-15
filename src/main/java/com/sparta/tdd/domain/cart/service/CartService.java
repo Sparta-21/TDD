@@ -10,6 +10,8 @@ import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +105,7 @@ public class CartService {
     // 장바구니 소유권 검증
     private void validateCartOwnership(Cart cart, CartItem cartItem) {
         if (!cartItem.getCart().getId().equals(cart.getId())) {
-            throw new IllegalArgumentException("본인의 장바구니 아이템만 수정할 수 있습니다.");
+            throw new BusinessException(ErrorCode.CART_ITEM_NOT_OWNED);
         }
     }
 
@@ -117,9 +119,7 @@ public class CartService {
         UUID newStoreId = menu.getStore().getId();
 
         if (!existingStoreId.equals(newStoreId)) {
-            throw new IllegalArgumentException(
-                    "장바구니에는 한 가게의 메뉴만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요."
-            );
+            throw new BusinessException(ErrorCode.CART_DIFFERENT_STORE);
         }
     }
 
@@ -136,21 +136,21 @@ public class CartService {
 
     private Cart getCartByUserId(Long userId) {
         return cartRepository.findByUserIdWithItems(userId)
-                .orElseThrow(() -> new IllegalArgumentException("장바구니를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_NOT_FOUND));
     }
 
     private CartItem getCartItemById(UUID cartItemId) {
         return cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
     }
 
     private Menu getMenuById(UUID menuId) {
         return menuRepository.findById(menuId)
-                .orElseThrow(() -> new IllegalArgumentException("메뉴를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
     }
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }

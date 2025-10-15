@@ -3,6 +3,8 @@ package com.sparta.tdd.domain.cart.entity;
 import com.sparta.tdd.domain.cart.dto.request.CartItemRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.store.entity.Store;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -65,7 +67,7 @@ public class CartItem extends BaseEntity {
 
     public void updateQuantity(Integer quantity) {
         if(quantity <= 0) {
-            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+            throw new BusinessException(ErrorCode.CART_ITEM_INVALID_QUANTITY);
         }
         this.quantity = quantity;
     }
