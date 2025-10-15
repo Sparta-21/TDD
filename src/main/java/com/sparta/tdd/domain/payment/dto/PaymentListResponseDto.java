@@ -17,7 +17,9 @@ public record PaymentListResponseDto(
             payment.getId(),
             payment.getNumber(),
             payment.getStatus().getDescription(),
-            payment.getOrder() != null ? payment.getOrder().getStore().getName() : "",
+            payment.getOrder() != null && payment.getOrder().getStore() != null
+                ? payment.getOrder().getStore().getName()
+                : "",
             payment.getAmount()
         ));
     }
