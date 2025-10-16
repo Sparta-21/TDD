@@ -94,7 +94,7 @@ public class CouponService {
 
     private Coupon findCoupon(UUID couponId) {
         return couponRepository.findByIdAndDeletedAtIsNull(couponId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUPON_NOT_FOUND));
     }
 
     private User findUser(Long userId) {
