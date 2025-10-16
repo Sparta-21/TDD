@@ -54,19 +54,19 @@ public class AddressService {
     }
     // 회원 주소 목록 조회
     public List<UserAddressResponseDto> getUserAddressByUserId(Long userId) {
-        List<UserAddress> userAddressList = userAddressRepository.findAllByUserId(userId);
+        List<UserAddress> userAddressList = userAddressRepository.findAllByUserIdAndDeletedIsNot(userId);
         return userAddressList.stream()
                 .map(UserAddressResponseDto::from)
                 .toList();
     }
     // 모든 가게 주소 페이징 조회
     public Page<StoreAddressResponseDto> getAllStoreAddress(Pageable pageable) {
-        Page<StoreAddress> storeAddressPage = storeAddressRepository.findAll(pageable);
+        Page<StoreAddress> storeAddressPage = storeAddressRepository.findAllStoreAddressByDeletedIsNot(pageable);
         return storeAddressPage.map(StoreAddressResponseDto::from);
     }
     // 모든 회원 주소 페이징 조회
     public Page<UserAddressResponseDto> getAllUserAddress(Pageable pageable) {
-        Page<UserAddress> userAddressPage = userAddressRepository.findAll(pageable);
+        Page<UserAddress> userAddressPage = userAddressRepository.findAllUserAddressByDeletedIsNot(pageable);
         return userAddressPage.map(UserAddressResponseDto::from);
     }
     // 주소 수정
@@ -109,7 +109,7 @@ public class AddressService {
     // 회원 대표 주소 설정
     @Transactional
     public void choicePrimaryUserAddress(UUID addressId, Long userId) {
-        List<UserAddress> userAddressList = userAddressRepository.findAllByUserId(userId);
+        List<UserAddress> userAddressList = userAddressRepository.findAllByUserIdAndDeletedIsNot(userId);
         userAddressList.forEach(userAddress -> {
             if (userAddress.getIsPrimary()) {
                 userAddress.updatePrimary();
