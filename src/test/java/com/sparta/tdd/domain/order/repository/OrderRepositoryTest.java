@@ -227,6 +227,38 @@ class OrderRepositoryTest
             );
         }
 
+        @Test
+        @DisplayName("owner 필터: page=0,size=10, createdAt DESC → 총23, 모두 owner 소유")
+        void page0_size10_sortedByCreatedAtDesc_ownerOnly() {
+            // given
+            seedOrders(23, 17);
+            var pageable = org.springframework.data.domain.PageRequest.of(
+                0, 10, org.springframework.data.domain.Sort.by("createdAt").descending());
+            var opt = new OrderSearchOptionDto(null, null, owner.getId(), null, null);
+
+            // when
+            var page = orderRepository.findPageIds(pageable, opt);
+
+            // then
+            var ids = page.getContent();
+            var orders = orderRepository.findDetailsByIdIn(ids);
+            var map = orders.stream().collect(java.util.stream.Collectors.toMap(Order::getId, o -> o));
+            var firstTwo = ids.stream().limit(2).toList();
+            var o0 = map.get(firstTwo.get(0));
+            var o1 = map.get(firstTwo.get(1));
+
+            org.junit.jupiter.api.Assertions.assertAll(
+                () -> org.junit.jupiter.api.Assertions.assertEquals(10, ids.size()),
+                () -> org.junit.jupiter.api.Assertions.assertEquals(25, page.getTotalElements()),
+                () -> org.junit.jupiter.api.Assertions.assertTrue(
+                    orders.stream().allMatch(o -> o.getStore().getUser().getId().equals(owner.getId())),
+                    "모든 결과가 owner 소유여야 함"),
+                () -> org.junit.jupiter.api.Assertions.assertTrue(
+                    !o0.getCreatedAt().isBefore(o1.getCreatedAt()),
+                    "createdAt 내림차순 정렬")
+            );
+        }
+
     }
 
 
