@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/user/coupon")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('CUSTOMER', 'MASTER')")
+@PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER', 'MASTER')")
 public class UserCouponController {
 
     private final UserCouponService userCouponService;
