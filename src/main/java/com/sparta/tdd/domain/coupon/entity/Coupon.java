@@ -87,4 +87,8 @@ public class Coupon extends BaseEntity {
         this.issuedCount++;
     }
 
+    public boolean isAlreadyIssued() {
+        return issuedCount > 0;
+    }
+
 }

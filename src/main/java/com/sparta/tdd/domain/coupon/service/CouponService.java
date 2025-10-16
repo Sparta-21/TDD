@@ -71,7 +71,7 @@ public class CouponService {
     @Transactional
     public void updateCoupon(UUID storeId, UUID couponId, CouponRequestDto dto, Long userId) {
         Coupon coupon = findCoupon(couponId);
-        if (coupon.getIssuedCount() != 0) {
+        if (coupon.isAlreadyIssued()) {
             throw new BusinessException(ErrorCode.COUPON_ALREADY_ISSUED);
         }
 

@@ -1,6 +1,5 @@
 package com.sparta.tdd.domain.coupon.service;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.coupon.dto.UserCouponResponseDto;
 import com.sparta.tdd.domain.coupon.entity.Coupon;
 import com.sparta.tdd.domain.coupon.entity.UserCoupon;
@@ -24,7 +23,6 @@ public class UserCouponService {
     private final UserCouponRepository userCouponRepository;
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
-    private final JPAQueryFactory query;
 
     public List<UserCouponResponseDto> getMyCoupons(Long userId) {
 
