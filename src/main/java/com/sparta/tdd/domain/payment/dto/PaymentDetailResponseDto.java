@@ -12,7 +12,7 @@ public record PaymentDetailResponseDto(
     Long price,
     String cardCompany,
     String cardNumber,
-    LocalDateTime approvedAt,
+    LocalDateTime processedAt,
     RestaurantInfo restaurant,
     List<OrderItemInfo> orderItem
 ) {
@@ -26,7 +26,7 @@ public record PaymentDetailResponseDto(
             payment.getAmount(),
             payment.getCardCompany().getDescription(),
             maskCardNumber(payment.getCardNumber()),
-            payment.getApprovedAt(),
+            payment.getProcessedAt(),
             restaurantInfo,
             orderItems
         );
