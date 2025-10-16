@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +21,7 @@ import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.order.dto.OrderItemInfoDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
+import com.sparta.tdd.domain.order.repository.OrderRepository;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.payment.dto.PaymentDetailResponseDto;
 import com.sparta.tdd.domain.payment.dto.PaymentListResponseDto;
@@ -31,6 +31,7 @@ import com.sparta.tdd.domain.payment.repository.PaymentRepository;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.repository.UserRepository;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
 import java.util.ArrayList;
@@ -60,6 +61,15 @@ class PaymentServiceTest {
 
     @Mock
     private StoreRepository storeRepository;
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PaymentResultProcessService paymentResultProcessService;
 
     @InjectMocks
     private PaymentService paymentService;
@@ -318,7 +328,7 @@ class PaymentServiceTest {
 
             // then
             assertThat(pendingPayment.getStatus()).isEqualTo(COMPLETED);
-            assertThat(pendingPayment.getApprovedAt()).isNotNull();
+            assertThat(pendingPayment.getProcessedAt()).isNotNull();
 
             verify(paymentRepository).findById(paymentId);
         }
@@ -348,7 +358,6 @@ class PaymentServiceTest {
             // given
             UUID paymentId = UUID.randomUUID();
             UpdatePaymentStatusRequest request = new UpdatePaymentStatusRequest(COMPLETED);
-            Payment mockPayment = mock(Payment.class);
 
             when(paymentRepository.findById(paymentId))
                 .thenReturn(Optional.empty());
@@ -359,7 +368,6 @@ class PaymentServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_NOT_FOUND);
 
             verify(paymentRepository).findById(paymentId);
-            verify(mockPayment, never()).updateStatus(any());
         }
     }
 
@@ -412,7 +420,7 @@ class PaymentServiceTest {
             paymentService.changePaymentStatus(paymentId, request);
 
             // then
-            assertThat(pendingPayment.getApprovedAt()).isNotNull();
+            assertThat(pendingPayment.getProcessedAt()).isNotNull();
         }
     }
 }
