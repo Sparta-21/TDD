@@ -78,10 +78,10 @@ public class PaymentService {
 
     @Transactional
     public void requestPayment(Long userId, PaymentRequestDto request) {
-        User user = findUser(userId);
         Order order = findOrder(request.orderId());
+        validateRequestPayment(userId, order);
 
-        validateRequestPayment(user, order);
+        User user = findUser(userId);
 
         long totalAmount = 0L;
         for (OrderMenu orderMenu : order.getOrderMenuList()) {
@@ -115,9 +115,8 @@ public class PaymentService {
             .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
     }
 
-    private void validateRequestPayment(User user, Order order) {
-        // ID로 비교 (equals() 구현에 의존하지 않음)
-        if (!order.getUser().getId().equals(user.getId())) {
+    private void validateRequestPayment(Long userId, Order order) {
+        if (!order.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.ORDER_PERMISSION_DENIED);
         }
 
