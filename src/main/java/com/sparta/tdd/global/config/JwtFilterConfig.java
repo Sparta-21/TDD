@@ -1,7 +1,7 @@
 package com.sparta.tdd.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.tdd.domain.auth.service.TokenBlacklistService;
+import com.sparta.tdd.global.jwt.JwtTokenValidator;
 import com.sparta.tdd.global.jwt.filter.JwtAuthenticationFilter;
 import com.sparta.tdd.global.jwt.filter.JwtExceptionFilter;
 import com.sparta.tdd.global.jwt.provider.JwtTokenProvider;
@@ -14,16 +14,16 @@ public class JwtFilterConfig {
 
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider accessTokenProvider;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final JwtTokenValidator jwtTokenValidator;
 
     JwtFilterConfig(
         ObjectMapper objectMapper,
         @Qualifier("accessTokenProvider") JwtTokenProvider accessTokenProvider,
-        TokenBlacklistService tokenBlacklistService
+        JwtTokenValidator jwtTokenValidator
     ) {
         this.objectMapper = objectMapper;
         this.accessTokenProvider = accessTokenProvider;
-        this.tokenBlacklistService = tokenBlacklistService;
+        this.jwtTokenValidator = jwtTokenValidator;
     }
 
     @Bean
@@ -33,6 +33,6 @@ public class JwtFilterConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(accessTokenProvider, tokenBlacklistService);
+        return new JwtAuthenticationFilter(accessTokenProvider, jwtTokenValidator);
     }
 }

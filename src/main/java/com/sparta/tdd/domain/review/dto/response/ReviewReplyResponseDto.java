@@ -1,5 +1,5 @@
 // ReviewReplyResponseDto.java
-package com.sparta.tdd.domain.review.dto;
+package com.sparta.tdd.domain.review.dto.response;
 
 import com.sparta.tdd.domain.review.entity.ReviewReply;
 
