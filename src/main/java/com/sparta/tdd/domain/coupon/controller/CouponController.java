@@ -58,7 +58,7 @@ public class CouponController {
         @RequestBody CouponRequestDto dto,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         couponService.updateCoupon(storeId, couponId, dto, userDetails.getUserId());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
@@ -67,7 +67,7 @@ public class CouponController {
         @PathVariable UUID couponId,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         couponService.deleteCoupon(storeId, couponId, userDetails.getUserId());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
 
