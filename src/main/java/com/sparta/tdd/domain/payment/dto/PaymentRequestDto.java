@@ -4,8 +4,12 @@ import com.sparta.tdd.domain.payment.enums.CardCompany;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import java.util.UUID;
 
-public record CreatePaymentRequest(
+public record PaymentRequestDto(
+    @NotNull(message = "주문 ID는 필수입니다.")
+    UUID orderId,
+
     @NotNull(message = "카드사는 필수입니다.")
     CardCompany cardCompany,
 

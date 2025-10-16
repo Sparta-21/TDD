@@ -14,7 +14,6 @@ import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.payment.entity.Payment;
-import com.sparta.tdd.domain.payment.enums.PaymentStatus;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.user.entity.User;
 import java.util.Optional;
@@ -87,14 +86,14 @@ class PaymentRepositoryTest extends RepositoryTest {
 
             // when
             Payment foundPayment = paymentRepository.findById(saved.getId()).orElseThrow();
-            foundPayment.updateStatus(COMPLETED);
+            foundPayment.approve();
             em.flush();
             em.clear();
 
             // then
             Payment updated = paymentRepository.findById(saved.getId()).orElseThrow();
             assertThat(updated.getStatus()).isEqualTo(COMPLETED);
-            assertThat(updated.getApprovedAt()).isNotNull();
+            assertThat(updated.getProcessedAt()).isNotNull();
         }
 
         @Test
@@ -315,7 +314,6 @@ class PaymentRepositoryTest extends RepositoryTest {
                 .user(customer)
                 .order(order)
                 .build();
-            payment.updateStatus(PaymentStatus.COMPLETED);
 
             Payment saved = paymentRepository.save(payment);
             em.flush();

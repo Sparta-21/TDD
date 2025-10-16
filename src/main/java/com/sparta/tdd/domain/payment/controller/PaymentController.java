@@ -1,9 +1,9 @@
 package com.sparta.tdd.domain.payment.controller;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
-import com.sparta.tdd.domain.payment.dto.CreatePaymentRequest;
 import com.sparta.tdd.domain.payment.dto.PaymentDetailResponseDto;
 import com.sparta.tdd.domain.payment.dto.PaymentListResponseDto;
+import com.sparta.tdd.domain.payment.dto.PaymentRequestDto;
 import com.sparta.tdd.domain.payment.dto.UpdatePaymentStatusRequest;
 import com.sparta.tdd.domain.payment.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -97,10 +97,13 @@ public class PaymentController {
         summary = "결제 요청",
         description = "해당하는 카드로 결제요청을 할 수 있습니다."
     )
-    @PostMapping("")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PostMapping("/request")
     public ResponseEntity<?> requestPayment(
-        @Valid @RequestBody CreatePaymentRequest request
+        @Valid @RequestBody PaymentRequestDto request,
+        @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
+        paymentService.requestPayment(userDetails.getUserId(), request);
         return ResponseEntity.ok().build();
     }
 }

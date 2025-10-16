@@ -88,4 +88,8 @@ public class Order extends BaseEntity {
     public void changeOrderStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
     }
+
+    public boolean isOwnedBy(Long userId) {
+        return this.getUser().getId().equals(userId);
+    }
 }
