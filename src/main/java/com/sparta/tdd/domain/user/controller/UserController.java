@@ -2,7 +2,7 @@ package com.sparta.tdd.domain.user.controller;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.order.dto.OrderResponseDto;
-import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewResponseDto;
 import com.sparta.tdd.domain.user.dto.*;
 import com.sparta.tdd.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

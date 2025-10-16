@@ -2,6 +2,10 @@ package com.sparta.tdd.domain.review.controller;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.review.dto.*;
+import com.sparta.tdd.domain.review.dto.request.ReviewReplyRequestDto;
+import com.sparta.tdd.domain.review.dto.request.ReviewRequestDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewReplyResponseDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewResponseDto;
 import com.sparta.tdd.domain.review.service.ReviewReplyService;
 import com.sparta.tdd.domain.review.service.ReviewService;
 import jakarta.validation.Valid;
@@ -14,8 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
