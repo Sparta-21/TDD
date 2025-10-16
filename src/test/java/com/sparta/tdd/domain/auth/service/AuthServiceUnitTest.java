@@ -97,7 +97,6 @@ public class AuthServiceUnitTest {
 
             // when
             AuthInfo result = authService.signUp(dto);
-            System.out.println("result = " + result);
 
             // then
             assertThat(result.userId()).isEqualTo(user.getId());
@@ -433,15 +432,12 @@ public class AuthServiceUnitTest {
         }
 
         @Test
-        @DisplayName("토큰 재발급 실패 - RT가 null인 경우")
-        void reissue_fail_refreshToken_isNull() {
-            // given
+        @DisplayName("토큰 재발급 실패 - RT가 없는 경우")
+        void reissue_fail_refreshToken_notFound() {
+            // given - RefreshToken이 쿠키에 없는 상황
             when(request.getCookies()).thenReturn(null);
 
-            doThrow(new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND))
-                .when(jwtTokenValidator).validateRefreshToken(null);
-
-            // when & then
+            // when & then - REFRESH_TOKEN_NOT_FOUND 예외 발생
             assertThatThrownBy(() -> authService.reissueToken(request))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.REFRESH_TOKEN_NOT_FOUND.getMessage());
