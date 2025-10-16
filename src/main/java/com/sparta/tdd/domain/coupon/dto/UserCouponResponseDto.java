@@ -1,7 +1,7 @@
 package com.sparta.tdd.domain.coupon.dto;
 
 import com.sparta.tdd.domain.coupon.entity.UserCoupon;
-import com.sparta.tdd.domain.coupon.enums.Status;
+import com.sparta.tdd.domain.coupon.enums.CouponStatus;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -10,7 +10,7 @@ public record UserCouponResponseDto(
     UUID userCouponId,
     Long userId,
     UUID couponId,
-    Status status
+    CouponStatus couponStatus
 ) {
 
     public static UserCouponResponseDto from(UserCoupon userCoupon) {
@@ -18,7 +18,7 @@ public record UserCouponResponseDto(
             .userCouponId(userCoupon.getId())
             .userId(userCoupon.getUser().getId())
             .couponId(userCoupon.getCoupon().getId())
-            .status(userCoupon.getStatus())
+            .couponStatus(userCoupon.getCouponStatus())
             .build();
     }
 }
