@@ -108,25 +108,25 @@ public class AddressService {
     private Store findStore(UUID storeId) {
         return storeRepository.findByStoreIdAndNotDeleted(storeId)
                 .orElseThrow(() -> {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
+            throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
         });
     }
     private User findUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         });
     }
     private UserAddress findUserAddress(UUID addressId) {
         return userAddressRepository.findById(addressId)
                 .orElseThrow(() -> {
-                    throw new BusinessException(ErrorCode.NOT_FOUND);
+                    throw new BusinessException(ErrorCode.ADDRESS_NOT_FOUND);
                 });
     }
     private StoreAddress findStoreAddress(UUID addressId) {
         return storeAddressRepository.findById(addressId)
                 .orElseThrow(() -> {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
+            throw new BusinessException(ErrorCode.ADDRESS_NOT_FOUND);
         });
     }
 }
