@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.cart.repository;
 
+import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.cart.entity.Cart;
 import com.sparta.tdd.domain.cart.entity.CartItem;
 import com.sparta.tdd.domain.menu.entity.Menu;
@@ -22,11 +23,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@Import({QueryDSLConfig.class, AuditConfig.class})
-@DisplayName("CartItemRepository 테스트")
-class CartItemRepositoryTest {
+class CartItemRepositoryTest extends RepositoryTest {
 
     @Autowired
     private CartItemRepository cartItemRepository;
