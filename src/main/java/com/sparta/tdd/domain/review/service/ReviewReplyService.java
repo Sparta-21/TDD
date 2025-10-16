@@ -1,7 +1,7 @@
 package com.sparta.tdd.domain.review.service;
 
-import com.sparta.tdd.domain.review.dto.ReviewReplyRequestDto;
-import com.sparta.tdd.domain.review.dto.ReviewReplyResponseDto;
+import com.sparta.tdd.domain.review.dto.request.ReviewReplyRequestDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewReplyResponseDto;
 import com.sparta.tdd.domain.review.entity.Review;
 import com.sparta.tdd.domain.review.entity.ReviewReply;
 import com.sparta.tdd.domain.review.repository.ReviewReplyRepository;
