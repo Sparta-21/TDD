@@ -34,9 +34,7 @@ public class AddressService {
     // 가게 주소 등록
     @Transactional
     public StoreAddressResponseDto createStoreAddress(UUID storeId, StoreAddressRequestDto requestDto) {
-        Store store = storeRepository.findByStoreIdAndNotDeleted(storeId).orElseThrow(() -> {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
-        });
+        Store store = findStore(storeId);
         StoreAddress storeAddress = StoreAddressRequestDto.toEntity(requestDto, store);
         storeAddressRepository.save(storeAddress);
         return StoreAddressResponseDto.from(storeAddress);
@@ -45,9 +43,7 @@ public class AddressService {
     // 회원 주소 등록
     @Transactional
     public UserAddressResponseDto createUserAddress(Long userId, UserAddressRequestDto requestDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
-        });
+        User user = findUser(userId);
         UserAddress userAddress = UserAddressRequestDto.toEntity(requestDto, user);
         userAddressRepository.save(userAddress);
         return UserAddressResponseDto.from(userAddress);
@@ -72,20 +68,14 @@ public class AddressService {
     // 주소 수정
     @Transactional
     public UserAddressResponseDto updateUserAddress(UUID addressId, UserAddressRequestDto requestDto) {
-        UserAddress userAddress = userAddressRepository.findById(addressId)
-                .orElseThrow(() -> {
-                    throw new BusinessException(ErrorCode.NOT_FOUND);
-                });
+        UserAddress userAddress = findUserAddress(addressId);
         userAddress.updateUserAddress(requestDto.jibunAddress(), requestDto.roadAddress(), requestDto.detailAddress(),
                 requestDto.alias(), requestDto.latitude(), requestDto.longitude());
         return UserAddressResponseDto.from(userAddress);
     }
     @Transactional
     public StoreAddressResponseDto updateStoreAddress(UUID addressId, StoreAddressRequestDto requestDto) {
-        StoreAddress storeAddress = storeAddressRepository.findById(addressId)
-                .orElseThrow(() -> {
-                    throw new BusinessException(ErrorCode.NOT_FOUND);
-                });
+        StoreAddress storeAddress = findStoreAddress(addressId);
         storeAddress.updateBaseAddress(requestDto.jibunAddress(), requestDto.roadAddress(), requestDto.detailAddress(),
                 requestDto.latitude(), requestDto.longitude());
         return StoreAddressResponseDto.from(storeAddress);
@@ -93,17 +83,13 @@ public class AddressService {
     // 가게 주소 삭제
     @Transactional
     public void deleteStoreAddress(UUID addressId, Long userId) {
-        StoreAddress storeAddress = storeAddressRepository.findById(addressId).orElseThrow(() -> {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
-        });
+        StoreAddress storeAddress = findStoreAddress(addressId);
         storeAddress.delete(userId);
     }
     // 회원 주소 삭제
     @Transactional
     public void deleteUserAddress(UUID addressId, Long userId) {
-        UserAddress userAddress = userAddressRepository.findById(addressId).orElseThrow(() -> {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
-        });
+        UserAddress userAddress = findUserAddress(addressId);
         userAddress.delete(userId);
     }
     // 회원 대표 주소 설정
@@ -117,6 +103,30 @@ public class AddressService {
             if (userAddress.getId().equals(addressId)) {
                 userAddress.updatePrimary();
             }
+        });
+    }
+    private Store findStore(UUID storeId) {
+        return storeRepository.findByStoreIdAndNotDeleted(storeId)
+                .orElseThrow(() -> {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        });
+    }
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        });
+    }
+    private UserAddress findUserAddress(UUID addressId) {
+        return userAddressRepository.findById(addressId)
+                .orElseThrow(() -> {
+                    throw new BusinessException(ErrorCode.NOT_FOUND);
+                });
+    }
+    private StoreAddress findStoreAddress(UUID addressId) {
+        return storeAddressRepository.findById(addressId)
+                .orElseThrow(() -> {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
         });
     }
 }
