@@ -16,7 +16,7 @@ public interface StoreRepository extends JpaRepository<Store, UUID>, StoreReposi
     Optional<Store> findByStoreIdAndNotDeleted(@Param("storeId") UUID storeId);
 
     Optional<Store> findByName(String name);
-    
+
     @Modifying
     @Query("UPDATE Store s SET s.deletedAt = :deletedAt, s.deletedBy = :deletedBy WHERE s.user.id = :userId AND s.deletedAt IS NULL")
     void bulkSoftDeleteByUserId(
@@ -26,4 +26,6 @@ public interface StoreRepository extends JpaRepository<Store, UUID>, StoreReposi
 
     @Query("SELECT s.id FROM Store s WHERE s.user.id = :userId AND s.deletedAt IS NULL")
     List<UUID> findStoreIdsByUserIdAndDeletedAtIsNull(Long userId);
+
+    boolean existsByIdAndUserIdAndDeletedAtIsNull(UUID storeId, Long userId);
 }

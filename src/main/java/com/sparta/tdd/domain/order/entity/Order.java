@@ -54,8 +54,7 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderMenu> orderMenuList;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
+    @OneToOne(mappedBy = "order")
     private Payment payment;
 
     @Builder
@@ -81,10 +80,16 @@ public class Order extends BaseEntity {
         this.orderMenuList.add(orderMenu);
         orderMenu.assignOrder(this);
     }
+
     public void nextStatus() {
         this.orderStatus = this.orderStatus.next();
     }
+
     public void changeOrderStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
+    }
+
+    public boolean isOwnedBy(Long userId) {
+        return this.getUser().getId().equals(userId);
     }
 }
