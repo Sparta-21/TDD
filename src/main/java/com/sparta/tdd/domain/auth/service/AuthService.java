@@ -10,13 +10,14 @@ import com.sparta.tdd.domain.user.repository.UserRepository;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
 import com.sparta.tdd.global.jwt.JwtTokenValidator;
-import com.sparta.tdd.global.jwt.TokenResolver;
+import com.sparta.tdd.global.jwt.RequestTokenExtractor;
 import com.sparta.tdd.global.jwt.provider.AccessTokenProvider;
 import com.sparta.tdd.global.jwt.provider.RefreshTokenProvider;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -78,11 +79,11 @@ public class AuthService {
     }
 
     public void logout(HttpServletRequest request) {
-        String accessToken = TokenResolver.extractAccessToken(request);
-        String refreshToken = TokenResolver.extractRefreshToken(request);
+        Optional<String> accessToken = RequestTokenExtractor.extractAccessToken(request);
+        Optional<String> refreshToken = RequestTokenExtractor.extractRefreshToken(request);
 
-        tokenBlacklistService.addAccessTokenToBlacklist(accessToken);
-        tokenBlacklistService.addRefreshTokenToBlacklist(refreshToken);
+        accessToken.ifPresent(tokenBlacklistService::addAccessTokenToBlacklist);
+        refreshToken.ifPresent(tokenBlacklistService::addRefreshTokenToBlacklist);
     }
 
     @Transactional
@@ -115,24 +116,35 @@ public class AuthService {
     // RTR 기법 적용 -> 유효한 RT로 AT 재발급 시 RT도 재발급 대상으로 취급
     // 유효기간이 긴 RT라는 점을 이용해 탈취당한 RT로 계속해서 AT를 재발급 받는 상황 방지
     public AuthInfo reissueToken(HttpServletRequest request) {
-        String accessToken = TokenResolver.extractAccessToken(request);
-        String refreshToken = TokenResolver.extractRefreshToken(request);
+        Optional<String> accessToken = RequestTokenExtractor.extractAccessToken(request);
+        Optional<String> refreshToken = RequestTokenExtractor.extractRefreshToken(request);
 
-        jwtTokenValidator.validateRefreshToken(refreshToken);
+        // refreshToken 검증 및 추출
+        String refreshTokenValue = refreshToken
+            .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
+        jwtTokenValidator.validateRefreshToken(refreshTokenValue);
 
-        if (accessToken != null && !accessToken.isEmpty()) {
-            tokenBlacklistService.addAccessTokenToBlacklist(accessToken);
-        }
-        tokenBlacklistService.addRefreshTokenToBlacklist(refreshToken);
+        // accessToken이 있으면 블랙리스트 추가
+        accessToken.ifPresent(tokenBlacklistService::addAccessTokenToBlacklist);
+        tokenBlacklistService.addRefreshTokenToBlacklist(refreshTokenValue);
 
-        Claims claims = refreshTokenProvider.getClaims(refreshToken);
+        Claims claims = refreshTokenProvider.getClaims(refreshTokenValue);
         Long userId = Long.parseLong(claims.getSubject());
-        Date refreshExpiration = refreshTokenProvider.getExpiration(refreshToken);
+        Date refreshExpiration = refreshTokenProvider.getExpiration(refreshTokenValue);
+
+        // TODO 각 도메인별 유틸(쿼리) 서비스 클래스로 리팩토링 하면 어떨까 싶습니다
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (user.isDeleted()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
 
-        String newAccessToken = accessTokenProvider.generateToken(user.getUsername(), userId, user.getAuthority());
-        String newRefreshToken = refreshTokenProvider.generateReissueToken(userId, refreshExpiration);
+        String newAccessToken = accessTokenProvider.generateToken(
+            user.getUsername(), userId, user.getAuthority()
+        );
+        String newRefreshToken = refreshTokenProvider.generateReissueToken(
+            userId, refreshExpiration
+        );
 
         return new AuthInfo(userId, newAccessToken, newRefreshToken);
     }
