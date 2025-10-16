@@ -77,7 +77,9 @@ public enum ErrorCode {
     COUPON_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
 
     // ADDRESS 도메인 관련
-    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "주소를 찾을 수 없습니다.");
+    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "주소를 찾을 수 없습니다."),
+    ADDRESS_STORE_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 가게의 소유자만 주소를 수정할 수 있습니다."),
+    ADDRESS_USER_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "본인의 주소만 수정할 수 있습니다.");
 
     private final HttpStatus status;
     private final String message;

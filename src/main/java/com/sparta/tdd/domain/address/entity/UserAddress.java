@@ -1,6 +1,8 @@
 package com.sparta.tdd.domain.address.entity;
 
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,5 +41,10 @@ public class UserAddress extends BaseAddress {
     }
     public void updatePrimary() {
         this.isPrimary = !isPrimary;
+    }
+    public void validateUser(Long id) {
+        if (!user.isSameId(id)) {
+            throw new BusinessException(ErrorCode.ADDRESS_USER_PERMISSION_DENIED);
+        }
     }
 }

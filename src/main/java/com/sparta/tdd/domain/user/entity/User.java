@@ -48,6 +48,12 @@ public class User extends BaseEntity {
         this.authority = authority;
     }
 
+    public boolean isSameId(Long id) {
+        if (this.id != id) {
+            return false;
+        }
+        return true;
+    }
     public boolean isOwnerLevel() {
         return EnumSet.of(UserAuthority.OWNER, UserAuthority.MANAGER, UserAuthority.MASTER)
             .contains(this.authority);

@@ -84,12 +84,17 @@ public class AddressService {
     @Transactional
     public void deleteStoreAddress(UUID addressId, Long userId) {
         StoreAddress storeAddress = findStoreAddress(addressId);
+        User user = findUser(userId);
+
+        storeAddress.validateOwner(user);
         storeAddress.delete(userId);
     }
     // 회원 주소 삭제
     @Transactional
     public void deleteUserAddress(UUID addressId, Long userId) {
         UserAddress userAddress = findUserAddress(addressId);
+
+        userAddress.validateUser(userId);
         userAddress.delete(userId);
     }
     // 회원 대표 주소 설정
