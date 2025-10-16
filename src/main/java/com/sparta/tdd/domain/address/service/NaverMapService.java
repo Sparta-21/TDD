@@ -16,10 +16,10 @@ import java.util.List;
 @Service
 public class NaverMapService {
 
-    @Value("${NAVER_CLIENT_ID}")
+    @Value("${naver.client.id}")
     private String clientId;
 
-    @Value("${NAVER_CLIENT_SECRET}")
+    @Value("${naver.client.secret}")
     private String secretId;
 
     private RestClient restClient;
