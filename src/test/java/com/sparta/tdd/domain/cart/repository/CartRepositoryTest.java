@@ -7,12 +7,15 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
+import com.sparta.tdd.global.config.AuditConfig;
+import com.sparta.tdd.global.config.QueryDSLConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
@@ -21,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@Import({QueryDSLConfig.class, AuditConfig.class})
 @DisplayName("CartRepository 테스트")
 class CartRepositoryTest {
 
@@ -78,7 +82,7 @@ class CartRepositoryTest {
 
     @Test
     @DisplayName("사용자 ID로 삭제되지 않은 장바구니 조회 - 성공")
-    void 장바구니조회() {
+    void findByCart() {
         // given
         Cart cart = Cart.builder()
                 .user(user)
@@ -97,7 +101,7 @@ class CartRepositoryTest {
 
     @Test
     @DisplayName("사용자 ID로 삭제되지 않은 장바구니 조회 - 장바구니가 없을 때")
-    void 빈장바구니조회() {
+    void emptyCart() {
         // when
         Optional<Cart> result = cartRepository.findByUserIdAndNotDeleted(user.getId());
 
