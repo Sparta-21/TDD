@@ -5,6 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Status {
+public enum CouponStatus {
     ACTIVE, USED, EXPIRED;
 }

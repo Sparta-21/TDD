@@ -1,6 +1,6 @@
 package com.sparta.tdd.domain.coupon.entity;
 
-import com.sparta.tdd.domain.coupon.enums.Status;
+import com.sparta.tdd.domain.coupon.enums.CouponStatus;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.Column;
@@ -38,7 +38,7 @@ public class UserCoupon extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status = Status.ACTIVE;
+    private CouponStatus couponStatus = CouponStatus.ACTIVE;
 
     @Column(name = "used_at")
     private LocalDateTime usedAt;
@@ -57,7 +57,7 @@ public class UserCoupon extends BaseEntity {
         this.coupon = coupon;
     }
 
-    public void updateStatus(Status newStatus) {
-        this.status = newStatus;
+    public void updateStatus(CouponStatus newCouponStatus) {
+        this.couponStatus = newCouponStatus;
     }
 }
