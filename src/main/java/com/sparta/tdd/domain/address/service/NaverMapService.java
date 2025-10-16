@@ -3,23 +3,18 @@ package com.sparta.tdd.domain.address.service;
 import com.sparta.tdd.domain.address.dto.AddressResponseDto;
 import com.sparta.tdd.domain.address.dto.naver.NaverAddress;
 import com.sparta.tdd.domain.address.dto.naver.NaverAddressResponse;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
 @Service
 public class NaverMapService {
-
-    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${NAVER_CLIENT_ID}")
     private String clientId;
@@ -27,17 +22,26 @@ public class NaverMapService {
     @Value("${NAVER_CLIENT_SECRET}")
     private String secretId;
 
+    private RestClient restClient;
+
+    @PostConstruct
+    public void init() {
+        this.restClient = RestClient.builder()
+                .defaultHeader("X-NCP-APIGW-API-KEY-ID", clientId)
+                .defaultHeader("X-NCP-APIGW-API-KEY", secretId)
+                .build();
+    }
     public Page<AddressResponseDto> getAddress(String address, Pageable pageable) {
-        String url = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query=" + address;
-
-        HttpHeaders header = new HttpHeaders();
-        header.set("X-NCP-APIGW-API-KEY-ID", clientId);
-        header.set("X-NCP-APIGW-API-KEY", secretId);
-
-        HttpEntity<Object> httpEntity = new HttpEntity<>(header);
-        ResponseEntity<NaverAddressResponse> response = restTemplate.exchange(url, HttpMethod.GET, httpEntity, NaverAddressResponse.class);
-
-        List<NaverAddress> addresses = response.getBody().addresses();
+        NaverAddressResponse response = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .host("maps.apigw.ntruss.com")
+                        .path("/map-geocode/v2/geocode")
+                        .queryParam("query", address)
+                        .build())
+                .retrieve()
+                .body(NaverAddressResponse.class);
+        List<NaverAddress> addresses = response.addresses();
         Page<NaverAddress> naverAddresses = new PageImpl<>(addresses, pageable, addresses.size());
         return naverAddresses.map(AddressResponseDto::from);
     }
