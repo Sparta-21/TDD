@@ -17,6 +17,8 @@ import com.sparta.tdd.domain.user.enums.UserAuthority;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,8 +114,8 @@ class OrderRepositoryTest
         target = em.persist(orderOf(ownerStore, owner, "targetAdd", OrderStatus.PENDING));
         otherOrderSameStore = em.persist(orderOf(ownerStore, owner, "targetAdd", OrderStatus.PENDING));
         orderDifferentStore = em.persist(orderOf(otherStore, other, "targetAdd", OrderStatus.PENDING));
-        Menu menu1 = em.persist(menuOf(ownerStore, "menu-1", 5000));
-        OrderMenu om1 = em.persist(orderMenuOf(target, menu1, 2, 10000));
+        menu1 = em.persist(menuOf(ownerStore, "menu-1", 5000));
+        om1 = em.persist(orderMenuOf(target, menu1, 2, 10000));
         em.flush();
         em.clear();
     }
@@ -197,12 +199,12 @@ class OrderRepositoryTest
         }
 
         @Test
-        @DisplayName("전체조회: page=0,size=10, createdAt DESC → 총40, 첫페이지10, 내림차순")
+        @DisplayName("전체조회: page=0,size=10, createdAt DESC → 총43, 첫페이지10, 내림차순")
         void page0_size10_sortedByCreatedAtDesc_all() {
             // given
-            seedOrders(23, 17); // 총 40건
-            var pageable = org.springframework.data.domain.PageRequest.of(
-                0, 10, org.springframework.data.domain.Sort.by("createdAt").descending());
+            seedOrders(23, 17); // 총 40건 beforeEach 3건 포함 43건
+            var pageable = PageRequest.of(
+                0, 10, Sort.by("createdAt").descending());
             var opt = new OrderSearchOptionDto(null, null, null, null, null);
 
             // when
@@ -210,17 +212,20 @@ class OrderRepositoryTest
 
             // then
             var ids = page.getContent();
-            org.junit.jupiter.api.Assertions.assertAll(
-                () -> org.junit.jupiter.api.Assertions.assertEquals(10, ids.size()),
-                () -> org.junit.jupiter.api.Assertions.assertEquals(43, page.getTotalElements()),
+            Assertions.assertAll(
+                () -> Assertions.assertEquals(10, ids.size()),
+                () -> Assertions.assertEquals(43, page.getTotalElements()),
                 () -> {
-                    var firstTwo = ids.stream().limit(2).toList();
+                    var firstTwo = ids.stream()
+                            .limit(2)
+                            .toList();
                     var orders = orderRepository.findDetailsByIdIn(firstTwo);
-                    var map = orders.stream().collect(java.util.stream.Collectors.toMap(Order::getId, o -> o));
+                    var map = orders.stream()
+                            .collect(Collectors.toMap(Order::getId, o -> o));
 
                     var o0 = map.get(firstTwo.get(0));
                     var o1 = map.get(firstTwo.get(1));
-                    org.junit.jupiter.api.Assertions.assertTrue(
+                    Assertions.assertTrue(
                         !o0.getCreatedAt().isBefore(o1.getCreatedAt()),
                         "createdAt must be DESC");
                 }
@@ -232,8 +237,8 @@ class OrderRepositoryTest
         void page0_size10_sortedByCreatedAtDesc_ownerOnly() {
             // given
             seedOrders(23, 17);
-            var pageable = org.springframework.data.domain.PageRequest.of(
-                0, 10, org.springframework.data.domain.Sort.by("createdAt").descending());
+            var pageable = PageRequest.of(
+                0, 10, Sort.by("createdAt").descending());
             var opt = new OrderSearchOptionDto(null, null, owner.getId(), null, null);
 
             // when
@@ -242,18 +247,20 @@ class OrderRepositoryTest
             // then
             var ids = page.getContent();
             var orders = orderRepository.findDetailsByIdIn(ids);
-            var map = orders.stream().collect(java.util.stream.Collectors.toMap(Order::getId, o -> o));
-            var firstTwo = ids.stream().limit(2).toList();
+            var map = orders.stream().collect(Collectors.toMap(Order::getId, o -> o));
+            var firstTwo = ids.stream()
+                    .limit(2)
+                    .toList();
             var o0 = map.get(firstTwo.get(0));
             var o1 = map.get(firstTwo.get(1));
 
             org.junit.jupiter.api.Assertions.assertAll(
-                () -> org.junit.jupiter.api.Assertions.assertEquals(10, ids.size()),
-                () -> org.junit.jupiter.api.Assertions.assertEquals(25, page.getTotalElements()),
-                () -> org.junit.jupiter.api.Assertions.assertTrue(
+                () -> Assertions.assertEquals(10, ids.size()),
+                () -> Assertions.assertEquals(25, page.getTotalElements()),
+                () -> Assertions.assertTrue(
                     orders.stream().allMatch(o -> o.getStore().getUser().getId().equals(owner.getId())),
                     "모든 결과가 owner 소유여야 함"),
-                () -> org.junit.jupiter.api.Assertions.assertTrue(
+                () -> Assertions.assertTrue(
                     !o0.getCreatedAt().isBefore(o1.getCreatedAt()),
                     "createdAt 내림차순 정렬")
             );
