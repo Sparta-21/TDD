@@ -55,7 +55,7 @@ public class PaymentController {
     public ResponseEntity<Page<PaymentListResponseDto>> getStorePaymentHistory(
         @AuthenticationPrincipal UserDetailsImpl userDetails,
         @PathVariable(name = "storeId") UUID storeId,
-        @PageableDefault Pageable pageable,
+        Pageable pageable,
         @RequestParam(required = false) String keyword
     ) {
         Page<PaymentListResponseDto> response = paymentService.getStorePaymentHistory(userDetails.getUserId(), storeId,

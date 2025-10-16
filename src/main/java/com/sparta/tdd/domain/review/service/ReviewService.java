@@ -2,9 +2,9 @@ package com.sparta.tdd.domain.review.service;
 
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
-import com.sparta.tdd.domain.review.dto.ReviewRequestDto;
-import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
-import com.sparta.tdd.domain.review.dto.ReviewUpdateDto;
+import com.sparta.tdd.domain.review.dto.*;
+import com.sparta.tdd.domain.review.dto.request.ReviewRequestDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewResponseDto;
 import com.sparta.tdd.domain.review.entity.Review;
 import com.sparta.tdd.domain.review.entity.ReviewReply;
 import com.sparta.tdd.domain.review.repository.ReviewReplyRepository;
@@ -21,9 +21,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +60,7 @@ public class ReviewService {
     public ReviewResponseDto updateReview(UUID reviewId, Long userId, ReviewUpdateDto request) {
         Review review = findReviewById(reviewId);
 
-        if (!isQualified(review, userId)) {
+        if (!isQualified(review,userId)) {
             throw new BusinessException(ErrorCode.REVIEW_NOT_OWNED);
         }
 
@@ -74,7 +80,7 @@ public class ReviewService {
         }
 
         ReviewResponseDto.ReviewReplyInfo replyInfo =
-            new ReviewResponseDto.ReviewReplyInfo(reply.getContent());
+                new ReviewResponseDto.ReviewReplyInfo(reply.getContent());
         return ReviewResponseDto.from(review, replyInfo);
     }
 
@@ -83,19 +89,19 @@ public class ReviewService {
         Page<Review> reviews = reviewRepository.findPageByStoreIdAndNotDeleted(storeId, pageable);
 
         List<UUID> reviewIds = reviews.getContent().stream()
-            .map(Review::getId)
-            .toList();
+                .map(Review::getId)
+                .toList();
 
         Map<UUID, ReviewReply> replyMap = reviewReplyRepository.findByReviewIdsAndNotDeleted(reviewIds)
-            .stream()
-            .collect(Collectors.toMap(ReviewReply::getReviewId, reply -> reply));
+                .stream()
+                .collect(Collectors.toMap(ReviewReply::getReviewId, reply -> reply));
 
         return reviews.map(review -> {
             ReviewReply reply = replyMap.get(review.getId());
 
             if (reply != null) {
                 ReviewResponseDto.ReviewReplyInfo replyInfo =
-                    new ReviewResponseDto.ReviewReplyInfo(reply.getContent());
+                        new ReviewResponseDto.ReviewReplyInfo(reply.getContent());
                 return ReviewResponseDto.from(review, replyInfo);
             }
 

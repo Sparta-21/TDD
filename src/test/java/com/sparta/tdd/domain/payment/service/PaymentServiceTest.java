@@ -19,11 +19,11 @@ import static org.mockito.Mockito.when;
 
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
+import com.sparta.tdd.domain.order.dto.OrderItemInfoDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.payment.dto.PaymentDetailResponseDto;
-import com.sparta.tdd.domain.payment.dto.PaymentDetailResponseDto.OrderItemInfo;
 import com.sparta.tdd.domain.payment.dto.PaymentListResponseDto;
 import com.sparta.tdd.domain.payment.dto.UpdatePaymentStatusRequest;
 import com.sparta.tdd.domain.payment.entity.Payment;
@@ -381,7 +381,7 @@ class PaymentServiceTest {
 
             // then
             int orderTotal = result.orderItem().stream()
-                .mapToInt(OrderItemInfo::totalPrice)
+                .mapToInt(OrderItemInfoDto::totalPrice)
                 .sum();
 
             assertThat(result.price()).isEqualTo(orderTotal);

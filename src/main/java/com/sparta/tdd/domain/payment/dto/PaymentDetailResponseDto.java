@@ -1,11 +1,10 @@
 package com.sparta.tdd.domain.payment.dto;
 
-import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
+import com.sparta.tdd.domain.order.dto.OrderItemInfoDto;
 import com.sparta.tdd.domain.payment.entity.Payment;
-import com.sparta.tdd.domain.store.entity.Store;
+import com.sparta.tdd.domain.store.dto.StoreSimpleInfoDto;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public record PaymentDetailResponseDto(
     String paymentNumber,
@@ -13,13 +12,13 @@ public record PaymentDetailResponseDto(
     String cardCompany,
     String cardNumber,
     LocalDateTime processedAt,
-    RestaurantInfo restaurant,
-    List<OrderItemInfo> orderItem
+    StoreSimpleInfoDto restaurant,
+    List<OrderItemInfoDto> orderItem
 ) {
 
     public static PaymentDetailResponseDto from(Payment payment) {
-        RestaurantInfo restaurantInfo = RestaurantInfo.from(payment.getOrder().getStore());
-        List<OrderItemInfo> orderItems = OrderItemInfo.fromList(payment.getOrder().getOrderMenuList());
+        StoreSimpleInfoDto restaurantInfo = StoreSimpleInfoDto.from(payment.getOrder().getStore());
+        List<OrderItemInfoDto> orderItems = OrderItemInfoDto.fromList(payment.getOrder().getOrderMenuList());
 
         return new PaymentDetailResponseDto(
             payment.getNumber(),
@@ -51,43 +50,5 @@ public record PaymentDetailResponseDto(
         }
 
         return firstFour + " " + masked + " " + lastFour;
-    }
-
-    public record RestaurantInfo(
-        UUID id,
-        String storeName
-    ) {
-
-        public static RestaurantInfo from(Store store) {
-            return new RestaurantInfo(
-                store.getId(),
-                store.getName()
-            );
-        }
-    }
-
-    public record OrderItemInfo(
-        UUID id,
-        String menuName,
-        Integer quantity,
-        Integer price,
-        Integer totalPrice
-    ) {
-
-        public static OrderItemInfo from(OrderMenu orderMenu) {
-            return new OrderItemInfo(
-                orderMenu.getId(),
-                orderMenu.getMenu().getName(),
-                orderMenu.getQuantity(),
-                orderMenu.getPrice(),
-                orderMenu.getPrice() * orderMenu.getQuantity()
-            );
-        }
-
-        public static List<OrderItemInfo> fromList(List<OrderMenu> orderMenuList) {
-            return orderMenuList.stream()
-                .map(OrderItemInfo::from)
-                .toList();
-        }
     }
 }

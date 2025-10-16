@@ -4,7 +4,7 @@ import com.sparta.tdd.domain.order.dto.OrderResponseDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.mapper.OrderMapper;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
-import com.sparta.tdd.domain.review.dto.ReviewResponseDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewResponseDto;
 import com.sparta.tdd.domain.review.entity.Review;
 import com.sparta.tdd.domain.review.repository.ReviewRepository;
 import com.sparta.tdd.domain.user.dto.UserNicknameRequestDto;
