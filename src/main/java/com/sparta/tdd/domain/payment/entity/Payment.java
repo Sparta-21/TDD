@@ -4,6 +4,8 @@ import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.payment.enums.CardCompany;
 import com.sparta.tdd.domain.payment.enums.PaymentStatus;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.global.exception.BusinessException;
+import com.sparta.tdd.global.exception.ErrorCode;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,8 +54,8 @@ public class Payment extends BaseEntity {
     @Column(name = "status", nullable = false, length = 20)
     private PaymentStatus status = PaymentStatus.PENDING;
 
-    @Column(name = "approved_at")
-    private LocalDateTime approvedAt;
+    @Column(name = "processed_at")
+    private LocalDateTime processedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -75,10 +77,27 @@ public class Payment extends BaseEntity {
         this.order = order;
     }
 
-    public void updateStatus(PaymentStatus status) {
-        this.status = status;
-        if (status == PaymentStatus.COMPLETED) {
-            this.approvedAt = LocalDateTime.now();
+    public void approve() {
+        validateStatusTransition(PaymentStatus.COMPLETED);
+        this.status = PaymentStatus.COMPLETED;
+        this.processedAt = LocalDateTime.now();
+    }
+
+    public void cancel() {
+        validateStatusTransition(PaymentStatus.CANCELLED);
+        this.status = PaymentStatus.CANCELLED;
+        this.processedAt = LocalDateTime.now();
+    }
+
+    public void fail() {
+        validateStatusTransition(PaymentStatus.FAILED);
+        this.status = PaymentStatus.FAILED;
+        this.processedAt = LocalDateTime.now();
+    }
+
+    private void validateStatusTransition(PaymentStatus newStatus) {
+        if (!newStatus.canTransitionFrom(this.status)) {
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT_REQUEST);
         }
     }
 }
