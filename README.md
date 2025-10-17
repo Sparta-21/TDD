@@ -21,7 +21,7 @@ TDD(Today Delicious Delivery)는 이름 그대로 '오늘의 맛있는 배달' �
 | 분류                  | 상세                                                                         |
 |---------------------|----------------------------------------------------------------------------|
 | **Back-End**        | Java 21, Spring Boot 3.5.6, Spring Data JPA, Querydsl 7.0, Spring Security |
-| **Database**        | PostgreSQL 18.0                                                            |
+ **Database**        | PostgreSQL 17.6                                                            |
 | **Build Tool**      | Gradle                                                                     |
 | **Infra**           | Docker compose, Github Actions(CI)                                         |
 | **open API**        | Google GenAI API, Naver Map API                                            |
