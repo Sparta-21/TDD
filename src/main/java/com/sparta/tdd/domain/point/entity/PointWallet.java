@@ -44,4 +44,14 @@ public class PointWallet extends BaseEntity {
     public void addBalance(Long earnAmount) {
         this.balance += earnAmount;
     }
+
+    public Long subtractBalance(Long amount) {
+        if (this.balance < amount) {
+            Long currentBalance = this.balance;
+            this.balance = 0L;
+            return amount - currentBalance;
+        }
+        this.balance -= amount;
+        return amount;
+    }
 }

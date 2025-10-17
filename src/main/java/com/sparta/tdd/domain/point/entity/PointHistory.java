@@ -1,6 +1,6 @@
 package com.sparta.tdd.domain.point.entity;
 
-import com.sparta.tdd.domain.point.dto.PointEarnRequest;
+import com.sparta.tdd.domain.point.dto.PointRequest;
 import com.sparta.tdd.domain.point.enums.PointType;
 import com.sparta.tdd.global.model.BaseEntity;
 import jakarta.persistence.Column;
@@ -63,7 +63,7 @@ public class PointHistory extends BaseEntity {
         this.expireAt = expireAt;
     }
 
-    public static PointHistory create(PointWallet wallet, PointEarnRequest request,
+    public static PointHistory create(PointWallet wallet, PointRequest request,
         LocalDateTime expireAt) {
         return PointHistory.builder()
             .wallet(wallet)

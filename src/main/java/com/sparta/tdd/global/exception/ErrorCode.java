@@ -61,6 +61,7 @@ public enum ErrorCode {
     GET_STORE_PAYMENT_DENIED(HttpStatus.FORBIDDEN, "본인의 상점의 결제 내역만 조회할 수 있습니다."),
     PAYMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "주문에 대한 결제건이 이미 존재합니다."),
     INVALID_PAYMENT_REQUEST(HttpStatus.BAD_REQUEST, "올바른 주문 요청이 아닙니다."),
+    POINT_PROCESSING_FAILED(HttpStatus.BAD_REQUEST, "포인트 적립 관련 오류입니다."),
 
     // AI 도메인 관련
 
@@ -69,7 +70,8 @@ public enum ErrorCode {
     CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니 아이템을 찾을 수 없습니다."),
     CART_ITEM_INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "수량은 1개 이상이어야 합니다."),
     CART_ITEM_NOT_OWNED(HttpStatus.FORBIDDEN, "본인의 장바구니 아이템만 수정할 수 있습니다."),
-    CART_DIFFERENT_STORE(HttpStatus.BAD_REQUEST, "장바구니에는 한 가게의 메뉴만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요."),
+    CART_DIFFERENT_STORE(HttpStatus.BAD_REQUEST,
+        "장바구니에는 한 가게의 메뉴만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요."),
 
     // COUPON 도메인 관련
     COUPON_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Scope 설정이 잘못되었습니다."),

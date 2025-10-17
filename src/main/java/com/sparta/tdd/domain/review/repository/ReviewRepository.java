@@ -56,5 +56,6 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     @Query("SELECT r.id FROM Review r WHERE r.store.id IN :storeIds AND r.deletedAt IS NULL")
     List<UUID> findReviewIdsByStoreIds(@Param("storeIds") List<UUID> storeIds);
 
-
+    @Query("SELECT COUNT(r) > 0 FROM Review r WHERE r.order.id = :orderId AND r.deletedAt IS NULL")
+    boolean existsByOrderId(@Param("orderId") UUID orderId);
 }

@@ -38,8 +38,6 @@ public class PaymentResultProcessService {
 
         // 주문 상태 변경 (PENDING -> DELIVERED)
         order.nextStatus();
-
-        // TODO: 포인트 적립
     }
 
     private void processCancelled(Payment payment, Order order) {
