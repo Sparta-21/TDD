@@ -90,4 +90,9 @@ public class Store extends BaseEntity {
     public boolean isOwner(User user) {
         return this.getUser().getId().equals(user.getId());
     }
+
+    public void updateRatingInfo(BigDecimal newAvgRating, Integer newReviewCount) {
+        this.avgRating = newAvgRating;
+        this.reviewCount = newReviewCount;
+    }
 }
