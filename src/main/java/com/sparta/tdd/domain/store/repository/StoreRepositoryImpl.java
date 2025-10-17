@@ -9,6 +9,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.menu.entity.QMenu;
 import com.sparta.tdd.domain.order.entity.QOrder;
+import com.sparta.tdd.domain.store.dto.StoreResponseDto;
 import com.sparta.tdd.domain.store.entity.QStore;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.QUser;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -24,15 +27,55 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
+//    @Override
+//    public List<UUID> findPagedStoreIdsByKeyword(Pageable pageable, String keyword,
+//        StoreCategory storeCategory) {
+//
+//        QStore store = QStore.store;
+//        QMenu menu = QMenu.menu;
+//        QOrder order = QOrder.order;
+//
+//        return queryFactory
+//            .select(store.id)
+//            .from(store)
+//            .leftJoin(menu).on(menu.store.eq(store))
+//            .where(
+//                storeIsNotDeleted(),
+//                menuIsNotHidden(),
+//                storeCategoryEq(storeCategory),
+//                storeNameLike(keyword)
+//                    .or(menuNameLike(keyword))
+//            )
+//            .groupBy(store.id)
+//            .orderBy(toOrderSpecifiers(pageable, store, order))
+//            .offset(pageable.getOffset())
+//            .limit(pageable.getPageSize())
+//            .fetch();
+//    }
+
     @Override
-    public List<UUID> findPagedStoreIdsByKeyword(Pageable pageable, String keyword,
+    public Page<StoreResponseDto> findPagedStoreIdsByKeyword(Pageable pageable, String keyword,
         StoreCategory storeCategory) {
 
         QStore store = QStore.store;
         QMenu menu = QMenu.menu;
-        QOrder order = QOrder.order;
 
-        return queryFactory
+        List<StoreResponseDto> content = queryFactory
+            .select(StoreResponseDto.qConstructor(store, menu))
+            .from(store)
+            .leftJoin(menu).on(menu.store.eq(store)).fetchJoin()
+            .where(
+                storeIsNotDeleted(),
+                menuIsNotHidden(),
+                storeCategoryEq(storeCategory),
+                storeNameLike(keyword).or(menuNameLike(keyword))
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .distinct()
+            .fetch();
+
+        long total = queryFactory
             .select(store.id)
             .from(store)
             .leftJoin(menu).on(menu.store.eq(store))
@@ -43,11 +86,11 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
                 storeNameLike(keyword)
                     .or(menuNameLike(keyword))
             )
-            .groupBy(store.id)
-            .orderBy(toOrderSpecifiers(pageable, store, order))
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
+            .distinct()
+            .fetch()
+            .size();
+
+        return new PageImpl<>(content, pageable, total);
     }
 
     @Override

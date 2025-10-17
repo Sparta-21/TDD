@@ -6,7 +6,6 @@ import com.sparta.tdd.domain.store.dto.StoreResponseDto;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.service.StoreService;
 import jakarta.validation.Valid;
-import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,8 +29,18 @@ public class StoreController {
 
     private final StoreService storeService;
 
+//    @GetMapping
+//    public ResponseEntity<Page<StoreResponseDto>> searchStores(
+//        @RequestParam(required = false) String keyword,
+//        @RequestParam(required = false) StoreCategory storeCategory,
+//        Pageable pageable) {
+//        Page<StoreResponseDto> responseDto = storeService.searchStoresByKeywordAndCategoryWithMenus(
+//            keyword, storeCategory, pageable);
+//        return ResponseEntity.ok(responseDto);
+//    }
+
     @GetMapping
-    public ResponseEntity<Page<StoreResponseDto>> searchStores(
+    public ResponseEntity<Page<StoreResponseDto>> searchStores2(
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) StoreCategory storeCategory,
         Pageable pageable) {
@@ -41,26 +49,26 @@ public class StoreController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
-    @PostMapping
-    public ResponseEntity<StoreResponseDto> createStore(
-        @Valid @RequestBody StoreRequestDto requestDto,
-        @AuthenticationPrincipal UserDetailsImpl user) {
+//    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
+//    @PostMapping
+//    public ResponseEntity<StoreResponseDto> createStore(
+//        @Valid @RequestBody StoreRequestDto requestDto,
+//        @AuthenticationPrincipal UserDetailsImpl user) {
+//
+//        StoreResponseDto responseDto = storeService.createStore(user.getUserId(), requestDto);
+//
+//        URI location = URI.create("/v1/stores/" + responseDto.id());
+//
+//        return ResponseEntity
+//            .created(location)
+//            .body(responseDto);
+//    }
 
-        StoreResponseDto responseDto = storeService.createStore(user.getUserId(), requestDto);
-
-        URI location = URI.create("/v1/stores/" + responseDto.id());
-
-        return ResponseEntity
-            .created(location)
-            .body(responseDto);
-    }
-
-    @GetMapping("{storeId}")
-    public ResponseEntity<StoreResponseDto> getStore(@PathVariable UUID storeId) {
-        StoreResponseDto responseDto = storeService.getStore(storeId);
-        return ResponseEntity.ok(responseDto);
-    }
+//    @GetMapping("{storeId}")
+//    public ResponseEntity<StoreResponseDto> getStore(@PathVariable UUID storeId) {
+//        StoreResponseDto responseDto = storeService.getStore(storeId);
+//        return ResponseEntity.ok(responseDto);
+//    }
 
     @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PatchMapping("{storeId}")
