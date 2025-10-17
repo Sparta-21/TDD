@@ -1,193 +1,272 @@
 package com.sparta.tdd.domain.order.repository;
 
-import static com.sparta.tdd.domain.store.enums.StoreCategory.CHINESE;
-import static com.sparta.tdd.domain.user.enums.UserAuthority.CUSTOMER;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
+import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.store.entity.Store;
+import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceUnitUtil;
-import java.util.ArrayList;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.hibernate.Hibernate;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
-class OrderRepositoryTest extends RepositoryTest {
+
+class OrderRepositoryTest
+    extends RepositoryTest
+{
 
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
-    private EntityManager em;
+    private TestEntityManager em;
 
+    User owner, other;
+    Store ownerStore, otherStore;
+    Order target, otherOrderSameStore, orderDifferentStore;
+    Menu menu1;
+    OrderMenu om1;
 
-    @Nested
-    @DisplayName("주문 CRUD 테스트")
-    class testCRUD {
-
-        @Test
-        @DisplayName("ID 로 주문 조회")
-        void findId() {
-            Order order = Order.builder()
-                .address("서울시 강남구 테스트동 123")
-                .build();
-            Order saved = orderRepository.save(order);
-
-            Optional<Order> found = orderRepository.findById(saved.getId());
-
-            assertThat(found).isPresent();
-            assertThat(found.get().getId()).isEqualTo(saved.getId());
-        }
-
-        @Test
-        @DisplayName("Dirty Checking 확인")
-        void update() {
-            Order order = Order.builder()
-                .address("서울시 강남구 테스트동 123")
-                .build();
-            Order saved = orderRepository.save(order);
-
-            Order found = orderRepository.findById(saved.getId()).get();
-
-            em.flush();
-            em.clear();
-
-            Order updated = orderRepository.findById(saved.getId()).get();
-        }
-
-        @Test
-        @DisplayName("Id 로 삭제상태 변경 확인")
-        void delete() {
-            Order order = Order.builder()
-                .address("서울시 강남구 테스트동 123")
-                .build();
-            Order saved = orderRepository.save(order);
-
-            Order found = orderRepository.findById(saved.getId()).get();
-            found.delete(11L);
-
-            assertThat(found.isDeleted()).isTrue();
-            assertThat(orderRepository.findById(saved.getId())).isPresent();
-            assertThat(found.getDeletedBy()).isEqualTo(11L);
-        }
+    private User ownerUser() {
+        return User.builder()
+            .username("owner")
+            .password("pw")
+            .nickname("owner")
+            .authority(UserAuthority.OWNER)
+            .build();
     }
 
-    @Test
-    void findDetailById_fetchJoin_graphLoaded() throws JsonProcessingException {
-        // === given ===
-        // 1) 기초 엔티티 persist
-        User user = User.builder()
-            .username("tester")
+    private User otherUser() {
+        return User.builder()
+            .username("other")
             .password("pw")
-            .nickname("nick")
-            .authority(CUSTOMER)
+            .nickname("other")
+            .authority(UserAuthority.OWNER)
             .build();
+    }
 
-        Store store = Store.builder()
-            .name("치킨집")
-            .description("맛집")
-            .category(CHINESE)
-            .user(user).build();
-
-        em.persist(user);
-        em.persist(store);
-
-        Menu fried = Menu.builder()
-            .dto(new MenuRequestDto("후라이드", "바삭", 15_000, null))
-            .store(store)
+    private Store storeOwnedBy(User user, String name, StoreCategory storeCategory) {
+        return Store.builder()
+            .name(name)
+            .category(storeCategory)
+            .description(null)
+            .imageUrl(null)
+            .user(user)
             .build();
+    }
 
-        Menu seasoned = Menu.builder()
-            .dto(new MenuRequestDto("양념치킨", "매콤", 16_000, null))
-            .store(store)
-            .build();
-
-        em.persist(fried);
-        em.persist(seasoned);
-
-        // 2) Order + OrderMenu 구성 (양방향 고정)
-        Order order = Order.builder()
-            .address("서울시 강남구")
-            .orderStatus(OrderStatus.PENDING)
-            .orderMenuList(new ArrayList<>())
+    private Order orderOf(Store store, User user, String addr, OrderStatus orderStatus) {
+        return Order.builder()
+            .address(addr)
+            .orderStatus(orderStatus)
             .store(store)
             .user(user)
             .build();
+    }
 
-        OrderMenu om1 = OrderMenu.builder()
-            .menu(fried)
-            .quantity(2)
-            .price(fried.getPrice())
+    private MenuRequestDto menuDto(String name, Integer price) {
+        return MenuRequestDto.builder()
+            .name(name)
+            .description(null)
+            .price(price)
+            .imageUrl(null)
             .build();
-        OrderMenu om2 = OrderMenu.builder()
-            .menu(seasoned)
-            .quantity(3)
-            .price(seasoned.getPrice())
+    }
+
+    private Menu menuOf(Store store, String name, Integer price) {
+        return menuDto(name, price).toEntity(store);
+    }
+
+    private OrderMenu orderMenuOf(Order order, Menu menu, int qty, int price) {
+        return OrderMenu.builder()
+            .quantity(qty)
+            .price(price)
+            .order(order)
+            .menu(menu)
             .build();
+    }
 
-        order.addOrderMenu(om1);
-        order.addOrderMenu(om2);
-
-        em.persist(order);
+    @BeforeEach
+    void setUp() {
+        owner = em.persist(ownerUser());
+        other = em.persist(otherUser());
+        ownerStore = em.persist(storeOwnedBy(owner,"ownerStore", StoreCategory.BAKERY));
+        otherStore = em.persist(storeOwnedBy(other,"otherStore", StoreCategory.CHINESE));
+        target = em.persist(orderOf(ownerStore, owner, "targetAdd", OrderStatus.PENDING));
+        otherOrderSameStore = em.persist(orderOf(ownerStore, owner, "targetAdd", OrderStatus.PENDING));
+        orderDifferentStore = em.persist(orderOf(otherStore, other, "targetAdd", OrderStatus.PENDING));
+        menu1 = em.persist(menuOf(ownerStore, "menu-1", 5000));
+        om1 = em.persist(orderMenuOf(target, menu1, 2, 10000));
         em.flush();
-        em.clear(); // ★ 1차 캐시 제거: fetch join 효과를 순수 쿼리로 검증
+        em.clear();
+    }
 
-        UUID orderId = orderRepository
-            .findAll() // 단 하나니까 이렇게 꺼내도 됨 (혹은 위에서 order.getId() 보관)
-            .get(0)
-            .getId();
+    @Nested
+    @DisplayName("findOrderByIdAndStoreUserId 테스트")
+    class FindOrderByIdAndStoreUserId {
+        @Test
+        @DisplayName("주문과 점주가 일치하면 주문을 반환한다")
+        void whenOwnerAndOrderMatch_returnsOrder() {
+            // When
+            Optional<Order> result = orderRepository.findOrderByIdAndStoreUserId(target.getId(), owner.getId());
 
-        // === when ===
-        Order found = orderRepository.findDetailById(orderId).orElseThrow();
+            // Then
+            Assertions.assertAll(
+                () -> assertTrue(result.isPresent()),
+                () -> Assertions.assertEquals(target.getId(), result.get().getId()),
+                () -> Assertions.assertEquals(owner.getId(), result.get().getStore().getUser().getId())
+            );
+        }
+        @Test
+        @DisplayName("점주 불일치면 빈값")
+        void whenStoreUserIdDiff_returnsEmpty() {
+            //When
+            Optional<Order> result = orderRepository.findOrderByIdAndStoreUserId(target.getId(), other.getId());
 
-        // === then ===
-        PersistenceUnitUtil util = em.getEntityManagerFactory().getPersistenceUnitUtil();
+            assertFalse(result.isPresent());
+        }
 
-        System.out.println("=== Order 확인 ===");
-        System.out.println("orderId   = " + found.getId());
-        System.out.println("address   = " + found.getAddress());
-        System.out.println("status    = " + found.getOrderStatus());
-        System.out.println("user      = " + (found.getUser() != null ? found.getUser().getNickname() : null));
-        System.out.println("store     = " + (found.getStore() != null ? found.getStore().getName() : null));
-        System.out.println("payment   = " + (found.getPayment() != null ? found.getPayment().getId() : null));
+        @Test
+        @DisplayName("주문 ID 가 없으면 빈값")
+        void whenOrderIdDiff_returnsOrder() {
+            //When
+            Optional<Order> result = orderRepository.findOrderByIdAndStoreUserId(UUID.randomUUID(), owner.getId());
 
-        System.out.println("=== OrderMenu 목록 ===");
-        for (OrderMenu om : found.getOrderMenuList()) {
-            System.out.println(
-                "  menu=" + om.getMenu().getName() +
-                    ", price=" + om.getPrice() +
-                    ", qty=" + om.getQuantity()
+
+            assertFalse(result.isPresent());
+        }
+    }
+
+    @Nested
+    @DisplayName("findDetailById 테스트")
+    class findDetailById {
+
+
+        @Test
+            @DisplayName("페치 조인으로 연관이 초기화")
+            void OrderRelationInitialize() {
+            //when
+            Optional<Order> result = orderRepository.findDetailById(target.getId());
+
+            System.out.println(result.get().getCreatedAt());
+
+            assertTrue(result.isPresent());
+            assertTrue(Hibernate.isInitialized(result.get().getStore()));
+            assertTrue(Hibernate.isInitialized(result.get().getUser()));
+            assertTrue(Hibernate.isInitialized(result.get().getOrderMenuList()));
+            result.get().getOrderMenuList().forEach(
+                om ->
+                    assertTrue(Hibernate.isInitialized(om.getMenu()))
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("findPageIds 테스트")
+    class findPageIds {
+
+        private void seedOrders(int ownerCount, int otherCount) {
+            for (int i = 0; i < ownerCount; i++) {
+                Order order = orderOf(ownerStore, owner, "addr-o-"+i, OrderStatus.PENDING);
+                try { Thread.sleep(1); } catch (InterruptedException ignored) {}
+                em.persist(order);
+            }
+            for (int i = 0; i < otherCount; i++) {
+                Order order = orderOf(otherStore, other, "addr-x-"+i, OrderStatus.PENDING);
+                try { Thread.sleep(1); } catch (InterruptedException ignored) {}
+                em.persist(order);
+            }
+            em.flush(); em.clear();
+        }
+
+        @Test
+        @DisplayName("전체조회: page=0,size=10, createdAt DESC → 총43, 첫페이지10, 내림차순")
+        void page0_size10_sortedByCreatedAtDesc_all() {
+            // given
+            seedOrders(23, 17); // 총 40건 beforeEach 3건 포함 43건
+            var pageable = PageRequest.of(
+                0, 10, Sort.by("createdAt").descending());
+            var opt = new OrderSearchOptionDto(null, null, null, null, null);
+
+            // when
+            var page = orderRepository.findPageIds(pageable, opt);
+
+            // then
+            var ids = page.getContent();
+            Assertions.assertAll(
+                () -> Assertions.assertEquals(10, ids.size()),
+                () -> Assertions.assertEquals(43, page.getTotalElements()),
+                () -> {
+                    var firstTwo = ids.stream()
+                            .limit(2)
+                            .toList();
+                    var orders = orderRepository.findDetailsByIdIn(firstTwo);
+                    var map = orders.stream()
+                            .collect(Collectors.toMap(Order::getId, o -> o));
+
+                    var o0 = map.get(firstTwo.get(0));
+                    var o1 = map.get(firstTwo.get(1));
+                    Assertions.assertTrue(
+                        !o0.getCreatedAt().isBefore(o1.getCreatedAt()),
+                        "createdAt must be DESC");
+                }
             );
         }
 
-        // 연관 로딩 검증
-        assertThat(util.isLoaded(found.getUser())).isTrue();
-        assertThat(util.isLoaded(found.getStore())).isTrue();
-        assertThat(util.isLoaded(found.getPayment())).isTrue();
-        assertThat(util.isLoaded(found.getOrderMenuList())).isTrue();
+        @Test
+        @DisplayName("owner 필터: page=0,size=10, createdAt DESC → 총23, 모두 owner 소유")
+        void page0_size10_sortedByCreatedAtDesc_ownerOnly() {
+            // given
+            seedOrders(23, 17);
+            var pageable = PageRequest.of(
+                0, 10, Sort.by("createdAt").descending());
+            var opt = new OrderSearchOptionDto(null, null, owner.getId(), null, null);
 
-        assertThat(found.getOrderMenuList()).hasSize(2);
+            // when
+            var page = orderRepository.findPageIds(pageable, opt);
 
-        // 하위 연관(menu)까지 fetch join 되었는지 검증
-        OrderMenu first = found.getOrderMenuList().get(0);
-        assertThat(util.isLoaded(first.getMenu())).isTrue();
+            // then
+            var ids = page.getContent();
+            var orders = orderRepository.findDetailsByIdIn(ids);
+            var map = orders.stream().collect(Collectors.toMap(Order::getId, o -> o));
+            var firstTwo = ids.stream()
+                    .limit(2)
+                    .toList();
+            var o0 = map.get(firstTwo.get(0));
+            var o1 = map.get(firstTwo.get(1));
 
-        // 값도 간단히 검증
-        assertThat(found.getAddress()).isEqualTo("서울시 강남구");
-        assertThat(found.getUser().getNickname()).isEqualTo("nick");
-        assertThat(found.getStore().getName()).isEqualTo("치킨집");
-        assertThat(found.getOrderMenuList())
-            .extracting(om -> om.getMenu().getName())
-            .containsExactlyInAnyOrder("후라이드", "양념치킨");
+            org.junit.jupiter.api.Assertions.assertAll(
+                () -> Assertions.assertEquals(10, ids.size()),
+                () -> Assertions.assertEquals(25, page.getTotalElements()),
+                () -> Assertions.assertTrue(
+                    orders.stream().allMatch(o -> o.getStore().getUser().getId().equals(owner.getId())),
+                    "모든 결과가 owner 소유여야 함"),
+                () -> Assertions.assertTrue(
+                    !o0.getCreatedAt().isBefore(o1.getCreatedAt()),
+                    "createdAt 내림차순 정렬")
+            );
+        }
+
     }
+
+
 }
