@@ -3,6 +3,7 @@ package com.sparta.tdd.domain.store.service;
 import static com.sparta.tdd.domain.store.entity.QStore.store;
 
 import com.querydsl.core.Tuple;
+import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.menu.dto.MenuWithStoreResponseDto;
 import com.sparta.tdd.domain.menu.entity.QMenu;
 import com.sparta.tdd.domain.store.dto.StoreRequestDto;
@@ -11,6 +12,7 @@ import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
+import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
@@ -81,30 +83,23 @@ public class StoreService {
     @Transactional
     public StoreResponseDto createStore(Long userId, @Valid StoreRequestDto requestDto) {
         User user = getUserById(userId);
-        validateStorePermission(user);
-
         Store store = requestDto.toEntity(user);
 
-        Store savedStore = storeRepository.save(store);
-        return StoreResponseDto.from(savedStore);
+        return StoreResponseDto.from(storeRepository.save(store));
     }
 
     public StoreResponseDto getStore(UUID storeId) {
-        Store store = getStoreById(storeId);
-        return StoreResponseDto.from(store);
+        return StoreResponseDto.from(getStoreById(storeId));
     }
 
     @Transactional
-    public void updateStore(Long userId, UUID storeId, @Valid StoreRequestDto requestDto) {
-        User user = getUserById(userId);
+    public void updateStore(UserDetailsImpl userDetails, UUID storeId,
+        @Valid StoreRequestDto requestDto) {
+        User user = getUserById(userDetails.getUserId());
         Store store = getStoreById(storeId);
         validateStoreOwnership(user, store);
 
-        store.updateName(requestDto.name());
-        store.updateUser(user);
-        store.updateCategory(requestDto.category());
-        store.updateDescription(requestDto.description());
-        store.updateImageUrl(requestDto.imageUrl());
+        store.updateStore(user, requestDto);
     }
 
     @Transactional
@@ -126,14 +121,8 @@ public class StoreService {
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
-    private void validateStorePermission(User user) {
-        if (!user.isOwnerLevel()) {
-            throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
-        }
-    }
-
     private void validateStoreOwnership(User user, Store store) {
-        if (!store.isOwner(user) && !user.isManagerLevel()) {
+        if (!store.isOwner(user) && !UserAuthority.isManagerLevel(user.getAuthority())) {
             throw new BusinessException(ErrorCode.STORE_OWNERSHIP_DENIED);
         }
     }
