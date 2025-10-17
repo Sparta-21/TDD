@@ -62,6 +62,7 @@ public enum ErrorCode {
     PAYMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "주문에 대한 결제건이 이미 존재합니다."),
     INVALID_PAYMENT_REQUEST(HttpStatus.BAD_REQUEST, "올바른 주문 요청이 아닙니다."),
     POINT_PROCESSING_FAILED(HttpStatus.BAD_REQUEST, "포인트 적립 관련 오류입니다."),
+    PAYMENT_CANCEL_TIME_EXPIRED(HttpStatus.CONFLICT, "결제 후 5분이 지나 취소할 수 없습니다."),
 
     // AI 도메인 관련
 
