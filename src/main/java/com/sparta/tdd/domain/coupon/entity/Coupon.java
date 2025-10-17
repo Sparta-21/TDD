@@ -85,10 +85,21 @@ public class Coupon extends BaseEntity {
 
     public void issuedCount() {
         this.issuedCount++;
+        if (issuedCount == quantity) {
+            this.delete(null);
+        }
+    }
+
+    public boolean checkIssuedCount() {
+        return this.issuedCount >= this.quantity;
     }
 
     public boolean isAlreadyIssued() {
         return issuedCount > 0;
     }
 
+    public boolean checkMinOrderPrice(Integer minOrderPrice) {
+        return this.minOrderPrice > minOrderPrice;
+
+    }
 }
