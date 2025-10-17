@@ -175,6 +175,7 @@ public class OrderService {
         }
     }
 
+    @Transactional
     public OrderResponseDto cancelOrder(UUID orderId, UserDetailsImpl userDetails) {
         Order targetOrder = orderRepository.findDetailById(orderId)
             .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
