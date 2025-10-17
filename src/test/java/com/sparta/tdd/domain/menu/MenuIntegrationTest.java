@@ -260,7 +260,7 @@ public class MenuIntegrationTest extends IntegrationTest {
             mockMvc.perform(
                     get("/v1/store/{storeId}/menu/{menuId}", storeId, menuId)
                         .with(csrf()))
-                .andExpectAll(status().isBadRequest());
+                .andExpectAll(status().isNotFound());
         }
 
         @Test
