@@ -53,6 +53,7 @@ public enum ErrorCode {
     REVIEW_REPLY_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 답글이 존재합니다."),
     REVIEW_REPLY_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 가게의 소유자만 답글을 작성할 수 있습니다."),
     REVIEW_REPLY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답글입니다."),
+    DUPLICATE_REVIEW(HttpStatus.CONFLICT, "이미 해당 주문에 대한 리뷰가 존재합니다."),
 
     // PAYMENT 도메인 관련
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 결제 내역입니다."),
@@ -60,6 +61,8 @@ public enum ErrorCode {
     GET_STORE_PAYMENT_DENIED(HttpStatus.FORBIDDEN, "본인의 상점의 결제 내역만 조회할 수 있습니다."),
     PAYMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "주문에 대한 결제건이 이미 존재합니다."),
     INVALID_PAYMENT_REQUEST(HttpStatus.BAD_REQUEST, "올바른 주문 요청이 아닙니다."),
+    POINT_PROCESSING_FAILED(HttpStatus.BAD_REQUEST, "포인트 적립 관련 오류입니다."),
+    PAYMENT_CANCEL_TIME_EXPIRED(HttpStatus.CONFLICT, "결제 후 5분이 지나 취소할 수 없습니다."),
 
     // AI 도메인 관련
 
