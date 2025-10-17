@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface PaymentRepository extends JpaRepository<Payment, UUID> {
+public interface PaymentRepository extends JpaRepository<Payment, UUID>,
+    PaymentRepositoryCustom {
 
     @Modifying
     @Query("UPDATE Payment p SET p.deletedAt = :deletedAt, p.deletedBy = :deletedBy WHERE p.user.id = :userId AND p.deletedAt IS NULL")
