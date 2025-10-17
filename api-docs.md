@@ -728,6 +728,49 @@
     <td><pre><code>{}</code></pre></td>
     <td><pre><code>{}</code></pre></td>
   </tr>
+  <tr>
+    <td>Review</td><td>리뷰 목록 조회(사장님 답글 추가 시)</td><td>GET</td><td>/v1/reviews/{storeId}?page=1&size=10</td>
+    <td><pre><code>{}</code></pre></td>
+    <td><pre><code>{
+  "reviews": [
+  {
+    "reviewId": 101,
+    “storeId”: 1,
+    "content": "음식이 맛있어요!",
+    “rating”: 3,
+    "userId": "user01",
+    “photos”: “abc.png”,
+    "createdAt": "2025-09-25T14:30:00",
+    "modifiedAt": "2025-09-29T10:20:00”,
+    “reply”: { 
+      “conetent”: 이용해주셔서 감사합니다
+    }
+
+},
+{
+"reviewId": 102,
+“storeId”: 1,
+"content": "서비스가 친절했어요.",
+“rating”: 3,
+"userId": "user02",
+“photos”: “abc.png”,
+"createdAt": "2025-09-26T16:45:00",
+"modifiedAt": "2025-09-29T10:20:00”
+“reply”: {
+“conetent”: 다음에 또 오세요
+}
+
+}
+],
+"pageInfo": {
+"page": 1,
+"size": 10,
+"totalElements": 52,
+"totalPages": 6,
+"hasNext": true
+}
+}</code></pre></td>
+</tr>
   <!-- Store Domain Added -->
 
   <tr>
