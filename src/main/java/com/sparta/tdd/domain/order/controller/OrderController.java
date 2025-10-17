@@ -43,7 +43,6 @@ public class OrderController {
     public ResponseEntity<Page<OrderResponseDto>> getOrders(
         @ModelAttribute @Valid OrderSearchOptionDto searchOption,
         @AuthenticationPrincipal UserDetailsImpl userDetails,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
         Pageable pageable) {
         Page<OrderResponseDto> responseDtos = orderService.getOrders(
             userDetails,
