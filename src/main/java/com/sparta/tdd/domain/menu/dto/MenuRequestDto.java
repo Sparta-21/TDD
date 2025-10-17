@@ -9,12 +9,27 @@ public record MenuRequestDto(
     String name,
     String description,
     Integer price,
-    String imageUrl
+    String imageUrl,
+    boolean useAiDescription
 ) {
 
+    public Menu toEntity(Store store, String description) {
+        return Menu.builder()
+            .name(name)
+            .description(description)
+            .price(price)
+            .imageUrl(imageUrl)
+            .store(store)
+            .build();
+    }
+    
     public Menu toEntity(Store store) {
         return Menu.builder()
-            .dto(this)
-            .store(store).build();
+            .name(name)
+            .description(description)
+            .price(price)
+            .imageUrl(imageUrl)
+            .store(store)
+            .build();
     }
 }
