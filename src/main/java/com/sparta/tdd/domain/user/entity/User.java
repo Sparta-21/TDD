@@ -15,6 +15,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.EnumSet;
+
 @Getter
 @Entity
 @Table(name = "p_user")
@@ -45,6 +47,21 @@ public class User extends BaseEntity {
         this.password = password;
         this.nickname = nickname;
         this.authority = authority;
+    }
+
+    public boolean isSameId(Long id) {
+        if (this.id != id) {
+            return false;
+        }
+        return true;
+    }
+    public boolean isOwnerLevel() {
+        return EnumSet.of(UserAuthority.OWNER, UserAuthority.MANAGER, UserAuthority.MASTER)
+            .contains(this.authority);
+    }
+
+    public boolean isManagerLevel() {
+        return EnumSet.of(UserAuthority.MANAGER, UserAuthority.MASTER).contains(this.authority);
     }
 
     public void updateNickname(String nickname) {
