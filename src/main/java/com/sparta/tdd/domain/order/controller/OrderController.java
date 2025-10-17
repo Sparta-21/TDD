@@ -39,23 +39,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
     private final OrderService orderService;
 
-    List<Integer> allowedSizes = List.of(10, 30, 50);
-
     @GetMapping
     public ResponseEntity<Page<OrderResponseDto>> getOrders(
         @ModelAttribute @Valid OrderSearchOptionDto searchOption,
         @AuthenticationPrincipal UserDetailsImpl userDetails,
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
         Pageable pageable) {
-        int size = allowedSizes.contains(pageable.getPageSize())
-            ? pageable.getPageSize()
-            : 10;
-
-        Pageable fixedPageable = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
-
         Page<OrderResponseDto> responseDtos = orderService.getOrders(
             userDetails,
-            fixedPageable,
+            pageable,
             searchOption
         );
 
