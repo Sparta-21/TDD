@@ -53,6 +53,7 @@ public enum ErrorCode {
     REVIEW_REPLY_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 답글이 존재합니다."),
     REVIEW_REPLY_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 가게의 소유자만 답글을 작성할 수 있습니다."),
     REVIEW_REPLY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답글입니다."),
+    DUPLICATE_REVIEW(HttpStatus.CONFLICT, "이미 해당 주문에 대한 리뷰가 존재합니다."),
 
     // PAYMENT 도메인 관련
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 결제 내역입니다."),

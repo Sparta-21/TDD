@@ -49,6 +49,8 @@ public class ReviewService {
         Store store = findStoreById(request.storeId());
         Order order = findOrderById(orderId);
 
+        existsByOrderId(orderId);
+
         Review review = request.toEntity(user, store, order);
 
         Review savedReview = reviewRepository.save(review);
@@ -144,5 +146,11 @@ public class ReviewService {
     private Order findOrderById(UUID orderId) {
         return orderRepository.findById(orderId)
             .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
+    private void existsByOrderId(UUID orderId) {
+        if (reviewRepository.existsByOrderId(orderId)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_REVIEW);
+        }
     }
 }
