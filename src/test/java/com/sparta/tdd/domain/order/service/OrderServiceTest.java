@@ -6,26 +6,21 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
-import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
 import com.sparta.tdd.domain.menu.repository.MenuRepository;
 import com.sparta.tdd.domain.order.dto.OrderRequestDto;
 import com.sparta.tdd.domain.order.dto.OrderResponseDto;
-import com.sparta.tdd.domain.order.dto.OrderStatusRequestDto;
 import com.sparta.tdd.domain.order.entity.Order;
-import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.order.mapper.OrderMapper;
 import com.sparta.tdd.domain.order.mapper.OrderMapperImpl;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
 import com.sparta.tdd.domain.orderMenu.dto.OrderMenuRequestDto;
-import com.sparta.tdd.domain.orderMenu.entity.OrderMenu;
 import com.sparta.tdd.domain.orderMenu.mapper.OrderMenuMapper;
 import com.sparta.tdd.domain.store.entity.Store;
 import com.sparta.tdd.domain.store.repository.StoreRepository;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
 import com.sparta.tdd.domain.user.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,10 +36,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    @Mock private OrderRepository orderRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private StoreRepository storeRepository;
-    @Mock private MenuRepository menuRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private StoreRepository storeRepository;
+    @Mock
+    private MenuRepository menuRepository;
 
     private OrderMapper orderMapper;
     private OrderService orderService;
@@ -87,12 +86,22 @@ class OrderServiceTest {
         ReflectionTestUtils.setField(store, "id", storeUUID);
 
         // 5. 메뉴 세팅
-        MenuRequestDto friedDto = new MenuRequestDto("후라이드", "바삭한 후라이드 치킨", 15000, null);
-        friedMenu = Menu.builder().dto(friedDto).store(store).build();
+        friedMenu = Menu.builder()
+            .name("후라이드")
+            .description("바삭한 후라이드 치킨")
+            .price(15000)
+            .imageUrl(null)
+            .store(store)
+            .build();
         ReflectionTestUtils.setField(friedMenu, "id", UUID.randomUUID());
 
-        MenuRequestDto seasonedDto = new MenuRequestDto("양념치킨", "매콤달콤 양념치킨", 16000, null);
-        seasonedMenu = Menu.builder().dto(seasonedDto).store(store).build();
+        seasonedMenu = Menu.builder()
+            .name("양념치킨")
+            .description("매콤달콤 양념치킨")
+            .price(16000)
+            .imageUrl(null)
+            .store(store)
+            .build();
         ReflectionTestUtils.setField(seasonedMenu, "id", UUID.randomUUID());
 
         // 6. 주문 요청 DTO 세팅

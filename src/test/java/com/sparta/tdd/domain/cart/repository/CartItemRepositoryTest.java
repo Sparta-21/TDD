@@ -68,17 +68,19 @@ class CartItemRepositoryTest extends RepositoryTest {
 
         // 테스트 메뉴 생성
         menu1 = Menu.builder()
-                .dto(new com.sparta.tdd.domain.menu.dto.MenuRequestDto(
-                        "김치찌개", "맛있는 김치찌개", 8000, null
-                ))
+                .name("김치찌개")
+                .description("맛있는 김치찌개")
+                .price(8000)
+                .imageUrl(null)
                 .store(store)
                 .build();
         em.persist(menu1);
 
         menu2 = Menu.builder()
-                .dto(new com.sparta.tdd.domain.menu.dto.MenuRequestDto(
-                        "된장찌개", "구수한 된장찌개", 7000, null
-                ))
+                .name("된장찌개")
+                .description("구수한 된장찌개")
+                .price(7000)
+                .imageUrl(null)
                 .store(store)
                 .build();
         em.persist(menu2);
