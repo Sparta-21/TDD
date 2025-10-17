@@ -354,11 +354,11 @@ class StoreRepositoryTest extends RepositoryTest {
 
 # 팀원 소개
 
-| 팀원  | 깃허브                                        | 역할 |
-|-----|--------------------------------------------|----|
-| 박성민 | [@dnjsals45](https://github.com/dnjsals45) |    |
-| 김민수 | [@Doritosch](https://github.com/Doritosch) |    |
-| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   |    |
-| 박주찬 | [@p990805](https://github.com/p990805)     |    |
-| 변영재 | [@bbangjae](https://github.com/bbangjae)   |    |
-| 송의현 | [@yawning5](https://github.com/yawning5)   |    |
+| 팀원  | 깃허브                                        | 역할                                            |
+|-----|--------------------------------------------|-----------------------------------------------|
+| 박성민 | [@dnjsals45](https://github.com/dnjsals45) | Auth, Payment 도메인 개발 및 테스트코드 작성               |
+| 김민수 | [@Doritosch](https://github.com/Doritosch) | User, AI, Address 도메인 개발 및 테스코드 작성            |
+| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   | Menu, Coupon 도메인 개발 및 테스트코드 작성                |
+| 박주찬 | [@p990805](https://github.com/p990805)     | Review, ReviewReply, Cart 도메인 개발 및 테스트코드 작성   |
+| 변영재 | [@bbangjae](https://github.com/bbangjae)   | Store, Point 도메인 개발 및 테스트코드 작성                |
+| 송의현 | [@yawning5](https://github.com/yawning5)   | Order, OrderMenu 도메인 개발 및 테스트코드 작성, 페이징 정책 적용 |
