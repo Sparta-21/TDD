@@ -76,7 +76,7 @@ docker exec -it tdd-db psql -U test -d tdd-db
 
 ## 1. ERD
 
-![erd](https://github.com/user-attachments/assets/96efb039-16e5-4f0d-95e6-b0b7e0a40cbb)
+![erd](https://github.com/user-attachments/assets/5a08601b-8d4d-4993-a7f2-833bdfa86d16)
 
 ## 2. 도메인 다이어그램
 
@@ -97,6 +97,26 @@ docker exec -it tdd-db psql -U test -d tdd-db
 # 개발 산출물
 
 ## 1. 도메인별 핵심 기능 상세 구현
+
+### (1) Order
+
+![Order diagram](https://github.com/user-attachments/assets/6caa1364-0a1b-4e17-8706-25f320bb0004)
+
+- Order 도메인
+    - DDD 원칙에 따라 주문의 상태 전이(`nextStatus`, `changeOrderStatus`) 로직을 엔티티 내부에 위치
+    - Order 와 Menu 의 다대다 관계를 OrderMenu 로 풀어내 도메인 응집도 강화
+    - Mapper 를 통해 Service 는 트랜잭션 중심의 조합 역할만 수행
+- getOrders(주문 목록 조회)
+    - QueryDSL을 이용한 동적 검색 (조건 null 시 필터 미적용)
+    - MANAGER, MASTER 권한 외 사용자는 본인 주문만 조회 (권한 검증)
+    - Page 처리로 ID 목록 우선 조회 후 fetch join으로 세부 데이터 일괄 로딩 (N+1 방지)
+- nextOrderStatus(주문 단계 변경)
+    - OWNER 가 가능한 주문 단계변경 메서드로 시스템의 규칙에 따라서만 변경이 가능하도록 nextStatus 로 동작
+    - 관리자 권한의 사용자들은 changeOrderStatus 를 통하여 임의 변경가능하도록 별도 API 구성
+
+- PageableHandlerMethodArgumentResolver
+    - 공통 페이징 정책을 일괄 적용하기 위해 WebMvcConfig 에 정책 등록
+    - 기본 정렬 기준(`createdAt DESC`)을 지정하여 일관된 정렬 정책 유지
 
 ## 2. 트러블슈팅
 
@@ -354,11 +374,11 @@ class StoreRepositoryTest extends RepositoryTest {
 
 # 팀원 소개
 
-| 팀원  | 깃허브                                        | 역할                                            |
-|-----|--------------------------------------------|-----------------------------------------------|
-| 박성민 | [@dnjsals45](https://github.com/dnjsals45) | Auth, Payment 도메인 개발 및 테스트코드 작성               |
-| 김민수 | [@Doritosch](https://github.com/Doritosch) | User, AI, Address 도메인 개발 및 테스코드 작성            |
-| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   | Menu, Coupon 도메인 개발 및 테스트코드 작성                |
-| 박주찬 | [@p990805](https://github.com/p990805)     | Review, ReviewReply, Cart 도메인 개발 및 테스트코드 작성   |
-| 변영재 | [@bbangjae](https://github.com/bbangjae)   | Store, Point 도메인 개발 및 테스트코드 작성                |
-| 송의현 | [@yawning5](https://github.com/yawning5)   | Order, OrderMenu 도메인 개발 및 테스트코드 작성, 페이징 정책 적용 |
+| 팀원  | 깃허브                                        | 역할                                                                               |
+|-----|--------------------------------------------|----------------------------------------------------------------------------------|
+| 박성민 | [@dnjsals45](https://github.com/dnjsals45) | Auth, Payment 도메인 개발 및 테스트코드 작성                                                  |
+| 김민수 | [@Doritosch](https://github.com/Doritosch) | User, AI, Address 도메인 개발 및 테스코드 작성                                               |
+| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   | Menu, Coupon 도메인 개발 및 테스트코드 작성                                                   |
+| 박주찬 | [@p990805](https://github.com/p990805)     | Review, ReviewReply, Cart 도메인 개발 및 테스트코드 작성                                      |
+| 변영재 | [@bbangjae](https://github.com/bbangjae)   | Store 도메인 개발 및 테스트 코드 작성, Point 로직(AOP 기반), AuditorAware를 통한 생성자/수정자 자동 관리 기능 구현 |
+| 송의현 | [@yawning5](https://github.com/yawning5)   | Order, OrderMenu 도메인 개발 및 테스트코드 작성, 페이징 정책 적용                                    |
