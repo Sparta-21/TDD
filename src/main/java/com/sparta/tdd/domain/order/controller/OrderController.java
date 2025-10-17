@@ -7,6 +7,8 @@ import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
 import com.sparta.tdd.domain.order.dto.OrderStatusRequestDto;
 import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.order.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -35,16 +37,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/orders")
 @RequiredArgsConstructor
-@Slf4j
+@Tag(
+    name = "주문",
+    description = "주문 생성, 조회, 상태 변경 및 취소 API"
+)
 public class OrderController {
     private final OrderService orderService;
 
+    @Operation(
+        summary = "주문 검색",
+        description = "로그인 한 사용자 또는 관리자가 주문 목록을 조회합니다."
+    )
     @GetMapping
     public ResponseEntity<Page<OrderResponseDto>> getOrders(
         @ModelAttribute @Valid OrderSearchOptionDto searchOption,
         @AuthenticationPrincipal UserDetailsImpl userDetails,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
-        Pageable pageable) {
+        @PageableDefault Pageable pageable) {
         Page<OrderResponseDto> responseDtos = orderService.getOrders(
             userDetails,
             pageable,
