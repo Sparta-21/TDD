@@ -182,6 +182,9 @@ public class OrderService {
 
         validatePermission(userDetails, targetOrder);
 
+        if (!targetOrder.canCancel()) {
+            throw new BusinessException(ErrorCode.ORDER_CANCELLATION_NOT_ALLOWED);
+        }
         targetOrder.delete(userDetails.getUserId());
         targetOrder.changeOrderStatus(OrderStatus.CANCELLED);
 

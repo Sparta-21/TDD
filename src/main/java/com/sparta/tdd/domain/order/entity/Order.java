@@ -20,6 +20,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -91,5 +93,10 @@ public class Order extends BaseEntity {
 
     public boolean isOwnedBy(Long userId) {
         return this.getUser().getId().equals(userId);
+    }
+
+    public boolean canCancel() {
+        Duration duration = Duration.between(super.getCreatedAt(), LocalDateTime.now());
+        return duration.toMinutes() < 5;
     }
 }
