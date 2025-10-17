@@ -95,3 +95,8 @@ jwt:
 ai:
   google:
     api-key: testApiKey
+
+naver:
+  client:
+    id: testClientId
+    secret: testClientSecret

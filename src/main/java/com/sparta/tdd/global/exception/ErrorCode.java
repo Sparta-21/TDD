@@ -74,7 +74,12 @@ public enum ErrorCode {
     COUPON_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Scope 설정이 잘못되었습니다."),
     COUPON_ALREADY_ISSUED(HttpStatus.BAD_REQUEST, "이미 사용자가 발급하여 수정할 수 없습니다."),
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 쿠폰입니다."),
-    COUPON_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+    COUPON_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+
+    // ADDRESS 도메인 관련
+    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "주소를 찾을 수 없습니다."),
+    ADDRESS_STORE_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 가게의 소유자만 주소를 수정할 수 있습니다."),
+    ADDRESS_USER_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "본인의 주소만 수정할 수 있습니다.");
 
     private final HttpStatus status;
     private final String message;
