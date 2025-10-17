@@ -76,11 +76,11 @@ docker exec -it tdd-db psql -U test -d tdd-db
 
 ### 1. ERD
 
-[](https://github.com/user-attachments/assets/96efb039-16e5-4f0d-95e6-b0b7e0a40cbb)
+![erd](https://github.com/user-attachments/assets/96efb039-16e5-4f0d-95e6-b0b7e0a40cbb)
 
 ### 2. 도메인 다이어그램
 
-[](https://github.com/user-attachments/assets/0ab9c29e-c9e0-47f7-995a-1ece5c84a1a2)
+![domain_diagram](https://github.com/user-attachments/assets/0ab9c29e-c9e0-47f7-995a-1ece5c84a1a2)
 
 ### 3. API 명세서
 
@@ -88,7 +88,7 @@ docker exec -it tdd-db psql -U test -d tdd-db
 
 ### 4. 인프라 설계도
 
-[](https://github.com/user-attachments/assets/32c655a9-7567-4149-8ef9-2c55f5d50d08)
+![infra_architecture](https://github.com/user-attachments/assets/32c655a9-7567-4149-8ef9-2c55f5d50d08)
 
 ### 5. Conventions
 
