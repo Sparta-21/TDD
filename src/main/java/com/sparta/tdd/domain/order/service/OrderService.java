@@ -134,6 +134,11 @@ public class OrderService {
         }
     }
 
+    /*
+    ErrorCode.ENTITY_NOT_FOUND 를 마주쳤을때 어떤 repo 에서 발생했는지 확인 가능한가?
+    OrderService 에서 User 나 Store Repo 를 직접 조회하는게 아니라 다른 Service 에서 받아오는게 책임분리 면에서 옳다
+    제네릭을 사용할때는 범용성 고려필요 (범용성 <- 특정기술에 종속되서는 안 된다)
+     */
     /**
      * 특정 레포지토리의 id 탐색결과를 Optional로 받아 null 이면 예외를 발생<br>
      * 값이 존재한다면 Entity 를 반환합니다

@@ -28,6 +28,9 @@ public interface OrderMapper {
     @Mapping(target = "orderStatus", ignore = true)
     Order toOrder(OrderRequestDto orderRequestDto);
 
+    /*
+    expression 관련해서 컴파일단계에서 파악 되지않음
+     */
     @Mapping(target = "customerName", source = "user.username")
     @Mapping(target = "storeName", source = "store.name")
     @Mapping(target = "price",
