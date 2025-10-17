@@ -3,6 +3,10 @@ package com.sparta.tdd.domain.review.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.tdd.domain.auth.UserDetailsImpl;
 import com.sparta.tdd.domain.review.dto.*;
+import com.sparta.tdd.domain.review.dto.request.ReviewReplyRequestDto;
+import com.sparta.tdd.domain.review.dto.request.ReviewRequestDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewReplyResponseDto;
+import com.sparta.tdd.domain.review.dto.response.ReviewResponseDto;
 import com.sparta.tdd.domain.review.service.ReviewReplyService;
 import com.sparta.tdd.domain.review.service.ReviewService;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
@@ -15,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ReviewController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@EnableSpringDataWebSupport
 class ReviewControllerTest {
 
     @Autowired

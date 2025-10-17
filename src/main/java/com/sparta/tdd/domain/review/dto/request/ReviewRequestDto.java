@@ -1,4 +1,4 @@
-package com.sparta.tdd.domain.review.dto;
+package com.sparta.tdd.domain.review.dto.request;
 
 import com.sparta.tdd.domain.order.entity.Order;
 import com.sparta.tdd.domain.review.entity.Review;

@@ -2,23 +2,14 @@ package com.sparta.tdd.domain.user.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.sparta.tdd.common.template.RepositoryTest;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.enums.UserAuthority;
-import com.sparta.tdd.global.config.AuditConfig;
-import com.sparta.tdd.global.config.QueryDSLConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("local")
-@Import({AuditConfig.class, QueryDSLConfig.class})
-class UserRepositoryTest {
+class UserRepositoryTest extends RepositoryTest {
 
     private User user;
     @Autowired

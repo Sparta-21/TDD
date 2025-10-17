@@ -10,11 +10,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.EnumSet;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.EnumSet;
 
 @Getter
 @Entity
@@ -48,6 +49,12 @@ public class User extends BaseEntity {
         this.authority = authority;
     }
 
+    public boolean isSameId(Long id) {
+        if (this.id != id) {
+            return false;
+        }
+        return true;
+    }
     public boolean isOwnerLevel() {
         return EnumSet.of(UserAuthority.OWNER, UserAuthority.MANAGER, UserAuthority.MASTER)
             .contains(this.authority);

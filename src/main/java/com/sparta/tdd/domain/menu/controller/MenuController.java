@@ -64,7 +64,7 @@ public class MenuController {
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getUserId();
         menuService.updateMenu(storeId, menuId, menuRequestDto, userId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
@@ -75,7 +75,7 @@ public class MenuController {
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getUserId();
         menuService.updateMenuStatus(storeId, menuId, status, userId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
@@ -84,7 +84,7 @@ public class MenuController {
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getUserId();
         menuService.deleteMenu(storeId, menuId, userId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
 

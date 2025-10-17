@@ -57,9 +57,31 @@ public enum ErrorCode {
     REVIEW_REPLY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 답글입니다."),
 
     // PAYMENT 도메인 관련
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 결제 내역입니다."),
+    INVALID_CARD_COMPANY(HttpStatus.BAD_REQUEST, "유효하지 않은 카드사입니다."),
+    GET_STORE_PAYMENT_DENIED(HttpStatus.FORBIDDEN, "본인의 상점의 결제 내역만 조회할 수 있습니다."),
+    PAYMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "주문에 대한 결제건이 이미 존재합니다."),
+    INVALID_PAYMENT_REQUEST(HttpStatus.BAD_REQUEST, "올바른 주문 요청이 아닙니다."),
 
     // AI 도메인 관련
-    ;
+
+    // Cart 도메인 관련
+    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니 아이템을 찾을 수 없습니다."),
+    CART_ITEM_INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "수량은 1개 이상이어야 합니다."),
+    CART_ITEM_NOT_OWNED(HttpStatus.FORBIDDEN, "본인의 장바구니 아이템만 수정할 수 있습니다."),
+    CART_DIFFERENT_STORE(HttpStatus.BAD_REQUEST, "장바구니에는 한 가게의 메뉴만 담을 수 있습니다. 기존 장바구니를 비우고 다시 시도해주세요."),
+
+    // COUPON 도메인 관련
+    COUPON_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Scope 설정이 잘못되었습니다."),
+    COUPON_ALREADY_ISSUED(HttpStatus.BAD_REQUEST, "이미 사용자가 발급하여 수정할 수 없습니다."),
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 쿠폰입니다."),
+    COUPON_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+
+    // ADDRESS 도메인 관련
+    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "주소를 찾을 수 없습니다."),
+    ADDRESS_STORE_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 가게의 소유자만 주소를 수정할 수 있습니다."),
+    ADDRESS_USER_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "본인의 주소만 수정할 수 있습니다.");
 
     private final HttpStatus status;
     private final String message;

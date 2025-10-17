@@ -90,8 +90,8 @@ public class MenuService {
     }
 
     private Menu findMenu(UUID storeId, UUID menuId) {
-        return menuRepository.findByStoreIdAndIdAndIsDeletedFalse(storeId, menuId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
+        return menuRepository.findByIdAndStoreIdAndIsDeletedFalse(menuId, storeId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
     }
 
     private Store findStore(UUID storeId) {
