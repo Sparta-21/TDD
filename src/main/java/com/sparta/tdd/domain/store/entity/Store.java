@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.store.entity;
 
+import com.sparta.tdd.domain.store.dto.StoreRequestDto;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.global.model.BaseEntity;
@@ -71,20 +72,11 @@ public class Store extends BaseEntity {
         this.name = updatedName;
     }
 
-    public void updateUser(User user) {
+    public void updateStore(User user, StoreRequestDto requestDto) {
+        this.name = requestDto.name();
         this.user = user;
-    }
-
-    public void updateCategory(StoreCategory category) {
-        this.category = category;
-    }
-
-    public void updateDescription(String description) {
-        this.description = description;
-    }
-
-    public void updateImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+        this.category = requestDto.category();
+        this.description = requestDto.description();
     }
 
     public boolean isOwner(User user) {
