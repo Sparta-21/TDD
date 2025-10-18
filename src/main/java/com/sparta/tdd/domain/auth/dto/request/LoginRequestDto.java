@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+@Schema(description = "로그인 요청 DTO")
 public record LoginRequestDto(
     @NotBlank(message = "사용자명은 필수입니다")
     @Pattern(regexp = "^[a-z0-9]{4,10}$", message = "4~10 자의 알파벳 소문자와 숫자만 가능합니다")
