@@ -377,8 +377,8 @@ class StoreRepositoryTest extends RepositoryTest {
 | 팀원  | 깃허브                                        | 역할                                                                               |
 |-----|--------------------------------------------|----------------------------------------------------------------------------------|
 | 박성민 | [@dnjsals45](https://github.com/dnjsals45) | Auth, Payment 도메인 개발 및 테스트코드 작성                                                  |
-| 김민수 | [@Doritosch](https://github.com/Doritosch) | User, AI, Address 도메인 개발 및 테스코드 작성                                               |
-| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   | Menu, Coupon 도메인 개발 및 테스트코드 작성                                                   |
+| 김민수 | [@Doritosch](https://github.com/Doritosch) | AI 메뉴 소개 생성, 주소 및 유저 도메인 개발 및 테스트코드 작성                                           |
+| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   | Menu, Coupon 도메인 개발 및 테스트코드 작성, Coupon 스케쥴링 만료/삭제 구현, ReadMe 통합 작업               |
 | 박주찬 | [@p990805](https://github.com/p990805)     | Review, ReviewReply, Cart 도메인 개발 및 테스트코드 작성                                      |
 | 변영재 | [@bbangjae](https://github.com/bbangjae)   | Store 도메인 개발 및 테스트 코드 작성, Point 로직(AOP 기반), AuditorAware를 통한 생성자/수정자 자동 관리 기능 구현 |
 | 송의현 | [@yawning5](https://github.com/yawning5)   | Order, OrderMenu 도메인 개발 및 테스트코드 작성, 페이징 정책 적용                                    |
