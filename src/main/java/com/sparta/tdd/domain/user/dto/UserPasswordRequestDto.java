@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+@Schema(description = "회원 비밀번호 변경 요청 DTO")
 public record UserPasswordRequestDto(
         @NotBlank(message = "비밀번호는 필수입니다")
         @Pattern(
