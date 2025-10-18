@@ -39,22 +39,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
     private final OrderService orderService;
 
-    List<Integer> allowedSizes = List.of(10, 30, 50);
-
     @GetMapping
     public ResponseEntity<Page<OrderResponseDto>> getOrders(
         @ModelAttribute @Valid OrderSearchOptionDto searchOption,
         @AuthenticationPrincipal UserDetailsImpl userDetails,
         Pageable pageable) {
-        int size = allowedSizes.contains(pageable.getPageSize())
-            ? pageable.getPageSize()
-            : 10;
-
-        Pageable fixedPageable = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
-
         Page<OrderResponseDto> responseDtos = orderService.getOrders(
             userDetails,
-            fixedPageable,
+            pageable,
             searchOption
         );
 
@@ -110,6 +102,17 @@ public class OrderController {
         @RequestBody @Valid OrderStatusRequestDto reqDto
     ) {
         OrderResponseDto res = orderService.changeOrderStatus(orderId, reqDto);
+
+        return ResponseEntity
+            .ok(res);
+    }
+
+    @PatchMapping("/cancel/{orderId}")
+    public ResponseEntity<OrderResponseDto> cancelOrder(
+        @PathVariable UUID orderId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        OrderResponseDto res = orderService.cancelOrder(orderId, userDetails);
 
         return ResponseEntity
             .ok(res);

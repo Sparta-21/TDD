@@ -8,6 +8,7 @@ import com.sparta.tdd.domain.order.dto.OrderResponseDto;
 import com.sparta.tdd.domain.order.dto.OrderSearchOptionDto;
 import com.sparta.tdd.domain.order.dto.OrderStatusRequestDto;
 import com.sparta.tdd.domain.order.entity.Order;
+import com.sparta.tdd.domain.order.enums.OrderStatus;
 import com.sparta.tdd.domain.order.mapper.OrderMapper;
 import com.sparta.tdd.domain.order.repository.OrderRepository;
 import com.sparta.tdd.domain.store.entity.Store;
@@ -62,8 +63,9 @@ public class OrderService {
             UserDetailsImpl userDetails,
             Long userId) {
 
-        if (UserAuthority.isCustomer(userDetails.getUserAuthority())
-                && !userDetails.getUserId().equals(userId)) {
+        if ((UserAuthority.isCustomer(userDetails.getUserAuthority())
+            || UserAuthority.isOwner(userDetails.getUserAuthority()))
+            && !userDetails.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.ORDER_PERMISSION_DENIED);
         }
 
@@ -169,5 +171,28 @@ public class OrderService {
         return orderRepository.findDetailById(orderId)
             .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
+    }
+
+    private void validatePermission(UserDetailsImpl userDetails, Order order) {
+        switch (userDetails.getUserAuthority()) {
+            case OWNER -> hasPermission(userDetails, order.getStore().getUser().getId());
+            case CUSTOMER -> hasPermission(userDetails, order.getUser().getId());
+        }
+    }
+
+    @Transactional
+    public OrderResponseDto cancelOrder(UUID orderId, UserDetailsImpl userDetails) {
+        Order targetOrder = orderRepository.findDetailById(orderId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        validatePermission(userDetails, targetOrder);
+
+        if (!targetOrder.canCancel()) {
+            throw new BusinessException(ErrorCode.ORDER_CANCELLATION_NOT_ALLOWED);
+        }
+        targetOrder.delete(userDetails.getUserId());
+        targetOrder.changeOrderStatus(OrderStatus.CANCELLED);
+
+        return orderMapper.toResponse(targetOrder);
     }
 }
