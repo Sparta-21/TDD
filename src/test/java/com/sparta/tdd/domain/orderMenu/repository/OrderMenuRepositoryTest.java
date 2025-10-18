@@ -57,9 +57,11 @@ class OrderMenuRepositoryTest extends RepositoryTest {
             .build();
         em.persist(testOrder);
 
-        menuDto = new MenuRequestDto("테스트 메뉴", "맛있는 메뉴", 5000, "string");
         testMenu = Menu.builder()
-            .dto(menuDto)
+            .name("테스트 메뉴")
+            .description("맛있는 메뉴")
+            .price(5000)
+            .imageUrl("string")
             .store(testStore)
             .build();
         em.persist(testMenu);

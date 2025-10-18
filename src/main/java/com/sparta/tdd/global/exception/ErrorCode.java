@@ -32,6 +32,7 @@ public enum ErrorCode {
     ALREADY_MANAGER(HttpStatus.BAD_REQUEST, "이미 매니저 권한입니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
     CANNOT_MODIFY_OTHER_MEMBER(HttpStatus.FORBIDDEN, "다른 사용자의 정보를 수정할 수 없습니다."),
+    USER_AUTHORITY_FORBIDDEN(HttpStatus.FORBIDDEN, " 권한이 없습니다."),
 
     // STORE 도메인 관련
     STORE_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "상점 관련 작업을 수행할 권한이 없습니다."),
@@ -40,12 +41,13 @@ public enum ErrorCode {
 
     // ORDER 도메인 관련
     ORDER_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
-    MENU_NOT_IN_STORE(HttpStatus.BAD_REQUEST, "해당 가게의 메뉴가 아닙니다."),
-    MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 메뉴가 포함되어 있습니다."),
-    MENU_INVALID_INFO(HttpStatus.BAD_REQUEST, "메뉴 정보가 올바르지 않습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
 
     // MENU 도메인 관련
+    IS_HIDDEN_MENU(HttpStatus.BAD_REQUEST, "숨겨진 메뉴입니다."),
+    MENU_NOT_IN_STORE(HttpStatus.BAD_REQUEST, "해당 가게의 메뉴가 아닙니다."),
+    MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 메뉴가 포함되어 있습니다."),
+    MENU_INVALID_INFO(HttpStatus.BAD_REQUEST, "메뉴 정보가 올바르지 않습니다."),
 
     // REVIEW 도메인 관련
     REVIEW_NOT_OWNED(HttpStatus.FORBIDDEN, "본인의 리뷰만 수정/삭제할 수 있습니다."),

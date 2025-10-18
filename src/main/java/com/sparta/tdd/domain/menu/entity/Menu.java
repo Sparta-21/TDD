@@ -51,11 +51,11 @@ public class Menu extends BaseEntity {
     private Store store;
 
     @Builder
-    public Menu(MenuRequestDto dto, Store store) {
-        this.name = dto.name();
-        this.description = dto.description();
-        this.price = dto.price();
-        this.imageUrl = dto.imageUrl();
+    public Menu(String name, String description, Integer price, String imageUrl, Store store) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.imageUrl = imageUrl;
         this.store = store;
     }
 

@@ -291,7 +291,10 @@ class StoreRepositoryImplTest extends RepositoryTest {
     private Menu createMenu(String menuName, String description, int price, String image,
         Store store) {
         return Menu.builder()
-            .dto(new MenuRequestDto(menuName, description, price, image))
+            .name(menuName)
+            .description(description)
+            .price(price)
+            .imageUrl(image)
             .store(store)
             .build();
     }

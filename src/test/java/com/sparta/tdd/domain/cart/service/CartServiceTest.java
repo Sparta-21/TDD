@@ -91,9 +91,10 @@ class CartServiceTest {
 
         // 메뉴
         menu = Menu.builder()
-                .dto(new com.sparta.tdd.domain.menu.dto.MenuRequestDto(
-                        "김치찌개", "맛있는 김치찌개", 8000, null
-                ))
+                .name("김치찌개")
+                .description("맛있는 김치찌개")
+                .price(8000)
+                .imageUrl(null)
                 .store(store)
                 .build();
         setId(menu, UUID.randomUUID());
@@ -266,9 +267,10 @@ class CartServiceTest {
             setId(differentStore, UUID.randomUUID());
 
             Menu differentMenu = Menu.builder()
-                    .dto(new com.sparta.tdd.domain.menu.dto.MenuRequestDto(
-                            "짜장면", "맛있는 짜장면", 6000, null
-                    ))
+                    .name("짜장면")
+                    .description("맛있는 짜장면")
+                    .price(6000)
+                    .imageUrl(null)
                     .store(differentStore)
                     .build();
             setId(differentMenu, menuId);
