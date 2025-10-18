@@ -8,11 +8,9 @@ import com.sparta.tdd.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,36 +23,52 @@ public class UserController {
 
     private final UserService userService;
 
-    // 회원 목록 조회
+    @Operation(
+            summary = "모든 유저 조회",
+            description = """
+                    모든 유저의 id, username, password, nickname, authority를 조회합니다.
+                    MANAGER나 MASTER가 아니면 조회할 수 없습니다.
+                    """)
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_MASTER') or hasRole('ROLE_MANAGER')")
-    @Operation(summary = "모든 유저 조회")
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     public ResponseEntity<UserPageResponseDto> getAllUser(Pageable pageable) {
         UserPageResponseDto users = new UserPageResponseDto(userService.getAllUsers(pageable));
         return ResponseEntity.ok(users);
     }
 
-    // 회원 정보 조회
+    @Operation(
+            summary = "유저 조회",
+            description = """
+                    특정 유저의 id, username, password, nickname, authority를 조회합니다.
+                    """
+    )
     @GetMapping("/{userId}")
-    @Operation(summary = "유저 식별자로 유저 조회")
     public ResponseEntity<UserResponseDto> getUserByUserId(@PathVariable("userId") Long userId) {
         UserResponseDto user = userService.getUserByUserId(userId);
         return ResponseEntity.ok(user);
     }
 
-    // 회원 닉네임 수정
+    @Operation(
+            summary = "유저 닉네임 변경",
+            description = """
+                    유저의 닉네임을 변경합니다. 닉네임은 2자 이상, 10자 이하로 입력해야 합니다.
+                    자신의 닉네임만 변경할 수 있습니다.
+                    """)
     @PatchMapping("/{userId}/nickname")
-    @Operation(summary = "유저 닉네임 변경")
     public ResponseEntity<UserResponseDto> updateUserNickname(@PathVariable("userId") Long userId,
-                                              @RequestBody UserNicknameRequestDto requestDto,
+                                              @Valid @RequestBody UserNicknameRequestDto requestDto,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
         UserResponseDto responseDto = userService.updateUserNickname(userId, userDetails.getUserId(), requestDto);
         return ResponseEntity.ok(responseDto);
     }
 
-    // 회원 비밀번호 수정
+    @Operation(
+            summary = "유저 비밀번호 변경",
+            description = """
+                    유저의 비밀번호를 변경합니다. 비밀번호는 8~15자의 대소문자, 숫자, 특수문자를 포함해야 합니다.
+                    자신의 비밀번호만 변경할 수 있습니다.
+                    """)
     @PatchMapping("/{userId}/password")
-    @Operation(summary = "유저 비밀번호 변경")
     public ResponseEntity<UserResponseDto> updateUserPassword(@PathVariable("userId") Long userId,
                                               @Valid @RequestBody UserPasswordRequestDto requestDto,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -62,26 +76,36 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
-    // 회원 매니저 권한 부여
+    @Operation(
+            summary = "유저 매니저 권한 부여",
+            description = """
+                    유저의 권한을 매니저로 변경합니다. MASTER 권한을 가진 유저만 변경할 수 있습니다.
+                    """)
     @PatchMapping("/{userId}/authority")
-    @PreAuthorize("hasRole('ROLE_MASTER')")
-    @Operation(summary = "유저 매니저 권한 부여")
+    @PreAuthorize("hasRole('MASTER')")
     public ResponseEntity<UserResponseDto> updateManagerAuthorityUser(@PathVariable("userId") Long userId) {
         UserResponseDto responseDto = userService.grantUserManagerAuthority(userId);
         return ResponseEntity.ok(responseDto);
     }
 
-    // 회원 리뷰 목록 조회
+    @Operation(
+            summary = "유저 리뷰 목록 조회",
+            description = """
+                    특정 유저가 작성한 리뷰 목록을 조회합니다. 삭제한 리뷰는 조회할 수 없습니다.
+                    """)
     @GetMapping("/{userId}/reviews")
-    @Operation(summary = "유저 리뷰 목록 조회")
     public ResponseEntity<Page<ReviewResponseDto>> getUserReviewsByUserId(@PathVariable("userId") Long userId,
                                                                           @PageableDefault Pageable pageable) {
         Page<ReviewResponseDto> responseDto = userService.getPersonalReviews(userId, pageable);
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(
+            summary = "유저 주문 목록 조회",
+            description = """
+                    특정 유저가 주문한 주문 목록을 조회합니다. 삭제한 주문은 조회할 수 없습니다.
+                    """)
     @GetMapping("/{userId}/orders")
-    @Operation(summary = "유저 주문 목록 조회")
     public ResponseEntity<Page<OrderResponseDto>> getUserOrdersByUserId(@PathVariable("userId") Long userId,
                                                                         @PageableDefault Pageable pageable) {
         Page<OrderResponseDto> responseDto = userService.getPersonalOrders(userId, pageable);
