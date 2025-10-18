@@ -51,7 +51,7 @@ public class UserController {
     @Operation(
             summary = "유저 닉네임 변경",
             description = """
-                    유저의 닉네임을 변경합니다. 닉네임은 2자 이상, 10자 이하로 입력해야 합니다.
+                    유저의 닉네임을 변경합니다.
                     자신의 닉네임만 변경할 수 있습니다.
                     """)
     @PatchMapping("/{userId}/nickname")
@@ -95,7 +95,7 @@ public class UserController {
                     """)
     @GetMapping("/{userId}/reviews")
     public ResponseEntity<Page<ReviewResponseDto>> getUserReviewsByUserId(@PathVariable("userId") Long userId,
-                                                                          @PageableDefault Pageable pageable) {
+                                                                          Pageable pageable) {
         Page<ReviewResponseDto> responseDto = userService.getPersonalReviews(userId, pageable);
         return ResponseEntity.ok(responseDto);
     }
@@ -107,7 +107,7 @@ public class UserController {
                     """)
     @GetMapping("/{userId}/orders")
     public ResponseEntity<Page<OrderResponseDto>> getUserOrdersByUserId(@PathVariable("userId") Long userId,
-                                                                        @PageableDefault Pageable pageable) {
+                                                                        Pageable pageable) {
         Page<OrderResponseDto> responseDto = userService.getPersonalOrders(userId, pageable);
         return ResponseEntity.ok(responseDto);
     }
