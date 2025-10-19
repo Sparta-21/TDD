@@ -176,6 +176,46 @@ docker exec -it tdd-db psql -U test -d tdd-db
 - `JwtExceptionFilter`: JWT 필터에서 발생하는 예외 처리
 - `JwtTokenProvider`: 토큰 발급, 검증, 디코딩 담당
 
+### (3) Coupon
+
+![Coupon diagram](https://github.com/user-attachments/assets/8d1595ff-be64-4cad-b62c-baabb2bc6658)
+
+**Coupon**
+
+- 가게 쿠폰 목록 조회
+    - 가게의 모든 쿠폰을 조회
+- Store 쿠폰 등록
+    - 반드시 `SCOPE`가 `STORE`여야 함
+    - `TYPE` 설정을 통해 고정된 할인(FIXED) 혹은 %할인(PERCENT) 선택 가능
+    - OWNER는 반드시 해당 가게 OWNER만 가능함
+- Master 쿠폰 등록
+    - 반드시 `SCOPE`가 `MASTER`여야 함
+    - 해당 기능은 MASTER만 가능
+- 쿠폰 수정
+    - 유저가 1회라도 발급받았다면, 쿠폰 수정은 불가
+    - OWNER는 반드시 해당 가게 OWNER만 가능함
+- 쿠폰 삭제
+    - 만료된 쿠폰은 스케쥴러를 통해 soft delete
+    - OWNER는 반드시 해당 가게 OWNER만 가능함
+
+**UserCoupon**
+
+- 내 쿠폰 목록 조회
+    - CouponStatus에 대하여 ACTIVE > USED/EXPIRED 순으로 정렬하되, 각 그룹에 대하여 생성일 순으로 정렬하여 조회
+- 쿠폰 발급
+    - 쿠폰 발급 기능
+    - exist 설정을 통해 중복 발급 방지
+    - 사용자가 몰려 해당 기능을 수행할 경우를 대비해야 함(동시성 문제)
+
+**기타**
+
+- 모든 API에 대하여 @PreAuthorize를 통해 허용된 권한만 접근 가능하도록 설정
+- SRT 원칙을 지키며 각 클래스가 명확한 책임을 가지도록 메서드 단위를 최소화하여 개발
+- 추가 로직
+    - UserCoupon 만료/만료된 Coupon 삭제 처리를 하나의 트랜잭션 작업으로 묶어서 매일 자정 스케쥴링
+    - 만료된지 7일 된 UserCoupon에 대한 삭제 처리 스케쥴링
+    - Order에서 주문 생성 시 쿠폰을 적용할 수 있는 로직 추가(최소 주문 금액에 맞는지 확인 및 총 결제금액 계산까지 확장 가능)
+
 ## 2. 트러블슈팅
 
 ### (1) CustomPageableResolver Bean 등록 미적용 문제
