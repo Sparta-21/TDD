@@ -26,12 +26,8 @@ public class PointAspect {
     private final PointService pointService;
     private final ReviewRepository reviewRepository;
 
-    @Value("${point.earn.rate}")
-    private double orderPointRate;
-
-    @Value("${point.review.amount}")
-    private Long reviewPointRate;
-
+    private static final double ORDER_POINT_RATE = 0.01;
+    private static final long REVIEW_POINT_AMOUNT = 500L;
 
     @AfterReturning(
         pointcut = "execution(* com.sparta.tdd.domain.payment.service.PaymentResultProcessService.processPaymentResult(..)) && args(payment)",
@@ -47,7 +43,7 @@ public class PointAspect {
                 log.info("결제 완료 payment_Id={}", payment.getId());
 
                 Long totalAmount = payment.getAmount();
-                Long earnAmount = (long) Math.floor(totalAmount * orderPointRate);
+                Long earnAmount = (long) Math.floor(totalAmount * ORDER_POINT_RATE);
 
                 pointService.earnPoints(PointRequest.forPayment(
                     user,
@@ -83,7 +79,7 @@ public class PointAspect {
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
             User user = review.getUser();
-            Long earnAmount = reviewPointRate;
+            Long earnAmount = REVIEW_POINT_AMOUNT;
 
             pointService.earnPoints(PointRequest.forReview(
                 user,
