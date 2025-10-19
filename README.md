@@ -118,6 +118,64 @@ docker exec -it tdd-db psql -U test -d tdd-db
     - 공통 페이징 정책을 일괄 적용하기 위해 WebMvcConfig 에 정책 등록
     - 기본 정렬 기준(`createdAt DESC`)을 지정하여 일관된 정렬 정책 유지
 
+### (2) Authentication
+
+**회원가입**
+
+- username, password를 이용한 신규 사용자 등록
+- 회원가입 시점에서 권한(CUSTOMER, OWNER, MANAGER, MASTER) 설정 가능
+- 즉시 로그인 처리되어 Access Token(Header), Refresh Token(Cookie) 자동 발급
+- 비밀번호는 BCryptPasswordEncoder를 통해 암호화 저장
+
+**로그인**
+
+- username, password를 이용한 인증 처리
+- `PasswordEncoder.matches()`를 통한 비밀번호 검증
+- Access Token(Header), Refresh Token(Cookie) 발급
+
+**로그아웃**
+
+- 현재 사용 중인 Access Token과 Refresh Token을 블랙리스트에 추가
+- 로컬 캐시 기반 블랙리스트 관리로 빠른 토큰 무효화 처리
+- Refresh Token 쿠키 무효화
+
+**회원 탈퇴**
+
+- Soft Delete 방식으로 사용자 및 연관 데이터 삭제
+- 권한별 차등 삭제 로직:
+    - OWNER: 소유 가게 → 메뉴 → 리뷰 → 리뷰 댓글 등 연관 데이터 일괄 삭제
+    - CUSTOMER: 리뷰, 주문 등 개인 데이터 삭제
+- 탈퇴 후 자동 로그아웃 처리 (토큰 블랙리스트 추가)
+
+### (3) JWT 기반 인증 시스템
+
+**토큰 관리 전략**
+
+- Access Token: HTTP Authorization Header로 전달 (짧은 유효기간)
+- Refresh Token: HttpOnly Cookie로 전달 (긴 유효기간)
+- JWT 라이브러리: `jjwt` 사용
+
+**토큰 재발급 (RTR 기법 적용)**
+
+- Refresh Token Rotation (RTR) 기법을 통한 보안 강화
+    - 토큰 재발급 시 Refresh Token도 함께 재발급
+    - 기존 Refresh Token은 블랙리스트에 추가
+    - 탈취된 Refresh Token의 장기 사용 방지
+- Refresh Token의 최대 유효기간 유지
+    - 재발급 시에도 원본 Refresh Token의 만료 시간을 그대로 적용
+    - 무한 갱신 방지 및 주기적 재로그인 유도
+- Access Token, Refresh Token 모두 만료 시 재로그인 필요
+
+**인증 필터 처리**
+
+- `JwtAuthenticationFilter`:
+    - 요청 헤더 및 쿠키에서 토큰 추출
+    - 토큰 검증 및 사용자 인증 정보 생성
+    - SecurityContextHolder에 인증 정보 저장
+    - 토큰이 없는 경우 public URL로 판단
+- `JwtExceptionFilter`: JWT 필터에서 발생하는 예외 처리
+- `JwtTokenProvider`: 토큰 발급, 검증, 디코딩 담당
+
 ## 2. 트러블슈팅
 
 ### (1) CustomPageableResolver Bean 등록 미적용 문제
