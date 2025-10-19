@@ -31,19 +31,44 @@
   <tr>
     <td>Address</td><td>가게 주소 등록</td><td>POST</td><td>/v1/address/store</td>
     <td><pre><code>{
-  "roadAddress": "경기도 성남시 분당구 불정로 6 NAVER그린팩토리",
-  "jibunAddress": "경기도 성남시 분당구 정자동 178-1 NAVER그린팩토리",
-  "detailAddress": "101동",
-  "latitude": "127.1052160",
-  "longitude": "37.3595033"
+"roadAddress": "경기도 성남시 분당구 불정로 6 NAVER그린팩토리",
+"jibunAddress": "경기도 성남시 분당구 정자동 178-1 NAVER그린팩토리",
+"detailAddress": "101동",
+"latitude": "127.105216",
+"longitude": "37.3595033"
 }</code></pre></td>
-    <td></td>
+    <td><pre><code>{
+"uuid": "90553608-0f86-441f-811f-8dc7abf70e9b",
+"jibunAddress": "경기도 성남시 분당구 정자동 178-1 NAVER그린팩토리",
+"roadAddress": "경기도 성남시 분당구 불정로 6 NAVER그린팩토리",
+"detailAddress": "101동",
+"latitude": "127.105216",
+"longitude": "37.3595033"
+}</code></pre></td>
   </tr>
 
   <tr>
     <td>Address</td><td>가게 주소 수정</td><td>PATCH</td><td>/v1/address/store/{storeId}</td>
-    <td></td>
-    <td></td>
+    <td><pre><code>
+{
+"uuid": "90553608-0f86-441f-811f-8dc7abf70e9b",
+"jibunAddress": "서울특별시 구로구 구로동 5-1",
+"roadAddress": "서울특별시 구로구 새말로 89",
+"detailAddress": "2층",
+"latitude": "126.8896815",
+"longitude": "37.505573"
+}
+</code></pre></td>
+    <td><pre><code>
+{
+"uuid": "90553608-0f86-441f-811f-8dc7abf70e9b",
+"jibunAddress": "서울특별시 구로구 구로동 5-1",
+"roadAddress": "서울특별시 구로구 새말로 89",
+"detailAddress": "2층",
+"latitude": "126.8896815",
+"longitude": "37.505573"
+}
+</code></pre></td>
   </tr>
 
   <tr>
@@ -62,13 +87,88 @@
   "latitude": "127.1052160",
   "longitude": "37.3595033"
 }</code></pre></td>
-    <td></td>
+    <td><pre><code>
+{
+"uuid": "2c92e6c7-6906-4f06-b34e-124b51210520",
+"jibunAddress": "경기도 성남시 분당구 정자동 178-1 NAVER그린팩토리",
+"roadAddress": "경기도 성남시 분당구 불정로 6 NAVER그린팩토리",
+"detailAddress": "101동",
+"alias": "우리집",
+"latitude": "127.105216",
+"longitude": "37.3595033"
+}
+</code></pre></td>
   </tr>
 
   <tr>
+    <td>Address</td><td>전체 회원 주소 목록 조회</td><td>GET</td><td>/v1/address/user/all?page=0&size=10</td>
+    <td></td>
+    <td><pre><code>
+{
+"content": [
+{
+"uuid": "90553608-0f86-441f-811f-8dc7abf70e9b",
+"jibunAddress": "서울특별시 구로구 구로동 5-1",
+"roadAddress": "서울특별시 구로구 새말로 89",
+"detailAddress": "2층",
+"latitude": "126.8896815",
+"longitude": "37.505573"
+}
+],
+"pageable": {
+"pageNumber": 0,
+"pageSize": 10,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"offset": 0,
+"unpaged": false,
+"paged": true
+},
+"last": true,
+"totalPages": 1,
+"totalElements": 1,
+"first": true,
+"size": 10,
+"number": 0,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"numberOfElements": 1,
+"empty": false
+}
+</code></pre></td>
+  </tr>
+
+<tr>
     <td>Address</td><td>회원 주소 조회</td><td>GET</td><td>/v1/address/user</td>
-    <td><pre><code>{}</code></pre></td>
-    <td>여기 넣으세요</td>
+    <td></td>
+    <td><pre><code>
+[
+{
+"uuid": "d06857dd-0090-4821-a1a3-ffbb662b40c6",
+"jibunAddress": "경기도 성남시 분당구 정자동 178-1 NAVER그린팩토리",
+"roadAddress": "경기도 성남시 분당구 불정로 6 NAVER그린팩토리",
+"detailAddress": "101동",
+"alias": "우리집",
+"latitude": "127.105216",
+"longitude": "37.3595033"
+},
+{
+"uuid": "6174753c-6b24-43fe-b526-754825ff1b1f",
+"jibunAddress": "서울특별시 구로구 구로동 5-1",
+"roadAddress": "서울특별시 구로구 새말로 89",
+"detailAddress": "2층",
+"alias": "회사",
+"latitude": "126.8896815",
+"longitude": "37.505573"
+}
+]
+</code></pre></td>
   </tr>
 
   <tr>
@@ -80,29 +180,66 @@
   "alias": "회사",
   "latitude": "127.1052160",
   "longitude": "37.3595033"
-}</code></pre></td>
-    <td>여기 넣으세요</td>
+}</code>
+{
+"uuid": "d06857dd-0090-4821-a1a3-ffbb662b40c6",
+"jibunAddress": "경기도 성남시 분당구 정자동 178-1 NAVER그린팩토리",
+"roadAddress": "경기도 성남시 분당구 불정로 6 NAVER그린팩토리",
+"detailAddress": "101동",
+"alias": "회사2",
+"latitude": "127.105216",
+"longitude": "37.3595033"
+}</pre></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Address</td><td>회원 주소 삭제</td><td>DELETE</td><td>/v1/address/user/{addressId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td>여기 넣으세요</td>
+    <td></td>
+    <td></td>
   </tr>
 
-  <!-- New AI Domain Added -->
   <tr>
-    <td>AI</td><td>음식 소개 작성</td><td>POST</td><td>/v1/ai/req</td>
-    <td><pre><code>{
-  "content": "요청내용"
-}</code></pre></td>
-    <td><pre><code>{
-  "id": "id",
-  "inputText": "만두",
-  "outputText": "오감만족, 인생만두!",
-  "createdAt": "2025-10-02T12:57:43.983978"
+    <td>Address</td><td>API 주소 조회</td><td>GET</td><td>/v1/address?query={address}</td>
+    <td></td>
+    <td><pre><code>
+{
+"content": [
+{
+"jibunAddress": "경기도 성남시 분당구 정자동 178-1 NAVER그린팩토리",
+"roadAddress": "경기도 성남시 분당구 불정로 6 NAVER그린팩토리",
+"latitude": "127.1052160",
+"longitude": "37.3595033"
+}
+],
+"pageable": {
+"pageNumber": 0,
+"pageSize": 10,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"offset": 0,
+"unpaged": false,
+"paged": true
+},
+"last": true,
+"totalPages": 1,
+"totalElements": 1,
+"first": true,
+"size": 10,
+"number": 0,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"numberOfElements": 1,
+"empty": false
 }</code></pre></td>
   </tr>
+
   <!-- Auth Domain Added -->
 
  <tr>
@@ -118,7 +255,7 @@
 
   <tr>
     <td>Auth</td><td>유저네임 중복확인</td><td>GET</td><td>/v1/auth/exists?username={username}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "exists": true
 }</code></pre></td>
@@ -137,25 +274,26 @@
 
   <tr>
     <td>Auth</td><td>로그아웃</td><td>POST</td><td>/v1/auth/logout</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Auth</td><td>회원 탈퇴</td><td>DELETE</td><td>/v1/auth/withdrawal</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Auth</td><td>토큰 재발급</td><td>POST</td><td>/v1/auth/token/reissue</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>AT: 헤더, RT: 쿠키</code></pre></td>
+    <td></td>
+    <td></td>
   </tr>
-  <!-- New Cart Domain Added -->
+
+  <!-- Cart Domain -->
   <tr>
     <td>Cart</td><td>장바구니 조회</td><td>GET</td><td>/v1/cart</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "cartId": "UUID",
   "userId": 1,
@@ -204,7 +342,7 @@
 
   <tr>
     <td>Cart</td><td>장바구니 아이템 수량 수정</td><td>PATCH</td><td>/v1/cart/items/{cartItemId}?quantity={quantity}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td><pre><code>/v1/cart/items/{cartItemId}?quantity=5</code></pre></td>
     <td><pre><code>{
   "cartId": "UUID",
   "userId": 1,
@@ -216,87 +354,157 @@
 
   <tr>
     <td>Cart</td><td>장바구니 아이템 삭제</td><td>DELETE</td><td>/v1/cart/items/{cartItemId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{
-  "cartId": "UUID",
-  "userId": 1,
-  "items": [],
-  "totalPrice": 0,
-  "storeId": null
-}</code></pre></td>
+    <td><pre><code>/v1/cart/items/{cartItemId}</code></pre></td>
+    <td><pre><code>
+{
+"cartId": “UUID",
+"userId": 1,
+"items": [],
+"totalPrice": 0,
+"storeId": null
+}
+</code></pre></td>
   </tr>
 
   <tr>
     <td>Cart</td><td>장바구니 비우기</td><td>DELETE</td><td>/v1/cart</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{
-  "cartId": "UUID",
-  "userId": 1,
-  "items": [],
-  "totalPrice": 0,
-  "storeId": null
-}</code></pre></td>
+    <td></td>
+    <td></td>
   </tr>
-  <!-- New Coupon Domain Added -->
+  <!-- Coupon Domain -->
 
   <tr>
     <td>Coupon</td><td>매장 쿠폰 목록 조회</td><td>GET</td><td>/v1/coupon/list/{storeId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td><pre><code>[
+  {
+    "couponId": "9f2d9a2e-1b4a-45a3-9b7f-2f9e6b2d2f00",
+    "name": "주말 10% 할인",
+    "type": "PERCENT",
+    "scope": "STORE",
+    "discountValue": 10,
+    "minOrderPrice": 15000,
+    "quantity": 500,
+    "issuedCount": 132,
+    "expiredAt": "2025-12-31T23:59:59"
+  },
+  {
+    "couponId": "74a7c6c5-8a18-4e1e-9a3b-0c2b4f8f9c11",
+    "name": "3천원 즉시할인",
+    "type": "FIXED",
+    "scope": "STORE",
+    "discountValue": 3000,
+    "minOrderPrice": 12000,
+    "quantity": 300,
+    "issuedCount": 98,
+    "expiredAt": "2025-11-30T23:59:59"
+  }
+]</code></pre></td>
   </tr>
 
   <tr>
     <td>Coupon</td><td>내 쿠폰 목록 조회</td><td>GET</td><td>/v1/coupon/my/list</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td><pre><code>[
+  {
+    "userCouponId": "a2b0a5ef-2d9c-4c6d-9b0e-1a2b3c4d5e6f",
+    "userId": 101,
+    "couponId": "9f2d9a2e-1b4a-45a3-9b7f-2f9e6b2d2f00",
+    "couponStatus": "ACTIVE"
+  },
+  {
+    "userCouponId": "e3c1d2f4-5678-49ab-9cde-0123456789ab",
+    "userId": 101,
+    "couponId": "74a7c6c5-8a18-4e1e-9a3b-0c2b4f8f9c11",
+    "couponStatus": "USED"
+  }
+]</code></pre></td>
   </tr>
 
   <tr>
     <td>Coupon</td><td>Store 쿠폰 등록</td><td>POST</td><td>/v1/coupon/{storeId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td><pre><code>{
+  "name": "2000원 할인",
+  "type": "FIXED",
+  "scope": "STORE",
+  "discountValue": 2000,
+  "minOrderPrice": 10000,
+  "quantity": 1000,
+  "expiredAt": "2025-12-31T23:59:59"
+}</code></pre></td>
+    <td><pre><code>{
+  "couponId": "2c3b4a5d-6e7f-4a8b-9c0d-1e2f3a4b5c6d",
+  "name": "2000원 할인",
+  "type": "FIXED",
+  "scope": "STORE",
+  "discountValue": 2000,
+  "minOrderPrice": 10000,
+  "quantity": 1000,
+  "issuedCount": 0,
+  "expiredAt": "2025-12-31T23:59:59"
+}</code></pre></td>
   </tr>
 
   <tr>
-    <td>Coupon</td><td>Master 쿠폰 등록</td><td>POST</td><td>/v1/coupon/{storeId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td>Coupon</td><td>MASTER 쿠폰 등록</td><td>POST</td><td>/v1/coupon/{couponId}</td>
+    <td><pre><code>{
+  "name": "전매장 5천원 할인",
+  "type": "FIXED",
+  "scope": "MASTER",
+  "discountValue": 5000,
+  "minOrderPrice": 20000,
+  "quantity": 10000,
+  "expiredAt": "2026-01-31T23:59:59"
+}</code></pre></td>
+    <td><pre><code>{
+  "couponId": "d4f1a2b3-c4d5-4e6f-8a90-b1c2d3e4f5a6",
+  "name": "전매장 5천원 할인",
+  "type": "FIXED",
+  "scope": "MASTER",
+  "discountValue": 5000,
+  "minOrderPrice": 20000,
+  "quantity": 10000,
+  "issuedCount": 0,
+  "expiredAt": "2026-01-31T23:59:59"
+}</code></pre></td>
   </tr>
 
   <tr>
-    <td>Coupon</td><td>쿠폰 발급</td><td>POST</td><td>/v1/coupon/{couponId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td>Coupon</td><td>Master 유저 쿠폰 등록</td><td>POST</td><td>/v1/coupon/{storeId}</td>
+    <td></td>
+    <td><pre><code>{
+  "userCouponId": "ab12cd34-ef56-7890-ab12-cd34ef567890",
+  "userId": 101,
+  "couponId": "d4f1a2b3-c4d5-4e6f-8a90-b1c2d3e4f5a6",
+  "couponStatus": "ACTIVE"
+}</code></pre></td>
   </tr>
 
   <tr>
     <td>Coupon</td><td>쿠폰 수정</td><td>PATCH</td><td>/v1/coupon/{couponId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
-  </tr>
-
-  <tr>
-    <td>Coupon</td><td>쿠폰 사용</td><td>POST</td><td>/v1/coupon/{couponId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td><pre><code>{
+  "name": "2000원 할인",
+  "type": "FIXED",
+  "scope": "STORE",
+  "discountValue": 2000,
+  "minOrderPrice": 10000,
+  "quantity": 1000,
+  "expiredAt": "2025-12-31T23:59:59"
+}</code></pre></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Coupon</td><td>쿠폰 삭제</td><td>DELETE</td><td>/v1/coupon/{couponId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td></td>
   </tr>
 
-  <tr>
-    <td>Coupon</td><td>쿠폰 만료</td><td>DELETE</td><td>/v1/coupon/expire/{couponId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
-  </tr>
-  <!-- New Menu Domain Added -->
+  <!-- Menu Domain -->
 
  <tr>
     <td>Menu</td><td>메뉴 조회(목록)</td><td>GET</td><td>/v1/store/{storeId}/menu</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>[
   {
     "menuId": "550e8400-e29b-41d4-a716-446655440000",
@@ -319,7 +527,7 @@
 
   <tr>
     <td>Menu</td><td>메뉴 조회(개별)</td><td>GET</td><td>/v1/store/{storeId}/menu/{menuId}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "menuId": "550e8400-e29b-41d4-a716-446655440000",
   "storeId": "660e8400-e29b-41d4-a716-446655440000",
@@ -355,25 +563,25 @@
   <tr>
     <td>Menu</td><td>메뉴 수정</td><td>PATCH</td><td>/v1/store/{storeId}/menu/{menuId}</td>
     <td><pre><code>{ "name": "수정버거" }</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Menu</td><td>메뉴 상태 변경</td><td>PATCH</td><td>/v1/store/{storeId}/menu/{menuId}/status</td>
     <td><pre><code>{ "isHidden": true }</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Menu</td><td>메뉴 삭제</td><td>DELETE</td><td>/v1/store/{storeId}/menu/{menuId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td></td>
   </tr>
-  <!-- New Order Domain Added -->
+  <!-- Order Domain -->
 
   <tr>
     <td>Order</td><td>주문 목록 조회</td><td>GET</td><td>/v1/orders?from={startDate}&to={endDate}&status={status}&userId={userId}&storeId={storeId}&sort={sort}&page={page}&size={size}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{ 
   "totalElements": 0,
   "totalPages": 0,
@@ -419,7 +627,7 @@
 
   <tr>
     <td>Order</td><td>주문 조회</td><td>GET</td><td>/v1/orders/{orderId}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{ 
   "id": 1002,
   "customerName": "c",
@@ -496,18 +704,43 @@
   <tr>
     <td>Order</td><td>주문 상태 변경(관리자)</td><td>PATCH</td><td>/v1/orders/{orderId}</td>
     <td><pre><code>{ "status": "DELIVERED" }</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td><pre><code>{
+"id": 1002,
+"customerName": "c",
+"storeName": "d",
+"price": 45000,
+"address": "부산시 어딘가 456",
+"orderMenuList": [
+{ “id”: UUID, "name": "탕수육", "price": 20000, "quantity": 1 },
+{”id”: UUID,  "name": "깐풍기", "price": 25000, "quantity": 2 }
+],
+"createdAt": "2025-09-29T12:34:56",
+”oderStatus”: “DELIVERED”
+}</code></pre></td>
   </tr>
 
   <tr>
     <td>Order</td><td>주문 상태 변경(가게주인, 관리자)</td><td>PATCH</td><td>/orderId/next-status</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td><pre><code>{
+"id": 1002,
+"customerName": "c",
+"storeName": "d",
+"price": 45000,
+"address": "부산시 어딘가 456",
+"orderMenuList": [
+{ “id”: UUID, "name": "탕수육", "price": 20000, "quantity": 1 },
+{”id”: UUID,  "name": "깐풍기", "price": 25000, "quantity": 2 }
+],
+"createdAt": "2025-09-29T12:34:56",
+”oderStatus”: “DELIVERED”
+}
+</code></pre></td>
   </tr>
 
   <tr>
     <td>Order</td><td>주문 취소</td><td>PATCH</td><td>/cancel/{orderId}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{ 
   "id": 1002,
   "customerName": "c",
@@ -532,67 +765,95 @@
   "orderStatus": "CANCELLED"
 }</code></pre></td>
   </tr>
-  <!-- New Payment Domain Added -->
+  <!-- Payment Domain -->
 
   <tr>
     <td>Payment</td><td>결제내역 조회</td><td>GET</td><td>/v1/payments?page=1&size=10&orderBy={정렬조건}&keyword={검색조건}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
-  "payments": [
-    {
-      "id": 1,
-      "paymentNumber": "12312312",
-      "status": "결제 성공",
-      "storeName": "음식점1",
-      "price": 10000
-    }
-  ]
+    “content”: [
+      {
+           “id”: UUID
+        “paymentNumber”: “12312312”,
+        “status”: “결제 성공”,
+         “storeName”: “음식점1”,
+         “price”: 10000
+      },
+      …
+    ],
+    "pageable": {
+         "pageNumber": 0,
+         "pageSize": 10,
+         "sort": {
+              "empty": false,
+              "sorted": true,
+              "unsorted": false
+      },
+      "offset": 0,
+      "paged": true,
+      "unpaged": false
+},
+    "totalPages": 1,
+    "last": true,
+    "totalElements": 8,
+    "size": 10,
+    "number": 0,
+    "sort": {
+        "empty": false,
+        "sorted": true,
+        "unsorted": false
+    },
+    "first": true,
+    "numberOfElements": 8,
+    "empty": false
 }</code></pre></td>
   </tr>
 
   <tr>
     <td>Payment</td><td>결제내역 상세 조회</td><td>GET</td><td>/v1/payments/{paymentId}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
-  "paymentNumber": "1q2w3e4r!",
-  "price": 10000,
-  "cardCompany": "XXX카드",
-  "cardNumber": "1111 2222 3333 4444",
-  "approvedAt": "2025-09-29T10:15:00",
-  "restaurant": {
-    "id": 1,
-    "storeName": "음식점",
-    "phone": "02-1234-1234",
-    "address": "서울 어떤가"
-  },
-  "orderItem": [
-    {
-      "id": 5,
-      "storeName": "음식1",
-      "quantity": 1,
-      "price": 5000,
-      "totalPrice": 5000
-    }
-  ]
+        “paymentNumber”: “1q2w3e4r!”,
+        “price”: 10000,
+        “cardCompany”: “XX카드”,
+        “cardNumber”: “1111 **** **** 4444”,
+        “processedAt”: "2025-09-29T10:15:00"
+        “restaurant”: {
+            “id”: 1,
+            “storeName”: “음식점”,
+        },
+        “orderItem” [
+            {
+                “id”: 5,
+                “menuName”: “음식1”,
+                “quantity”: 1
+                “price”: 5000,
+                “totalPrice”: 5000
+            },
+            …
+        ]
 }</code></pre></td>
   </tr>
 
   <tr>
     <td>Payment</td><td>결제 상태 변경</td><td>PATCH</td><td>/v1/payments/status/{paymentId}</td>
-    <td><pre><code>{ "status": "결제 완료" }</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td><pre><code>{
+    “status”: “COMPLETED”
+}</code></pre></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Payment</td><td>결제 요청</td><td>POST</td><td>/v1/payments</td>
     <td><pre><code>{
-  "cardCompany": "삼성",
-  "cardNumber": "123123"
+    “orderId”: UUID,
+    “cardCompany”: “SAMSUNG”,
+    “cardNumber”: “1111 **** **** 4444”
 }</code></pre></td>
-    <td><pre><code>{ "status": "approve" }</code></pre></td>
+    <td></td>
   </tr>
 
-  <!-- Review Domain Added -->
+  <!-- Review Domain -->
   <tr>
     <td>Review</td><td>리뷰 등록</td><td>POST</td><td>/v1/reviews/order/{orderId}</td>
     <td><pre><code>{
@@ -634,7 +895,7 @@
 
   <tr>
     <td>Review</td><td>리뷰 개별 조회</td><td>GET</td><td>/v1/reviews/{reviewId}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "reviewId": 123,
   "storeId": 1,
@@ -649,7 +910,7 @@
 
   <tr>
     <td>Review</td><td>리뷰 목록 조회</td><td>GET</td><td>/v1/reviews/{storeId}?page=1&size=10</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "reviews": [
     {
@@ -691,8 +952,11 @@
 
   <tr>
     <td>Review</td><td>리뷰 삭제</td><td>DELETE</td><td>/v1/reviews/{reviewId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td><pre><code>{
+  "status": 200,
+  "message": "리뷰가 성공적으로 삭제되었습니다."
+}</code></pre></td>
   </tr>
 
   <tr>
@@ -725,12 +989,12 @@
 
   <tr>
     <td>Review</td><td>리뷰 답글 삭제</td><td>DELETE</td><td>/v1/reviews/{reviewId}/reply</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
     <td>Review</td><td>리뷰 목록 조회(사장님 답글 추가 시)</td><td>GET</td><td>/v1/reviews/{storeId}?page=1&size=10</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "reviews": [
   {
@@ -745,7 +1009,6 @@
     “reply”: { 
       “conetent”: 이용해주셔서 감사합니다
     }
-
 },
 {
 "reviewId": 102,
@@ -759,7 +1022,6 @@
 “reply”: {
 “conetent”: 다음에 또 오세요
 }
-
 }
 ],
 "pageInfo": {
@@ -838,22 +1100,7 @@
   "address": "address",
   "imageUrl": "imageUrl"
 }</code></pre></td>
-    <td><pre><code>{
-  "status": 201,
-  "message": "음식점 등록에 성공했습니다.",
-  "data": {
-    "storeId": "storeId",
-    "name": "name",
-    "category": "category",
-    "description": "description",
-    "address": "address",
-    "imageUrl": "imageUrl",
-    "avgRating": 0,
-    "reviewCount": 0,
-    "createdAt": "",
-    "createdBy": ""
-  }
-}</code></pre></td>
+    <td></td>
   </tr>
 
   <tr>
@@ -866,43 +1113,22 @@
   "address": "newAddress",
   "imageUrl": "newImageUrl"
 }</code></pre></td>
-    <td><pre><code>{
-  "status": 200,
-  "message": "음식점 수정에 성공했습니다.",
-  "data": {
-    "storeId": "storeId",
-    "name": "newName",
-    "category": "newCategory",
-    "description": "newDescription",
-    "address": "newAddress",
-    "imageUrl": "newImageUrl",
-    "avgRating": 4.5,
-    "reviewCount": 500,
-    "updatedAt": "",
-    "updatedBy": ""
-  }
-}</code></pre></td>
+    <td></td>
   </tr>
 
   <tr>
     <td>Store</td><td>음식점 삭제</td><td>DELETE</td><td>/v1/store/{storeId}</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{
-  "status": 200,
-  "message": "음식점 삭제에 성공했습니다.",
-  "data": {
-    "storeId": "storeId",
-    "deletedAt": "",
-    "deletedBy": ""
-  }
-}</code></pre></td>
+    <td>{
+”storeId”:”storeId”
+}</td>
+    <td></td>
   </tr>
   <!-- User Domain Added -->
 
 
 <tr>
     <td>User</td><td>회원 정보 조회</td><td>GET</td><td>/v1/users/{userId}</td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "userId": "userId",
   "username": "username"
@@ -913,18 +1139,30 @@
     <td><pre><code>{
   "nickname": "nickname"
 }</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td>{
+"id": 1,
+"username": "test01",
+"password": "$2a$10$FYt/selrPyrJDEBzyjIyAu3z21285Kzjxh10GuLO9NYQDod7WkTOC",
+"nickname": "테스트입니다",
+"authority": "고객"
+}</td>
   </tr>
   <tr>
     <td>User</td><td>회원 비밀번호 수정</td><td>PATCH</td><td>/v1/users/{userId}/password</td>
     <td><pre><code>{
   "password": "password"
 }</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td><pre><code>{
+"id": 1,
+"username": "test01",
+"password": "$2a$10$OZnji3urkIVAufCRiwIu8e4t.JWZUZMSe.dM4qAu9r95A7qzkpFN2",
+"nickname": "테스트입니다",
+"authority": "고객"
+}</code></pre></td>
   </tr>
   <tr>
     <td>User</td><td>회원 리뷰 목록 조회</td><td>GET</td><td>/v1/users/{userId}/reviews</td>
-    <td><pre><code>정렬조건</code></pre></td>
+    <td></td>
     <td><pre><code>{
   "data": [
     {
@@ -942,40 +1180,136 @@
   </tr>
   <tr>
     <td>User</td><td>회원 목록 조회</td><td>GET</td><td>/v1/users</td>
-    <td><pre><code>{ page=1&size=10&sort=createdAt,desc }</code></pre></td>
+    <td></td>
     <td><pre><code>{
-  "data": [
-    {
-      "user1": {
-        "userId": "userId",
-        "username": "username"
-      }
-    }
-  ]
+"users": {
+"content": [
+{
+"id": 5,
+"username": "master1",
+"password": "$2a$10$yr4rLG.uvjLECZLn1AMP..5o1tRO0gzhEvf5a7LiZ5ImS9Mx4YW2y",
+"nickname": "owner",
+"authority": "최종 관리자"
+},
+…
+{
+"id": 1,
+"username": "test01",
+"password": "$2a$10$OZnji3urkIVAufCRiwIu8e4t.JWZUZMSe.dM4qAu9r95A7qzkpFN2",
+"nickname": "테스트입니다",
+"authority": "고객"
+}
+],
+"pageable": {
+"pageNumber": 0,
+"pageSize": 10,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"offset": 0,
+"unpaged": false,
+"paged": true
+},
+"last": true,
+"totalPages": 1,
+"totalElements": 5,
+"first": true,
+"size": 10,
+"number": 0,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"numberOfElements": 5,
+"empty": false
+}
 }</code></pre></td>
   </tr>
   <tr>
     <td>User</td><td>회원 주문 목록 조회</td><td>GET</td><td>/v1/users/{userId}/orders</td>
-    <td><pre><code>{ page=1&size=10&sort=createdAt,desc }</code></pre></td>
+    <td></td>
     <td><pre><code>{
-  "data": [
-    {
-      "orderId": "orderId",
-      "storeName": "storeName",
-      "price": "price",
-      "address": "address",
-      "createdAt": "2025-09-29T12:34:56",
-      "menu": [
-        { "name": "탕수육", "price": 20000, "quantity": 1 },
-        { "name": "깐풍기", "price": 25000, "quantity": 2 }
-      ]
-    }
-  ]
+"content": [
+{
+"id": "072979c1-8eaf-49c1-a36c-306c5c0792d7",
+"customerName": "test01",
+"storeName": "한식당",
+"price": 13000,
+"address": "string",
+"orderMenuList": [
+{
+"id": "56167b37-e9b1-4855-b1c9-f5ea54506fa8",
+"name": "칼국수",
+"price": 5000,
+"quantity": 1
+},
+{
+"id": "687e2748-1860-4c0a-bdd6-c77b0275f28b",
+"name": "김밥",
+"price": 2000,
+"quantity": 4
+}
+],
+"createdAt": "2025-10-18T13:34:46.945571",
+"orderStatus": "PENDING"
+},
+{
+"id": "c39792a8-60bd-4075-841e-6233bfe5c731",
+"customerName": "test01",
+"storeName": "한식당",
+"price": 15000,
+"address": "string",
+"orderMenuList": [
+{
+"id": "8093a169-80e7-43a5-8fd2-9a997c200f4f",
+"name": "칼국수",
+"price": 5000,
+"quantity": 3
+}
+],
+"createdAt": "2025-10-18T13:33:40.164406",
+"orderStatus": "PENDING"
+}
+],
+"pageable": {
+"pageNumber": 0,
+"pageSize": 10,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"offset": 0,
+"unpaged": false,
+"paged": true
+},
+"last": true,
+"totalPages": 1,
+"totalElements": 2,
+"first": true,
+"size": 10,
+"number": 0,
+"sort": {
+"empty": false,
+"unsorted": false,
+"sorted": true
+},
+"numberOfElements": 2,
+"empty": false
 }</code></pre></td>
   </tr>
   <tr>
     <td>User</td><td>매니저 권한 부여</td><td>PATCH</td><td>/v1/users/{userId}/authority</td>
-    <td><pre><code>{}</code></pre></td>
-    <td><pre><code>{}</code></pre></td>
+    <td></td>
+    <td><pre><code>{
+"id": 1,
+"username": "test01",
+"password": "$2a$10$OZnji3urkIVAufCRiwIu8e4t.JWZUZMSe.dM4qAu9r95A7qzkpFN2",
+"nickname": "테스트입니다",
+"authority": "관리자"
+}</code></pre></td>
   </tr>
 </table>
