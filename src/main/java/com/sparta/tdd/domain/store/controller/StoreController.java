@@ -5,6 +5,7 @@ import com.sparta.tdd.domain.store.dto.StoreRequestDto;
 import com.sparta.tdd.domain.store.dto.StoreResponseDto;
 import com.sparta.tdd.domain.store.enums.StoreCategory;
 import com.sparta.tdd.domain.store.service.StoreService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.UUID;
@@ -31,6 +32,10 @@ public class StoreController {
 
     private final StoreService storeService;
 
+    @Operation(
+        summary = "가게 검색",
+        description = "키워드, 카테고리, 페이징 정보로 가게를 검색합니다. 가게의 메뉴 정보도 함께 조회됩니다."
+    )
     @GetMapping
     public ResponseEntity<Page<StoreResponseDto>> searchStores(
         @RequestParam(required = false) String keyword,
@@ -41,6 +46,10 @@ public class StoreController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(
+        summary = "가게 생성",
+        description = "새로운 가게를 등록합니다. OWNER, MANAGER, MASTER 권한이 필요합니다."
+    )
     @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PostMapping
     public ResponseEntity<StoreResponseDto> createStore(
@@ -56,12 +65,23 @@ public class StoreController {
             .body(responseDto);
     }
 
+
+    @Operation(
+        summary = "가게 조회",
+        description = """
+            스토어 ID를 통해 가게를 조회 합니다.
+            """
+    )
     @GetMapping("{storeId}")
     public ResponseEntity<StoreResponseDto> getStore(@PathVariable UUID storeId) {
         StoreResponseDto responseDto = storeService.getStore(storeId);
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(
+        summary = "가게 상세 조회",
+        description = "스토어 ID를 통해 가게의 상세 정보를 조회합니다."
+    )
     @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PatchMapping("{storeId}")
     public ResponseEntity<Void> updateStore(
@@ -73,6 +93,10 @@ public class StoreController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+        summary = "가게 정보 수정",
+        description = "가게 정보를 수정합니다. OWNER, MANAGER, MASTER 권한이 필요합니다."
+    )
     @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @DeleteMapping("{storeId}")
     public ResponseEntity<Void> deleteStore(
