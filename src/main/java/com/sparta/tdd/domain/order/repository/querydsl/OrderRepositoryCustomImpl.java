@@ -1,6 +1,7 @@
 package com.sparta.tdd.domain.order.repository.querydsl;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.tdd.domain.menu.entity.QMenu;
@@ -64,34 +65,34 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 
         Long targetUserId = searchOption.userId();
         LocalDateTime start = searchOption.startOrNull();
-        LocalDateTime end =searchOption.endOrNull();
-        UUID targetStoreId =  searchOption.storeId();
+        LocalDateTime end = searchOption.endOrNull();
+        UUID targetStoreId = searchOption.storeId();
 
 
-        QOrder o = QOrder.order;
+        QOrder qOrder = QOrder.order;
 
         List<UUID> ids = query
-            .select(o.id)
-            .from(o)
+            .select(qOrder.id)
+            .from(qOrder)
             .where(
-                o.user.id.eq(targetUserId),
-                o.store.id.eq(targetStoreId),
-                o.createdAt.goe(start),
-                o.createdAt.lt(end)
+                userIdEq(targetUserId),
+                storeIdEq(targetStoreId),
+                createdAtGoe(start),
+                createdAtLt(end)
             )
-            .orderBy(toOrderSpecifier(pageable.getSort(), o))
+            .orderBy(toOrderSpecifier(pageable.getSort(), qOrder))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
         JPAQuery<Long> countQuery = query
-                .select(o.count())
-                .from(o)
+                .select(qOrder.count())
+                .from(qOrder)
                 .where(
-                        o.user.id.eq(targetUserId),
-                        o.store.id.eq(targetStoreId),
-                        o.createdAt.goe(start),
-                        o.createdAt.lt(end)
+                    userIdEq(targetUserId),
+                    storeIdEq(targetStoreId),
+                    createdAtGoe(start),
+                    createdAtLt(end)
                 );
 
         return PageableExecutionUtils.getPage(
@@ -128,5 +129,16 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         return specifiers.toArray(new OrderSpecifier[0]);
     }
 
-
+    private BooleanExpression userIdEq(Long id) {
+        return id == null ? null : QOrder.order.user.id.eq(id);
+    }
+    private BooleanExpression storeIdEq(UUID id) {
+        return id == null ? null : QOrder.order.store.id.eq(id);
+    }
+    private BooleanExpression createdAtGoe(LocalDateTime t) {
+        return t == null ? null : QOrder.order.createdAt.goe(t);
+    }
+    private BooleanExpression createdAtLt(LocalDateTime t) {
+        return t == null ? null : QOrder.order.createdAt.lt(t);
+    }
 }
