@@ -43,6 +43,7 @@ public enum ErrorCode {
     MENU_NOT_IN_STORE(HttpStatus.BAD_REQUEST, "해당 가게의 메뉴가 아닙니다."),
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 메뉴가 포함되어 있습니다."),
     MENU_INVALID_INFO(HttpStatus.BAD_REQUEST, "메뉴 정보가 올바르지 않습니다."),
+    ORDER_CANCELLATION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "주문 생성 후 5분이 지나 취소할 수 없습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
 
     // MENU 도메인 관련

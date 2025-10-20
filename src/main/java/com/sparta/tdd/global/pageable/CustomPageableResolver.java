@@ -16,12 +16,10 @@ public class CustomPageableResolver extends PageableHandlerMethodArgumentResolve
 
     private static final Set<Integer> ALLOWED = Set.of(10, 30, 50);
     private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int MAX_SIZE = 50;
 
     public CustomPageableResolver(SortHandlerMethodArgumentResolver sortResolver) {
         super(sortResolver);
         this.setFallbackPageable(PageRequest.of(0, DEFAULT_PAGE_SIZE));
-        this.setMaxPageSize(MAX_SIZE);
     }
 
     /**

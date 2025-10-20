@@ -33,7 +33,8 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     @Override
     public Optional<Order> findDetailById(UUID id) {
         QOrder qOrder = QOrder.order;
-        QUser qUser = QUser.user;
+        QUser qOrderUser = new QUser("orderUser");
+        QUser qStoreUser = new QUser("storeUser");
         QStore qStore = QStore.store;
         QPayment qPayment = QPayment.payment;
         QOrderMenu qOrderMenu = QOrderMenu.orderMenu;
@@ -42,8 +43,9 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         Order result = query
             .selectFrom(qOrder)
             .distinct()
-            .leftJoin(qOrder.user, qUser).fetchJoin()
+            .leftJoin(qOrder.user, qOrderUser).fetchJoin()
             .leftJoin(qOrder.store, qStore).fetchJoin()
+            .leftJoin(qOrder.store.user, qStoreUser).fetchJoin()
             .leftJoin(qOrder.payment, qPayment).fetchJoin()
             .leftJoin(qOrder.orderMenuList, qOrderMenu).fetchJoin()
             .leftJoin(qOrderMenu.menu, qMenu).fetchJoin()
