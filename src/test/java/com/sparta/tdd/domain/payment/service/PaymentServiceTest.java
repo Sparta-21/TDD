@@ -112,12 +112,10 @@ class PaymentServiceTest {
 
         // Menu
         menu = Menu.builder()
-            .dto(new MenuRequestDto(
-                "김치찌개",
-                "맛있는 김치찌개",
-                11000,
-                null
-            ))
+            .name("김치찌개")
+            .description("맛있는 김치찌개")
+            .price(11000)
+            .imageUrl(null)
             .store(store)
             .build();
         ReflectionTestUtils.setField(menu, "id", UUID.randomUUID());
