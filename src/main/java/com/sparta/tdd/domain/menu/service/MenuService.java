@@ -115,7 +115,7 @@ public class MenuService {
 
     private void validateUserOnMenu(User user, Store store) {
         if (!store.isOwner(user)) {
-            throw new BusinessException(ErrorCode.USER_AUTHORITY_FORBIDDEN);
+            throw new BusinessException(ErrorCode.STORE_OWNERSHIP_DENIED);
         }
     }
 }
