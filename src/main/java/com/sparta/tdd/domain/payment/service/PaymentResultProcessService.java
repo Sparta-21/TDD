@@ -6,6 +6,7 @@ import com.sparta.tdd.domain.payment.entity.Payment;
 import com.sparta.tdd.domain.payment.enums.PaymentStatus;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,17 +39,16 @@ public class PaymentResultProcessService {
 
         // 주문 상태 변경 (PENDING -> DELIVERED)
         order.nextStatus();
-
-        // TODO: 포인트 적립
     }
 
     private void processCancelled(Payment payment, Order order) {
+        if (LocalDateTime.now().minusMinutes(5).isAfter(payment.getCreatedAt())) {
+            throw new BusinessException(ErrorCode.PAYMENT_CANCEL_TIME_EXPIRED);
+        }
         // 주문 상태를 PENDING으로 복구
         order.changeOrderStatus(OrderStatus.PENDING);
 
         // 환불처리는 진행 된 것으로 가정하겠습니다.
-
-        // TODO 재고 복구, 적립된 포인트 회수 등
     }
 
     private void processFailed(Payment payment, Order order) {

@@ -100,3 +100,4 @@ naver:
   client:
     id: testClientId
     secret: testClientSecret
+
