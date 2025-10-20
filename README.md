@@ -21,7 +21,7 @@ TDD(Today Delicious Delivery)는 이름 그대로 '오늘의 맛있는 배달' �
 | 분류                  | 상세                                                                         |
 |---------------------|----------------------------------------------------------------------------|
 | **Back-End**        | Java 21, Spring Boot 3.5.6, Spring Data JPA, Querydsl 7.0, Spring Security |
-| **Database**        | PostgreSQL 18.0                                                            |
+ **Database**        | PostgreSQL 17.6                                                            |
 | **Build Tool**      | Gradle                                                                     |
 | **Infra**           | Docker compose, Github Actions(CI)                                         |
 | **open API**        | Google GenAI API, Naver Map API                                            |
@@ -76,7 +76,7 @@ docker exec -it tdd-db psql -U test -d tdd-db
 
 ## 1. ERD
 
-![erd](https://github.com/user-attachments/assets/96efb039-16e5-4f0d-95e6-b0b7e0a40cbb)
+![erd](https://github.com/user-attachments/assets/5a08601b-8d4d-4993-a7f2-833bdfa86d16)
 
 ## 2. 도메인 다이어그램
 
@@ -97,6 +97,124 @@ docker exec -it tdd-db psql -U test -d tdd-db
 # 개발 산출물
 
 ## 1. 도메인별 핵심 기능 상세 구현
+
+### (1) Order
+
+![Order diagram](https://github.com/user-attachments/assets/6caa1364-0a1b-4e17-8706-25f320bb0004)
+
+- Order 도메인
+    - DDD 원칙에 따라 주문의 상태 전이(`nextStatus`, `changeOrderStatus`) 로직을 엔티티 내부에 위치
+    - Order 와 Menu 의 다대다 관계를 OrderMenu 로 풀어내 도메인 응집도 강화
+    - Mapper 를 통해 Service 는 트랜잭션 중심의 조합 역할만 수행
+- getOrders(주문 목록 조회)
+    - QueryDSL을 이용한 동적 검색 (조건 null 시 필터 미적용)
+    - MANAGER, MASTER 권한 외 사용자는 본인 주문만 조회 (권한 검증)
+    - Page 처리로 ID 목록 우선 조회 후 fetch join으로 세부 데이터 일괄 로딩 (N+1 방지)
+- nextOrderStatus(주문 단계 변경)
+    - OWNER 가 가능한 주문 단계변경 메서드로 시스템의 규칙에 따라서만 변경이 가능하도록 nextStatus 로 동작
+    - 관리자 권한의 사용자들은 changeOrderStatus 를 통하여 임의 변경가능하도록 별도 API 구성
+
+- PageableHandlerMethodArgumentResolver
+    - 공통 페이징 정책을 일괄 적용하기 위해 WebMvcConfig 에 정책 등록
+    - 기본 정렬 기준(`createdAt DESC`)을 지정하여 일관된 정렬 정책 유지
+
+### (2) Authentication
+
+**회원가입**
+
+- username, password를 이용한 신규 사용자 등록
+- 회원가입 시점에서 권한(CUSTOMER, OWNER, MANAGER, MASTER) 설정 가능
+- 즉시 로그인 처리되어 Access Token(Header), Refresh Token(Cookie) 자동 발급
+- 비밀번호는 BCryptPasswordEncoder를 통해 암호화 저장
+
+**로그인**
+
+- username, password를 이용한 인증 처리
+- `PasswordEncoder.matches()`를 통한 비밀번호 검증
+- Access Token(Header), Refresh Token(Cookie) 발급
+
+**로그아웃**
+
+- 현재 사용 중인 Access Token과 Refresh Token을 블랙리스트에 추가
+- 로컬 캐시 기반 블랙리스트 관리로 빠른 토큰 무효화 처리
+- Refresh Token 쿠키 무효화
+
+**회원 탈퇴**
+
+- Soft Delete 방식으로 사용자 및 연관 데이터 삭제
+- 권한별 차등 삭제 로직:
+    - OWNER: 소유 가게 → 메뉴 → 리뷰 → 리뷰 댓글 등 연관 데이터 일괄 삭제
+    - CUSTOMER: 리뷰, 주문 등 개인 데이터 삭제
+- 탈퇴 후 자동 로그아웃 처리 (토큰 블랙리스트 추가)
+
+### (3) JWT 기반 인증 시스템
+
+**토큰 관리 전략**
+
+- Access Token: HTTP Authorization Header로 전달 (짧은 유효기간)
+- Refresh Token: HttpOnly Cookie로 전달 (긴 유효기간)
+- JWT 라이브러리: `jjwt` 사용
+
+**토큰 재발급 (RTR 기법 적용)**
+
+- Refresh Token Rotation (RTR) 기법을 통한 보안 강화
+    - 토큰 재발급 시 Refresh Token도 함께 재발급
+    - 기존 Refresh Token은 블랙리스트에 추가
+    - 탈취된 Refresh Token의 장기 사용 방지
+- Refresh Token의 최대 유효기간 유지
+    - 재발급 시에도 원본 Refresh Token의 만료 시간을 그대로 적용
+    - 무한 갱신 방지 및 주기적 재로그인 유도
+- Access Token, Refresh Token 모두 만료 시 재로그인 필요
+
+**인증 필터 처리**
+
+- `JwtAuthenticationFilter`:
+    - 요청 헤더 및 쿠키에서 토큰 추출
+    - 토큰 검증 및 사용자 인증 정보 생성
+    - SecurityContextHolder에 인증 정보 저장
+    - 토큰이 없는 경우 public URL로 판단
+- `JwtExceptionFilter`: JWT 필터에서 발생하는 예외 처리
+- `JwtTokenProvider`: 토큰 발급, 검증, 디코딩 담당
+
+### (3) Coupon
+
+![Coupon diagram](https://github.com/user-attachments/assets/8d1595ff-be64-4cad-b62c-baabb2bc6658)
+
+**Coupon**
+
+- 가게 쿠폰 목록 조회
+    - 가게의 모든 쿠폰을 조회
+- Store 쿠폰 등록
+    - 반드시 `SCOPE`가 `STORE`여야 함
+    - `TYPE` 설정을 통해 고정된 할인(FIXED) 혹은 %할인(PERCENT) 선택 가능
+    - OWNER는 반드시 해당 가게 OWNER만 가능함
+- Master 쿠폰 등록
+    - 반드시 `SCOPE`가 `MASTER`여야 함
+    - 해당 기능은 MASTER만 가능
+- 쿠폰 수정
+    - 유저가 1회라도 발급받았다면, 쿠폰 수정은 불가
+    - OWNER는 반드시 해당 가게 OWNER만 가능함
+- 쿠폰 삭제
+    - 만료된 쿠폰은 스케쥴러를 통해 soft delete
+    - OWNER는 반드시 해당 가게 OWNER만 가능함
+
+**UserCoupon**
+
+- 내 쿠폰 목록 조회
+    - CouponStatus에 대하여 ACTIVE > USED/EXPIRED 순으로 정렬하되, 각 그룹에 대하여 생성일 순으로 정렬하여 조회
+- 쿠폰 발급
+    - 쿠폰 발급 기능
+    - exist 설정을 통해 중복 발급 방지
+    - 사용자가 몰려 해당 기능을 수행할 경우를 대비해야 함(동시성 문제)
+
+**기타**
+
+- 모든 API에 대하여 @PreAuthorize를 통해 허용된 권한만 접근 가능하도록 설정
+- SRT 원칙을 지키며 각 클래스가 명확한 책임을 가지도록 메서드 단위를 최소화하여 개발
+- 추가 로직
+    - UserCoupon 만료/만료된 Coupon 삭제 처리를 하나의 트랜잭션 작업으로 묶어서 매일 자정 스케쥴링
+    - 만료된지 7일 된 UserCoupon에 대한 삭제 처리 스케쥴링
+    - Order에서 주문 생성 시 쿠폰을 적용할 수 있는 로직 추가(최소 주문 금액에 맞는지 확인 및 총 결제금액 계산까지 확장 가능)
 
 ## 2. 트러블슈팅
 
@@ -354,11 +472,11 @@ class StoreRepositoryTest extends RepositoryTest {
 
 # 팀원 소개
 
-| 팀원  | 깃허브                                        | 역할                                            |
-|-----|--------------------------------------------|-----------------------------------------------|
-| 박성민 | [@dnjsals45](https://github.com/dnjsals45) | Auth, Payment 도메인 개발 및 테스트코드 작성               |
-| 김민수 | [@Doritosch](https://github.com/Doritosch) | User, AI, Address 도메인 개발 및 테스코드 작성            |
-| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   | Menu, Coupon 도메인 개발 및 테스트코드 작성                |
-| 박주찬 | [@p990805](https://github.com/p990805)     | Review, ReviewReply, Cart 도메인 개발 및 테스트코드 작성   |
-| 변영재 | [@bbangjae](https://github.com/bbangjae)   | Store, Point 도메인 개발 및 테스트코드 작성                |
-| 송의현 | [@yawning5](https://github.com/yawning5)   | Order, OrderMenu 도메인 개발 및 테스트코드 작성, 페이징 정책 적용 |
+| 팀원  | 깃허브                                        | 역할                                                                               |
+|-----|--------------------------------------------|----------------------------------------------------------------------------------|
+| 박성민 | [@dnjsals45](https://github.com/dnjsals45) | Auth, Payment 도메인 개발 및 테스트코드 작성                                                  |
+| 김민수 | [@Doritosch](https://github.com/Doritosch) | AI 메뉴 소개 생성, 주소 및 유저 도메인 개발 및 테스트코드 작성                                           |
+| 김채연 | [@yeon-22k](https://github.com/yeon-22k)   | Menu, Coupon 도메인 개발 및 테스트코드 작성, Coupon 스케쥴링 만료/삭제 구현, ReadMe 통합 작업               |
+| 박주찬 | [@p990805](https://github.com/p990805)     | Review, ReviewReply, Cart 도메인 개발 및 테스트코드 작성                                      |
+| 변영재 | [@bbangjae](https://github.com/bbangjae)   | Store 도메인 개발 및 테스트 코드 작성, Point 로직(AOP 기반), AuditorAware를 통한 생성자/수정자 자동 관리 기능 구현 |
+| 송의현 | [@yawning5](https://github.com/yawning5)   | Order, OrderMenu 도메인 개발 및 테스트코드 작성, 페이징 정책 적용                                    |
