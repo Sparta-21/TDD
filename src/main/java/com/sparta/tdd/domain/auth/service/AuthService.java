@@ -132,7 +132,6 @@ public class AuthService {
         Long userId = Long.parseLong(claims.getSubject());
         Date refreshExpiration = refreshTokenProvider.getExpiration(refreshTokenValue);
 
-        // TODO 각 도메인별 유틸(쿼리) 서비스 클래스로 리팩토링 하면 어떨까 싶습니다
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         if (user.isDeleted()) {
