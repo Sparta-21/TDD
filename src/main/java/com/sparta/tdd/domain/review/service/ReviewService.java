@@ -15,6 +15,8 @@ import com.sparta.tdd.domain.user.entity.User;
 import com.sparta.tdd.domain.user.repository.UserRepository;
 import com.sparta.tdd.global.exception.BusinessException;
 import com.sparta.tdd.global.exception.ErrorCode;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,9 +51,13 @@ public class ReviewService {
         Store store = findStoreById(request.storeId());
         Order order = findOrderById(orderId);
 
+        existsByOrderId(orderId);
+
         Review review = request.toEntity(user, store, order);
 
         Review savedReview = reviewRepository.save(review);
+
+        updateStoreRating(store);
         return ReviewResponseDto.from(savedReview);
     }
 
@@ -65,6 +71,9 @@ public class ReviewService {
         }
 
         review.updateContent(request.rating(), request.photos(), request.content());
+
+        Store store = review.getStore();
+        updateStoreRating(store);
 
         return ReviewResponseDto.from(review);
     }
@@ -119,6 +128,19 @@ public class ReviewService {
         }
 
         review.delete(userId);
+        Store store = review.getStore();
+        updateStoreRating(store);
+    }
+
+    // 평점 계산 및 업데이트 메서드
+    private void updateStoreRating(Store store) {
+        Double avgRating = reviewRepository.findAverageRatingByStoreId(store.getId());
+        Long reviewCount = reviewRepository.countByStoreIdAndNotDeleted(store.getId());
+
+        store.updateRatingInfo(
+                avgRating != null ? BigDecimal.valueOf(avgRating) : BigDecimal.ZERO,
+                reviewCount.intValue()
+        );
     }
 
     private Review findReviewById(UUID reviewId) {
@@ -144,5 +166,11 @@ public class ReviewService {
     private Order findOrderById(UUID orderId) {
         return orderRepository.findById(orderId)
             .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
+    private void existsByOrderId(UUID orderId) {
+        if (reviewRepository.existsByOrderId(orderId)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_REVIEW);
+        }
     }
 }

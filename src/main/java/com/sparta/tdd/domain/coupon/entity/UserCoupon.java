@@ -57,7 +57,8 @@ public class UserCoupon extends BaseEntity {
         this.coupon = coupon;
     }
 
-    public void updateStatus(CouponStatus newCouponStatus) {
-        this.couponStatus = newCouponStatus;
+    public void updateStatusUsed() {
+        this.couponStatus = CouponStatus.USED;
+        this.usedAt = LocalDateTime.now();
     }
 }

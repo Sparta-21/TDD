@@ -6,6 +6,12 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum OrderStatus {
+    CANCELLED("취소됨"){
+        @Override
+        public OrderStatus next() {
+            throw new IllegalStateException("취소된 주문입니다");
+        }
+    },
     PENDING("대기") {
         @Override
         public OrderStatus next() {

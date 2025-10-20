@@ -42,10 +42,33 @@ public class UserCouponService {
             .user(user)
             .coupon(coupon)
             .build();
+
+        if (coupon.checkIssuedCount()) {
+            throw new BusinessException(ErrorCode.COUPON_ALL_SOLD_OUT);
+        }
+
         userCouponRepository.save(userCoupon);
         coupon.issuedCount();
 
         return UserCouponResponseDto.from(userCoupon);
+    }
+
+    @Transactional
+    public Integer useUserCoupon(Long userId, UUID userCouponId, Integer minOrderPrice) {
+        UserCoupon userCoupon = findUserCoupon(userCouponId);
+        Coupon coupon = userCoupon.getCoupon();
+
+        if (coupon.checkMinOrderPrice(minOrderPrice)) {
+            throw new BusinessException(ErrorCode.COUPON_MIN_PRICE_INVALID);
+        }
+
+        userCoupon.updateStatusUsed();
+        return coupon.getDiscountValue();
+    }
+
+    private UserCoupon findUserCoupon(UUID userCouponId) {
+        return userCouponRepository.findById(userCouponId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_COUPON_NOT_FOUND));
     }
 
     private Coupon findCoupon(UUID couponId) {

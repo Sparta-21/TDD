@@ -59,11 +59,11 @@ class PageableStandaloneTest {
     }
 
     @Test
-    @DisplayName("상한 후 허용: size=100 → 50")
+    @DisplayName("상한 후 허용: size=100 → 10")
     void capTo50() throws Exception {
         mvc.perform(get("/_probe/page").param("size", "100"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.size", is(50)));
+            .andExpect(jsonPath("$.size", is(10)));
     }
 
     @Test

@@ -2,7 +2,9 @@ package com.sparta.tdd.domain.payment.repository;
 
 import com.sparta.tdd.domain.payment.entity.Payment;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +20,8 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID>,
         @Param("deletedAt") LocalDateTime deletedAt,
         @Param("deletedBy") Long deletedBy
     );
+
+    @SuppressWarnings("NullableProblems")
+    @EntityGraph(attributePaths = {"order", "user"})
+    Optional<Payment> findById(UUID id);
 }
