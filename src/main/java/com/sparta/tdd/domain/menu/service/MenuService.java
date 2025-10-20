@@ -1,5 +1,6 @@
 package com.sparta.tdd.domain.menu.service;
 
+import com.sparta.tdd.domain.ai.service.AiService;
 import com.sparta.tdd.domain.menu.dto.MenuRequestDto;
 import com.sparta.tdd.domain.menu.dto.MenuResponseDto;
 import com.sparta.tdd.domain.menu.entity.Menu;
@@ -25,6 +26,7 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final AiService aiService;
 
     public List<MenuResponseDto> getMenus(UUID storeId, UserAuthority authority) {
         List<Menu> menus;
@@ -42,7 +44,7 @@ public class MenuService {
     public MenuResponseDto getMenu(UUID storeId, UUID menuId, UserAuthority authority) {
         Menu menu = findMenu(storeId, menuId);
         if (authority.isCustomerOrManager() && menu.isHidden()) {
-            throw new BusinessException(ErrorCode.MENU_HIDDEN);
+            throw new BusinessException(ErrorCode.IS_HIDDEN_MENU);
         }
         return MenuResponseDto.from(menu);
     }
@@ -52,8 +54,15 @@ public class MenuService {
         User user = findUser(userId);
         Store store = findStore(storeId);
         validateUserOnMenu(user, store);
+        Menu menu;
 
-        Menu menu = menuRequestDto.toEntity(store);
+        if (menuRequestDto.useAiDescription()) {
+            String aiDescription = aiService.createComment(menuRequestDto.name(), userId);
+            menu = menuRequestDto.toEntity(store, aiDescription);
+        } else {
+            menu = menuRequestDto.toEntity(store);
+        }
+
         menuRepository.save(menu);
 
         return MenuResponseDto.from(menu);

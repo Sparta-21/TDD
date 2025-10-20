@@ -15,12 +15,27 @@ public record MenuRequestDto(
     String description,
     @Schema(description = "가격", example = "10000")
     @NotNull Integer price,
-    String imageUrl
+    String imageUrl,
+    boolean useAiDescription
 ) {
+
+    public Menu toEntity(Store store, String description) {
+        return Menu.builder()
+            .name(name)
+            .description(description)
+            .price(price)
+            .imageUrl(imageUrl)
+            .store(store)
+            .build();
+    }
 
     public Menu toEntity(Store store) {
         return Menu.builder()
-            .dto(this)
-            .store(store).build();
+            .name(name)
+            .description(description)
+            .price(price)
+            .imageUrl(imageUrl)
+            .store(store)
+            .build();
     }
 }

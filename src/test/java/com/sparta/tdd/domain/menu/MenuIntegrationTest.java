@@ -71,15 +71,11 @@ public class MenuIntegrationTest extends IntegrationTest {
             .build();
         storeRepository.save(store);
 
-        MenuRequestDto dto = MenuRequestDto.builder()
+        menu = Menu.builder()
             .name("menu")
             .description("this is menu")
             .price(30000)
             .imageUrl("this is image url")
-            .build();
-
-        menu = Menu.builder()
-            .dto(dto)
             .store(store)
             .build();
         menuRepository.save(menu);
